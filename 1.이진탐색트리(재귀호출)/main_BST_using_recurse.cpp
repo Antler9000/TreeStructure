@@ -1,8 +1,13 @@
-#define TREE_LOG				//로그 콘솔 출력문들을 활성화함
-#define TREE_ERROR				//에러 콘솔 출력문들을 활성화함
-#define TREE_WARNING			//경고 콘솔 출력문들을 활성화함
+//로그, 에러, 경고 콘솔 출력문들을 활성화하기 위한 전처리 상수 정의
+//"testing 4 : Speed Test"에서 시간을 보다 정확히 측정하고 싶을 경우 상수 정의들을 주석처리 해야함
+#define TREE_LOG	
+#define TREE_ERROR
+#define TREE_WARNING
 
-#include "BST_using_recurse.h"	//본 단원에서 재귀를 이용해 구현한 BST을 호출해서 시험함
+#include <chrono>;				//속도 테스트용도
+#include "BST_using_recurse.h"	//이진 탐색 트리가 정의된 헤더파일
+
+using namespace chrono;
 
 template <typename DataType>
 inline void RetrieveResultPrint(const int key, const DataType retrievedData)
@@ -161,6 +166,57 @@ int main()
 	cout << endl << "전체 삭제" << endl;
 	stringTestBST.RemoveTree();
 	stringTestBST.PreorderPrint();
+
+	cout << endl << "testing 4 : Speed Test-------------------------------------------------------------------------" << endl;
+
+	BST<int> speedTestBST;
+	const int speedTestNumber = 1000;
+
+	//Tomorrow Do : 랜덤 삽입을 위한 삽입 데이터 미리 준비하기
+
+	steady_clock clock;
+
+	time_point<steady_clock> timeBegin = clock.now();
+	
+	//Tomorrow Do : 준비된 삽입 데이터들을 모두 삽입하기
+
+	time_point<steady_clock> timeEnd =	clock.now();
+
+	duration<double> timeDiff = timeEnd - timeBegin;
+
+	cout << speedTestNumber << "번의 삽입 동안 흐른 시간은 : " << timeDiff.count() << endl;
+
+	cout << endl << "testing 5 : Stack Safety Test-------------------------------------------------------------------------" << endl;
+
+	/*
+		stackSafetyTestNumber 횟수만큼 하나의 트리에 삽입을 수행함
+		작성자의 테스팅 환경에서는 stackSafetyTestNumber이 특정 값을 넘어가면 스택 오버플로우가 나는 것을 확인했음
+		stackSafetyTestNumber >= 1800 : 마지막의 노드 소멸 과정에서 스택 오버플로우 발생
+		stackSafetyTestNumber >= 2700 : 그보다 앞선 삽입 과정에서 스택 오버플로우 발생
+
+		작성자의 테스팅 환경은 아래와 같음
+		-삽입 패턴		: 편향 삽입을 통한 높이 N의 트리 형성
+		-실행 방법		: 디버깅 실행(F5)
+		-OS				: Windows 11, 버전 25H2, 빌드 26200.7922
+		-IDE				: Microsoft Visual Studio Community 2022 (64-bit) 버전 17.14.23
+		-플랫폼 도구 집합	: Visual Studio 2022 (v143)
+		-컴파일러 버전	: x86용 Microsoft (R) C/C++ 최적화 컴파일러 버전 19.44.35222
+		-스택 크기 설정	: 프로젝트 기본 설정(공란)
+		-C/C++ 최적화 설정	: 사용 안 함(/Od)
+
+	*/
+
+	BST<int> stackSafetyTestBST;
+	const int stackSafetyTestNumber = 1700;
+
+	cout << "삽입 시작" << endl;
+
+	for (int i = 0; i < stackSafetyTestNumber; i++)
+	{
+		stackSafetyTestBST.Insert(i, i);
+	}
+
+	cout << "삽입 성공" << endl;
 
 	return 0;
 }
