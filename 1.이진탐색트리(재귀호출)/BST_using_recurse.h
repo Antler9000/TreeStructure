@@ -407,7 +407,7 @@ bool BST<DataType>::ReplaceWithInorderPredecessor(BST_Node<DataType>* pRemoveTar
 	}
 
 	pRemoveTargetNode->m_key = pTraverse->m_key;
-	pRemoveTargetNode->m_data = pTraverse->m_data;
+	pRemoveTargetNode->m_data = move(pTraverse->m_data);
 
 	delete pTraverse;
 
@@ -437,7 +437,7 @@ bool BST<DataType>::ReplaceWithInorderSuccessor(BST_Node<DataType>* pRemoveTarge
 	}
 
 	pRemoveTargetNode->m_key = pTraverse->m_key;
-	pRemoveTargetNode->m_data = pTraverse->m_data;
+	pRemoveTargetNode->m_data = move(pTraverse->m_data);
 
 	delete pTraverse;
 

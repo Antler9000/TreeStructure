@@ -13,11 +13,11 @@ using namespace chrono;		//..
 template <typename DataType>
 void RetrieveResultPrint(const int key, const DataType retrievedData);
 
-void SpeedTest(const int speedTestRepeat);
+void SpeedTest(const int speedTestRepeat, const int speedTestPerDataLen);
 
-void SpeedTestBST(const int speedTestRepeat, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys);
+void SpeedTestBST(const int speedTestRepeat, vector<string> insertTestDatum, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys);
 
-void SpeedComparisonTestMap(const int speedTestRepeat, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys);
+void SpeedComparisonTestMap(const int speedTestRepeat, vector<string> insertTestDatum, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys);
 
 void SafetyTest(const int safetyTestRepeat);
 
@@ -177,33 +177,36 @@ int main()
 
 	/*
 		작성자의 테스팅 환경은 아래와 같음
-		- 실행 방법 : 디버깅 실행(F5)
-		- OS : Windows 11, 버전 25H2, 빌드 26200.7922
-		- IDE : Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
-		- 플랫폼 도구 집합 : Visual Studio 2022 (v143)
-		- 컴파일러 버전 : x86용 Microsoft(R) C / C++ 최적화 컴파일러 버전 19.44.35222
-		- 스택 크기 설정 : 프로젝트 기본 설정(공란)
-		- C / C++ 최적화 설정 : 사용 안 함(/ Od)
+		- 실행 방법			: 디버깅하지 않고 실행(Ctrl + F5)
+		- OS					: Windows 11, 버전 25H2, 빌드 26200.7922
+		- IDE				: Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
+		- 플랫폼 도구 집합		: Visual Studio 2022 (v143)
+		- 컴파일러 버전		: x86용 Microsoft(R) C / C++ 최적화 컴파일러 버전 19.44.35222
+		- 스택 크기 설정		: 프로젝트 기본 설정(공란)
+		- C / C++ 최적화 설정	: 최대 최적화(속도 우선)(/O2)
+		- 기본 런타임 검사		: 기본값
 	*/
 
 	/*
-		하나의 트리에 speedTestRepeat 횟수만큼 삽입, 검색, (단일 요소) 삭제를 수행함
-		미리 [0,speedTestRepeat-1]의 중복되지 않는 키 값들을 랜덤하게 셔플해서 사용함
-		작성자의 테스팅 환경에서는 safetyTestRepeat이 천만 번일 때,
-		BST 삽입에는 19.8초가 걸렸고, 비교용 std::map 삽입에는 22.3초가 걸렸음
-		BST 검색에는 24.0초가 걸렸고, 비교용 std::map 검색에는 23.1초가 걸렸음
-		BST 삭제에는 31.2초가 걸렸고, 비교용 std::map 삭제에는 30.6초가 걸렸음
+		하나의 트리에 speedTestRepeat 횟수만큼 삽입, 검색, 삭제를 수행함
+		키는 미리 [0,speedTestRepeat-1]의 중복되지 않는 키 값들을 랜덤하게 셔플해놓고 사용함
+		데이터는 미리 speedTestPerDataLen으로 지정된 길이의 string 객체를 speedTestRepeat 개 만들어놓고 사용함
+		작성자의 테스팅 환경에서는 speedTestRepeat이 10,000,000 이고, speedTestPerDataLen이 30 일 때,
+		BST 삽입에는 153.3초가 걸렸고, 비교용 std::map 삽입에는 25.4초가 걸렸음
+		BST 검색에는 19.0초가 걸렸고, 비교용 std::map 검색에는 19.1초가 걸렸음
+		BST 삭제에는 34.5초가 걸렸고, 비교용 std::map 삭제에는 28.4초가 걸렸음
 	*/
 
 	/*
-		다만 트리 균형이 유지되는 stl::map과 달리, 여기서 구현된 BST는 균형을 유지하지 않으므로,
-		테스트용 키 값들이 정렬된 순서로 삽입되는 선형 워크로드에서는 stl::map이 크게 유리할 것으로 추측함
+		트리 균형이 유지되는 stl::map과 달리, 여기서 구현된 BST는 균형을 유지하지 않으므로,
+		테스트용 키 값들이 정렬된 순서로 삽입되는 선형 워크로드에서 stl::map이 크게 유리할 것으로 추측함
 		여기서 구현된 트리는 재귀로 구현됨에 따라 스택 오버플로우가 발생하는 깊이 제한이 있어 (아래의 안전성 테스트 참고),
 		선형 워크로드에서의 유의미한 시간 비교를 수행할 수 없음
 	*/
 
 	const int speedTestRepeat = 10000000;
-	SpeedTest(speedTestRepeat);
+	const int speedTestPerDataLen = 30;
+	SpeedTest(speedTestRepeat, speedTestPerDataLen);
 
 	cout << endl << "testing 5 : Safety Test------------------------------------------------------------------------" << endl;
 
@@ -229,8 +232,15 @@ void RetrieveResultPrint(const int key, const DataType retrievedData)
 	cout << "retrieve key : " << key << ", retrieved data : " << retrievedData << endl;
 }
 
-void SpeedTest(const int speedTestRepeat)
+void SpeedTest(const int speedTestRepeat, const int speedTestPerDataLen)
 {
+	vector<string> insertTestDatum;
+	insertTestDatum.reserve(speedTestRepeat);
+	for (int i = 0; i < speedTestRepeat; i++)
+	{
+		insertTestDatum.emplace_back(string(speedTestPerDataLen, 'A'));
+	}
+	
 	vector<int> insertTestKeys(speedTestRepeat);
 	iota(insertTestKeys.begin(), insertTestKeys.end(), 0);
 	mt19937 insertTestRng(123456);
@@ -246,14 +256,14 @@ void SpeedTest(const int speedTestRepeat)
 	mt19937 removeTestRng(162534);
 	shuffle(removeTestKeys.begin(), removeTestKeys.end(), removeTestRng);
 
-	SpeedTestBST(speedTestRepeat, insertTestKeys, retrieveTestKeys, removeTestKeys);
+	SpeedTestBST(speedTestRepeat, insertTestDatum, insertTestKeys, retrieveTestKeys, removeTestKeys);
 
-	SpeedComparisonTestMap(speedTestRepeat, insertTestKeys, retrieveTestKeys, removeTestKeys);
+	SpeedComparisonTestMap(speedTestRepeat, insertTestDatum, insertTestKeys, retrieveTestKeys, removeTestKeys);
 }
 
-void SpeedTestBST(const int speedTestRepeat, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys)
+void SpeedTestBST(const int speedTestRepeat, vector<string> insertTestDatum, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys)
 {
-	BST<int> speedTestBST;
+	BST<string> speedTestBST;
 
 	steady_clock clock;
 	time_point<steady_clock> timeBegin;
@@ -269,7 +279,7 @@ void SpeedTestBST(const int speedTestRepeat, vector<int>& insertTestKeys, vector
 	{
 		if (i % ((speedTestRepeat / 20) + 1) == 0) cout << "*";
 
-		speedTestBST.Insert(insertTestKeys[i], insertTestKeys[i]);
+		speedTestBST.Insert(insertTestKeys[i], insertTestDatum[i]);
 	}
 	cout << endl;
 
@@ -281,7 +291,7 @@ void SpeedTestBST(const int speedTestRepeat, vector<int>& insertTestKeys, vector
 
 	cout << endl << "BST : " << speedTestRepeat << "번의 삽입 동안 흐른 시간은 : " << timeDiff.count() << endl;
 
-	int retrievedData = 0;
+	string retrievedData;
 
 	cout << endl << "BST 랜덤 검색 측정 시작" << endl;
 	cout << endl << "|------------------|" << endl;
@@ -326,9 +336,9 @@ void SpeedTestBST(const int speedTestRepeat, vector<int>& insertTestKeys, vector
 	cout << endl << "BST : " << speedTestRepeat << "번의 삭제 동안 흐른 시간은 : " << timeDiff.count() << endl;
 }
 
-void SpeedComparisonTestMap(const int speedTestRepeat, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys)
+void SpeedComparisonTestMap(const int speedTestRepeat, vector<string> insertTestDatum, vector<int>& insertTestKeys, vector<int>& retrieveTestKeys, vector<int>& removeTestKeys)
 {
-	map<int, int> speedCompareTestMap;
+	map<int, string> speedCompareTestMap;
 
 	steady_clock clock;
 	time_point<steady_clock> timeBegin;
@@ -344,7 +354,7 @@ void SpeedComparisonTestMap(const int speedTestRepeat, vector<int>& insertTestKe
 	{
 		if (i % ((speedTestRepeat / 20) + 1) == 0) cout << "*";
 
-		speedCompareTestMap.insert(pair<int, int>(insertTestKeys[i], insertTestKeys[i]));
+		speedCompareTestMap.emplace(insertTestKeys[i], insertTestDatum[i]);
 	}
 	cout << endl;
 
