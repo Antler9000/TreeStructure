@@ -240,6 +240,8 @@ void RetrieveResultPrint(const int key, const DataType retrievedData)
 
 void SpeedTest(const int speedTestRepeat, const int speedTestPerDataLen)
 {
+	cout << endl << "삽입용 데이터 준비 중...." << endl;
+
 	vector<string> insertTestDatum;
 	insertTestDatum.reserve(speedTestRepeat);
 	for (int i = 0; i < speedTestRepeat; i++)

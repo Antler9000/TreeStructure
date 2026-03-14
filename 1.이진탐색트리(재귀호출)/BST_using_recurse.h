@@ -3,7 +3,7 @@
 
 #include "../0.공통/debug_print.h"	//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 사용함
 #include <iostream>					//트리를 순회하며 콘솔에 각 노드를 출력할 때 std::cout을 사용함
-using namespace std;				//이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
+using namespace std;				//생성자 리스트, 이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
 
 template <typename DataType>
 class BST;
@@ -31,6 +31,15 @@ private:
 
 	}
 
+	//노드에 저장될 데이터를 인자로 명시해주는 경우에만 생성할 수 있도록 하며, 할당 또한 금지함
+	BST_Node(const BST_Node& sourceNode) = delete;
+
+	BST_Node(BST_Node&& sourceNode) = delete;
+
+	BST_Node& operator = (const BST_Node& sourceNode) = delete;
+
+	BST_Node& operator = (BST_Node&& sourceNode) = delete;
+
 	~BST_Node() noexcept
 	{
 		delete m_pLeftChild;
@@ -45,6 +54,13 @@ public:
 	BST() : m_pHead(NULL)
 	{
 		LogPrint("empty constructor");
+	}
+
+	~BST() noexcept
+	{
+		LogPrint("destructor");
+
+		RemoveTree();
 	}
 
 	BST(const BST<DataType>& sourceBST)
@@ -62,21 +78,9 @@ public:
 		sourceBST.m_pHead = NULL;
 	}
 
-	~BST() noexcept
-	{
-		LogPrint("destructor");
-
-		RemoveTree();
-	}
-
 	BST<DataType>& operator = (const BST<DataType>& sourceBST)
 	{
 		LogPrint("copy assignment");
-		
-		if (this == &sourceBST)
-		{
-			return *this;
-		}
 
 		CopyTree(sourceBST);
 
@@ -100,7 +104,6 @@ public:
 		return *this;
 	}
 
-	//값 전달로 인한 복사를 예방하기 위해 레퍼런스 인자를 사용함
 	bool Insert(const int newKey, const DataType& newData)
 	{
 		LogPrint("insert");
@@ -117,7 +120,6 @@ public:
 		}
 	}
 
-	//값 전달로 인한 복사를 예방하고, 나아가 rvalue 데이터가 오는 경우에는 이동 시맨틱을 이용해 빠른 연산이 가능하도록 rvalue 레퍼런스 인자를 사용함
 	bool Insert(const int newKey, DataType&& newData)
 	{
 		LogPrint("insert");
@@ -169,7 +171,7 @@ public:
 		}
 	}
 
-	void RemoveTree() noexcept
+	bool RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
 
@@ -178,6 +180,8 @@ public:
 			delete m_pHead;
 			m_pHead = NULL;
 		}
+
+		return true;
 	}
 
 	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함.
@@ -185,12 +189,6 @@ public:
 	bool CopyTree(const BST<DataType>& sourceBST)
 	{
 		LogPrint("copy tree");
-
-		if (&sourceBST == NULL)
-		{
-			WarningPrint("cannot copying. becuase source tree is null.");
-			return false;
-		}
 
 		if (sourceBST.m_pHead == NULL)
 		{

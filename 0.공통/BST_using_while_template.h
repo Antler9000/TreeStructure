@@ -3,7 +3,7 @@
 
 #include "../0.공통/debug_print.h"	//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 사용함
 #include "../0.공통/stack.h"		//스택을 통해 일부 함수 상태를 저장하여 재귀 호출을 대체하도록 함
-using namespace std;				//std::move(..)를 사용할 예정
+using namespace std;				//생성자 리스트, 이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
 
 template <class NodeType>
 class BST_Template
@@ -12,6 +12,13 @@ public:
 	BST_Template() : m_pHead(NULL)
 	{
 		LogPrint("empty constructor");
+	}
+
+	~BST_Template() noexcept
+	{
+		LogPrint("destructor");
+
+		RemoveTree();
 	}
 
 	BST_Template(const BST_Template<NodeType>& sourceBST)
@@ -27,13 +34,6 @@ public:
 
 		m_pHead = sourceBST.m_pHead;
 		sourceBST.m_pHead = NULL;
-	}
-
-	~BST_Template()
-	{
-		LogPrint("destructor");
-
-		RemoveTree();
 	}
 
 	BST_Template<NodeType>& operator = (const BST_Template<NodeType >& sourceBST)
@@ -118,16 +118,16 @@ public:
 
 	void InorderPrint()
 	{
-		cout << "inorder traverse start" << endl;
+		LogPrint("inorder print");
+
 		InorderTraverse(&BST_Template::PrintTargetNode, NULL);
-		cout << "traverse ended" << endl << endl;
 	}
 
 	void PostorderPrint()
 	{
-		cout << "postorder traverse start" << endl;
+		LogPrint("postorder print");
+
 		PostorderTraverse(&BST_Template::PrintTargetNode, NULL);
-		cout << "traverse ended" << endl << endl;
 	}
 
 protected:
@@ -170,20 +170,27 @@ protected:
 		if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL)	//두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
 		{
 			ReplaceWithInorderSuccessor(pTarget);
+
+			return NULL;
 		}
 		else if (pTarget->m_pLeftChild == NULL && pTarget->m_pRightChild != NULL)
 		{
 			ReplaceWithInorderSuccessor(pTarget);
+
+			return NULL;
 		}
 		else if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild == NULL)
 		{
 			ReplaceWithInorderPredecessor(pTarget);
+
+			return NULL;
 		}
 		else
 		{
 			delete pTarget;
 			pTarget = NULL;
-			return pTarget;
+
+			return NULL;
 		}
 	}
 
@@ -223,7 +230,7 @@ protected:
 		delete pTraverse;
 	}
 
-
+protected:
 	//"to_do_while_traverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
 	//"optional_target_BST" BST 포인터는 앞선 "to_do_while_traverse" 작업에서 대상 BST 포인터가 필요한 경우를 위한 인수임.
 	void PreorderTraverse(void (*pToDoWhileTraverse)(NodeType*, BST_Template*), BST_Template* pOptionalTargetBST) const
@@ -233,7 +240,7 @@ protected:
 		Stack<NodeType*> headStack;
 		NodeType* pTraverse = NULL;
 		headStack.Push(this->m_pHead);
-		while ((pTraverse = headStack.Pop()))
+		while (headStack.Pop(pTraverse) == true)
 		{
 			(*pToDoWhileTraverse)(pTraverse, pOptionalTargetBST);
 
@@ -251,12 +258,15 @@ protected:
 		bool newLeftSpine = true;
 		while (!headStack.IsEmpty())
 		{
-			while (newLeftSpine && headStack.GetTop()->m_pLeftChild)
+			NodeType* headNode = headStack.GetTop();
+
+			while (newLeftSpine && headNode->m_pLeftChild)
 			{
-				headStack.Push(headStack.GetTop()->m_pLeftChild);
+				headStack.Push(headNode->m_pLeftChild);
 			}
 
-			NodeType* pTraverse = headStack.Pop();
+			NodeType* pTraverse = NULL;
+			headStack.Pop(pTraverse);
 			(*pToDoWhileTraverse)(pTraverse, pOptionalTargetBST);
 
 			if (pTraverse->m_pRightChild != NULL)
@@ -281,25 +291,31 @@ protected:
 		bool newRightSpine = true;
 		while (!headStack.IsEmpty())
 		{
-			while (newLeftSpine && headStack.GetTop()->m_pLeftChild)
+			NodeType* headNode = NULL;
+			headStack.GetTop(headNode);
+
+			while (newLeftSpine && headNode->m_pLeftChild)
 			{
-				headStack.Push(headStack.GetTop()->m_pLeftChild);
+				headStack.GetTop(headNode);
+				headStack.Push(headNode->m_pLeftChild);
 			}
 
-			if (newRightSpine && headStack.GetTop()->m_pRightChild)
+			if (newRightSpine && headNode->m_pRightChild)
 			{
-				headStack.Push(headStack.GetTop()->m_pRightChild);
+				headStack.Push(headNode->m_pRightChild);
 				newLeftSpine = true;
 			}
 			else
 			{
-				(*pToDoWhileTraverse)(headStack.GetTop(), pOptionalTargetBST);
+				(*pToDoWhileTraverse)(headNode, pOptionalTargetBST);
 
 				newLeftSpine = false;
-				NodeType* pPreviousNode = headStack.Pop();
-				NodeType* pPpresentNode = headStack.GetTop();
+				NodeType* pPrevNode = NULL;
+				headStack.Pop(pPrevNode);
+				NodeType* pCurrNode = NULL;
+				headStack.GetTop(pCurrNode);
 
-				if (pPpresentNode && pPpresentNode->m_pRightChild && (pPpresentNode->m_pRightChild == pPreviousNode)) newRightSpine = false;
+				if (pCurrNode && pCurrNode->m_pRightChild && (pCurrNode->m_pRightChild == pPrevNode)) newRightSpine = false;
 				else newRightSpine = true;
 			}
 		}
