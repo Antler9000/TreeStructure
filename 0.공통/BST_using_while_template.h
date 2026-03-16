@@ -67,31 +67,41 @@ public:
 		return *this;
 	}
 
-	void Insert(int newKey, int newData)
+public:
+	bool Insert(int newKey,int newData)
 	{
 		LogPrint("insert");
 
-		NodeType* pMadeChild = Search(newKey, &BST_Template::SetDummyChild);
-		pMadeChild->m_key = newKey;
-		pMadeChild->m_data = newData;
+		NodeType* pInsertedNode = NULL;
+		bool ret = Search(newKey, pInsertedNode, &BST_Template::SetDummyChild);
+		
+		if (pInsertedNode != NULL)
+		{
+			pInsertedNode->m_key = newKey;
+			pInsertedNode->m_data = newData;
+		}
+
+		return ret;
 	}
 
-	int Retrieve(int targetKey)
+	bool Retrieve(int targetKey, int& outData)
 	{
 		LogPrint("retrieve");
 
-		return Search(targetKey, &BST_Template::GetT)->m_data;
+		return Search(targetKey, outData, &BST_Template::GetNodeData);
 	}
 
-	void Remove(int targetKey)
+	bool Remove(int targetKey)
 	{
 		LogPrint("remove one item");
 
-		Search(targetKey, &BST_Template::RemoveTarget);
+		char dummy = 'd';
+
+		return Search(targetKey, dummy, &BST_Template::RemoveTarget);
 	}
 
-
-	void RemoveTree()
+public:
+	void RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
 
@@ -131,70 +141,88 @@ public:
 	}
 
 protected:
-	//"to_do_with_target_ptr" 메소드 포인터는 특정 target_key를 가진 노드를 가리키는 자식 포인터에 수행할 작업이나,
-	//특정 target_key 노드가 삽입될 수 있는 NULL 자식 포인터에 수행할 작업을 넘겨주는 인터페이스임.
-	//응용되는 삽입-검색-삭제에서는 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있어야 하기에, 메소드 포인터는 레퍼런스 인자를 가짐
-	NodeType* Search(int targetKey, NodeType* (BST_Template::* pToDoWithTargetPtr)(NodeType*&))
+	//"pToDoWithTargetNode" 메소드 포인터는 특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 인터페이스임.
+	//삽입과 삭제 메소드가 기능하려면 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있어야 하기에, NodeType*&과 같이 레퍼런스 인자를 사용함.
+	template <typename OutDataType>
+	bool Search(int targetKey, OutDataType& outData, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, OutDataType&))
 	{
-		if (m_pHead == NULL) return (this->*pToDoWithTargetPtr)(m_pHead);
-		else if (targetKey == m_pHead->m_key) return (this->*pToDoWithTargetPtr)(m_pHead);
-
-		NodeType* pSearch = m_pHead;
-		while (true)
+		if (m_pHead == NULL)
 		{
-			if (targetKey < pSearch->m_key)
+			return (this->*pToDoWithTargetNode)(m_pHead, outData);
+		}
+		else if (targetKey == m_pHead->m_key) 
+		{
+			return (this->*pToDoWithTargetNode)(m_pHead, outData);
+		}
+		else
+		{
+			NodeType* pSearch = m_pHead;
+			while (true)
 			{
-				if (pSearch->m_pLeftChild != NULL && pSearch->m_pLeftChild->m_key != targetKey) pSearch = pSearch->m_pLeftChild;
-				else return (this->*pToDoWithTargetPtr)(pSearch->m_pLeftChild);
-			}
-			else
-			{
-				if (pSearch->m_pRightChild != NULL && pSearch->m_pRightChild->m_key != targetKey) pSearch = pSearch->m_pRightChild;
-				else return (this->*pToDoWithTargetPtr)(pSearch->m_pRightChild);
+				if (targetKey < pSearch->m_key)
+				{
+					if (pSearch->m_pLeftChild != NULL && pSearch->m_pLeftChild->m_key != targetKey)
+					{
+						pSearch = pSearch->m_pLeftChild;
+					}
+					else
+					{
+						return (this->*pToDoWithTargetNode)(pSearch->m_pLeftChild, outData);
+					}
+				}
+				else
+				{
+					if (pSearch->m_pRightChild != NULL && pSearch->m_pRightChild->m_key != targetKey)
+					{
+						pSearch = pSearch->m_pRightChild;
+					}
+					else
+					{
+						return (this->*pToDoWithTargetNode)(pSearch->m_pRightChild, outData);
+					}
+				}
 			}
 		}
 	}
 
-	NodeType* GetT(NodeType*& pParentSeat)
+	bool SetDummyChild(NodeType*& pParentSeat, NodeType*& pOutNode)
 	{
-		return pParentSeat;
+		pOutNode = pParentSeat = new NodeType(0, 0);
+
+		return true;
 	}
 
-	NodeType* SetDummyChild(NodeType*& pParentSeat)
+	bool GetNodeData(NodeType*& pInNode, int& pOutNodeData)
 	{
-		return pParentSeat = new NodeType(0, 0);
+		pOutNodeData = pInNode->m_data;
+
+		return true;
 	}
 
-	NodeType* RemoveTarget(NodeType*& pTarget)
+	bool RemoveTarget(NodeType*& pTarget, char& dummyParmeter)
 	{
-		if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL)	//두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
+		if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL)		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
 		{
-			ReplaceWithInorderSuccessor(pTarget);
-
-			return NULL;
+			return ReplaceWithInorderSuccessor(pTarget);
 		}
 		else if (pTarget->m_pLeftChild == NULL && pTarget->m_pRightChild != NULL)
 		{
-			ReplaceWithInorderSuccessor(pTarget);
-
-			return NULL;
+			return ReplaceWithInorderSuccessor(pTarget);
 		}
 		else if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild == NULL)
 		{
-			ReplaceWithInorderPredecessor(pTarget);
-
-			return NULL;
+			return ReplaceWithInorderPredecessor(pTarget);
 		}
 		else
 		{
 			delete pTarget;
 			pTarget = NULL;
 
-			return NULL;
+			return true;
 		}
 	}
 
-	void ReplaceWithInorderPredecessor(NodeType*& pTarget)
+	bool ReplaceWithInorderPredecessor(NodeType*& pTarget)
 	{
 		NodeType* pPrevious = NULL;
 		NodeType* pTraverse = pTarget->m_pLeftChild;
@@ -210,9 +238,11 @@ protected:
 		pTarget->m_key = pTraverse->m_key;
 		pTarget->m_data = pTraverse->m_data;
 		delete pTraverse;
+
+		return true;
 	}
 
-	void ReplaceWithInorderSuccessor(NodeType*& pTarget)
+	bool ReplaceWithInorderSuccessor(NodeType*& pTarget)
 	{
 		NodeType* pPrevious = NULL;
 		NodeType* pTraverse = pTarget->m_pRightChild;
@@ -228,10 +258,12 @@ protected:
 		pTarget->m_key = pTraverse->m_key;
 		pTarget->m_data = pTraverse->m_data;
 		delete pTraverse;
+
+		return true;
 	}
 
 protected:
-	//"to_do_while_traverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
+	//"pToDoWhileTraverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
 	//"optional_target_BST" BST 포인터는 앞선 "to_do_while_traverse" 작업에서 대상 BST 포인터가 필요한 경우를 위한 인수임.
 	void PreorderTraverse(void (*pToDoWhileTraverse)(NodeType*, BST_Template*), BST_Template* pOptionalTargetBST) const
 	{
@@ -321,11 +353,6 @@ protected:
 		}
 	}
 
-	static void PrintTargetNode(NodeType* pTargetNode, BST_Template* pDummyArgument)
-	{
-		cout << "node m_key : " << pTargetNode->m_key << " / node m_data : " << pTargetNode->m_data << endl;
-	}
-
 	static void RemoveChilds(NodeType* pTargetNode, BST_Template* pDummyArgument)
 	{
 		if (pTargetNode->m_pLeftChild != NULL)
@@ -342,13 +369,16 @@ protected:
 
 	static void CopyNode(NodeType* pSourceNode, BST_Template* pDestBST)
 	{
-		pDestBST->InsertNewNode(pSourceNode);
+		NodeType* pInsertedNode = NULL;
+		
+		bool ret = pDestBST->Search(pSourceNode->m_key, pInsertedNode, &BST_Template::SetDummyChild);
+
+		*pInsertedNode = *pSourceNode;
 	}
 
-	void InsertNewNode(NodeType* pNewNode)
+	static void PrintTargetNode(NodeType* pTargetNode, BST_Template* pDummyArgument)
 	{
-		NodeType* pMadeChild = Search(pNewNode->m_key, &BST_Template::SetDummyChild);
-		*pMadeChild = *pNewNode;
+		cout << "node m_key : " << pTargetNode->m_key << " / node m_data : " << pTargetNode->m_data << endl;
 	}
 
 protected:

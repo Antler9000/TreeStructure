@@ -51,6 +51,11 @@ int main()
 	testBST.PreorderPrint();
 	cout << endl;
 
+	cout << "retrieve test" << endl;
+	int retrievedData = 0;
+	testBST.Retrieve(7, retrievedData);
+	cout << "retrieved Data : " << retrievedData << endl;
+
 	cout << "copy test" << endl;
 	BST copied_test_BST = BST();
 	copied_test_BST.CopyTree(testBST);
@@ -88,7 +93,7 @@ int main()
 	testBST.PreorderPrint();
 	cout << endl;
 
-	cout << "copy test" << endl;
+	cout << "copied tree independency test" << endl;
 	copied_test_BST.PreorderPrint();
 
 	cout << "ended" << endl;
