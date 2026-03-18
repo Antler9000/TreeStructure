@@ -44,8 +44,8 @@ private:
 
 		m_data = sourceNode.m_data;
 		m_key = sourceNode.m_key;
-		m_pLeftChild = sourceNode.m_pLeftChild;
-		m_pRightChild = sourceNode.m_pRightChild;
+		m_pLeftChild = NULL;
+		m_pRightChild = NULL;
 
 		return *this;
 	}
