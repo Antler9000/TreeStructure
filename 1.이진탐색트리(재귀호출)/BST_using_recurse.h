@@ -1,9 +1,10 @@
 #ifndef BST_USING_RECURSE_H
 #define BST_USING_RECURSE_H
 
-#include "../0.공통/debug_print.h"	//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 사용함
-#include <iostream>					//트리를 순회하며 콘솔에 각 노드를 출력할 때 std::cout을 사용함
-using namespace std;				//생성자 리스트, 이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
+#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include <iostream>					//콘솔 출력을 사용함
+#include <utility>					//이동 시맨틱을 사용함
+using namespace std;				//..
 
 template <typename DataType>
 class BST;
@@ -11,14 +12,9 @@ class BST;
 template <typename DataType>
 class BST_Node
 {
-private:
 	friend class BST<DataType>;
 
-	int	m_key;
-	DataType m_data;
-	BST_Node<DataType>* m_pLeftChild;
-	BST_Node<DataType>* m_pRightChild;
-
+private:
 	BST_Node(const int newKey, const DataType& newData)
 		: m_key(newKey), m_data(newData), m_pLeftChild(NULL), m_pRightChild(NULL)
 	{
@@ -31,7 +27,15 @@ private:
 
 	}
 
-	//노드에 저장될 데이터를 인자로 명시해주는 경우에만 생성할 수 있도록 하며, 할당 또한 금지함
+	~BST_Node() noexcept
+	{
+		delete m_pLeftChild;
+		delete m_pRightChild;
+	}
+
+	//쓰이지 않는 노드 생성 방식
+	BST_Node() = delete;
+
 	BST_Node(const BST_Node& sourceNode) = delete;
 	
 	BST_Node(BST_Node&& sourceNode) = delete;
@@ -40,11 +44,11 @@ private:
 
 	BST_Node& operator = (BST_Node&& sourceNode) = delete;
 
-	~BST_Node() noexcept
-	{
-		delete m_pLeftChild;
-		delete m_pRightChild;
-	}
+private:
+	int	m_key;
+	DataType m_data;
+	BST_Node<DataType>* m_pLeftChild;
+	BST_Node<DataType>* m_pRightChild;
 };
 
 template <typename DataType>
@@ -54,13 +58,6 @@ public:
 	BST() : m_pHead(NULL)
 	{
 		LogPrint("empty constructor");
-	}
-
-	~BST() noexcept
-	{
-		LogPrint("destructor");
-
-		RemoveTree();
 	}
 
 	BST(const BST<DataType>& sourceBST)
@@ -102,6 +99,13 @@ public:
 		sourceBST.m_pHead = NULL;
 
 		return *this;
+	}
+
+	~BST() noexcept
+	{
+		LogPrint("destructor");
+
+		RemoveTree();
 	}
 
 	bool Insert(const int newKey, const DataType& newData)
@@ -407,7 +411,7 @@ bool BST<DataType>::RemoveRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 template <typename DataType>
 bool BST<DataType>::RemoveTarget(BST_Node<DataType>*& pRemoveTargetNode)
 {
-	//두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
+	//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
 	if (pRemoveTargetNode->m_pLeftChild != NULL && pRemoveTargetNode->m_pRightChild != NULL)
 	{
 		return ReplaceWithInorderSuccessor(pRemoveTargetNode);

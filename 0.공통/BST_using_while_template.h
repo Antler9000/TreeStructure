@@ -1,9 +1,11 @@
 #ifndef BST_USING_WHILE_TEMPLATE_H
 #define BST_USING_WHILE_TEMPLATE_H
 
-#include "../0.공통/debug_print.h"	//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 사용함
-#include "../0.공통/stack.h"		//스택을 통해 일부 함수 상태를 저장하여 재귀 호출을 대체하도록 함
-using namespace std;				//생성자 리스트, 이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
+#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include "../0.공통/stack.h"		//정의한 스택을 사용해, 재귀를 반복문으로 모방함
+#include <iostream>					//콘솔 출력을 사용함
+#include <utility>					//이동 시맨틱을 사용함
+using namespace std;				//..			
 
 template <class NodeType>
 class BST_Template
@@ -12,13 +14,6 @@ public:
 	BST_Template() : m_pHead(NULL)
 	{
 		LogPrint("empty constructor");
-	}
-
-	~BST_Template() noexcept
-	{
-		LogPrint("destructor");
-
-		RemoveTree();
 	}
 
 	BST_Template(const BST_Template<NodeType>& sourceBST)
@@ -36,7 +31,7 @@ public:
 		sourceBST.m_pHead = NULL;
 	}
 
-	//TODO : CopyTree(..)가 매개변수를 const로 받지 않아서 이 메소드가 인스턴스화되면 오류가 발생할 것이다. 이 오류를 해결하자.
+	//TODO : CopyTree(..)가 매개변수를 const로 받지 않아서 이 메소드가 인스턴스화되면 오류가 발생할 것이므로 곤칠 것
 	BST_Template<NodeType>& operator = (const BST_Template<NodeType>& sourceBST)
 	{
 		LogPrint("copy assignment");
@@ -66,6 +61,13 @@ public:
 		sourceBST.m_pHead = NULL;
 
 		return *this;
+	}
+
+	~BST_Template() noexcept
+	{
+		LogPrint("destructor");
+
+		RemoveTree();
 	}
 
 public:
@@ -206,7 +208,8 @@ protected:
 
 	bool RemoveTarget(NodeType*& pTargetNode, char& dummyParmeter)
 	{
-		if (pTargetNode->m_pLeftChild != NULL && pTargetNode->m_pRightChild != NULL)		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
+		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
+		if (pTargetNode->m_pLeftChild != NULL && pTargetNode->m_pRightChild != NULL)
 		{
 			return ReplaceWithInorderSuccessor(pTargetNode);
 		}

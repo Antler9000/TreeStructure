@@ -1,8 +1,9 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "../0.공통/debug_print.h"	//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 추후 도입할 예정
-using namespace std;				//생성자 리스트, 이동 생성자, 할당자, 삽입 메소드에서 std::move(..)를 사용함
+#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include <utility>					//이동 시맨틱을 사용함
+using namespace std;				//..
 
 template <class DataType>
 class Stack;
@@ -10,12 +11,9 @@ class Stack;
 template <class DataType>
 class StackNode
 {
-private:
 	friend class Stack<DataType>;
 
-	DataType m_data;
-	StackNode* m_pChild;
-
+private:
 	StackNode(const DataType& newData)
 		: m_data(newData), m_pChild(NULL)
 	{
@@ -28,14 +26,13 @@ private:
 
 	}
 
-	//이 노드를 사용하는 Stack에서는 순회를 이용한 소멸자가 정의되어있으므로,
-	//일단 노드 소멸자에서 m_pChild와 그 자식들의 해제를 하는 코드를 작성할 필요는 없음
+	//스택 클래스에 순회를 이용한 소멸자가 정의되어있으므로 노드의 소멸자 정의는 필요 없음
 	~StackNode() noexcept
 	{
 
 	}
 
-	//노드에 저장될 데이터를 인자로 명시해주는 경우에만 생성할 수 있도록 하며, 할당 또한 금지함
+	//쓰이지 않는 노드 생성 방식들
 	StackNode() = delete;
 
 	StackNode(const StackNode& sourceNode) = delete;
@@ -45,24 +42,20 @@ private:
 	StackNode& operator = (const StackNode& sourceNode) = delete;
 
 	StackNode& operator = (StackNode&& sourceNode) = delete;
+
+private:
+	DataType m_data;
+	StackNode* m_pChild;
 };
 
 template <class DataType>
 class Stack
 {
-private:
-	StackNode<DataType>* m_pHead;
-
 public:
 	Stack()
 		: m_pHead(NULL)
 	{
 	
-	}
-
-	~Stack() noexcept
-	{
-		RemoveStack();
 	}
 
 	Stack(const Stack& sourceStack)
@@ -98,6 +91,12 @@ public:
 		return *this;
 	}
 
+	~Stack() noexcept
+	{
+		RemoveStack();
+	}
+
+public :
 	bool Push(const DataType& data)
 	{
 		if (m_pHead == NULL)
@@ -241,6 +240,9 @@ public:
 
 		return true;
 	}
+
+private:
+	StackNode<DataType>* m_pHead;
 };
 
 #endif //STACK_H

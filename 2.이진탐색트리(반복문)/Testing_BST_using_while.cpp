@@ -1,9 +1,9 @@
-//디버그 출력문들을 활성화하기 위한 전처리 상수 정의
-#define TREE_LOG	
+//디버그 출력문들을 활성화하고 싶을 시 주석을 해제할 것
+//#define TREE_LOG	
 //#define TREE_ERROR
 //#define TREE_WARNING
 
-#include "BST_using_while.h"	//정의한 이진 탐색 트리를 테스팅함
+#include "BST_using_while.h"	//정의한 BST를 테스팅함
 
 int main()
 {
