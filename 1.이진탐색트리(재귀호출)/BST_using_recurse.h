@@ -197,6 +197,7 @@ public:
 		if (sourceBST.m_pHead == NULL)
 		{
 			WarningPrint("cannot coping. becuase source tree is empty.");
+
 			return false;
 		}
 
@@ -212,6 +213,7 @@ public:
 		if (m_pHead == NULL)
 		{
 			WarningPrint("cannot traverse print. becuase tree is empty.");
+
 			return;
 		}
 
@@ -225,6 +227,7 @@ public:
 		if (m_pHead == NULL)
 		{
 			WarningPrint("cannot traverse print. becuase tree is empty.");
+
 			return;
 		}
 
@@ -238,6 +241,7 @@ public:
 		if (m_pHead == NULL)
 		{
 			WarningPrint("cannot traverse print. becuase tree is empty.");
+
 			return;
 		}
 
@@ -280,6 +284,7 @@ bool BST<DataType>::InsertRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 		if (pSearchTargetNode->m_pLeftChild == NULL)
 		{
 			pSearchTargetNode->m_pLeftChild = new BST_Node<DataType>(newKey, newData);
+
 			return true;
 		}
 		else
@@ -292,6 +297,7 @@ bool BST<DataType>::InsertRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 		if (pSearchTargetNode->m_pRightChild == NULL)
 		{
 			pSearchTargetNode->m_pRightChild = new BST_Node<DataType>(newKey, newData);
+
 			return true;
 		}
 		else
@@ -315,6 +321,7 @@ bool BST<DataType>::InsertRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 		if (pSearchTargetNode->m_pLeftChild == NULL)
 		{
 			pSearchTargetNode->m_pLeftChild = new BST_Node<DataType>(newKey, move(newData));
+
 			return true;
 		}
 		else
@@ -327,6 +334,7 @@ bool BST<DataType>::InsertRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 		if (pSearchTargetNode->m_pRightChild == NULL)
 		{
 			pSearchTargetNode->m_pRightChild = new BST_Node<DataType>(newKey, move(newData));
+
 			return true;
 		}
 		else
@@ -353,7 +361,8 @@ bool BST<DataType>::RetrieveRecurse(const BST_Node<DataType>* pSearchTargetNode,
 		}
 		else
 		{
-			ErrorPrint("there is no such key in searching.");
+			ErrorPrint("cannot retrieve because there is no same key in tree!");
+
 			return false;
 		}
 	}
@@ -365,13 +374,15 @@ bool BST<DataType>::RetrieveRecurse(const BST_Node<DataType>* pSearchTargetNode,
 		}
 		else
 		{
-			ErrorPrint("there is no such key in searching.");
+			ErrorPrint("cannot retrieve because there is no same key in tree!");
+
 			return false;
 		}
 	}
 	else
 	{
 		outData = pSearchTargetNode->m_data;
+
 		return true;
 	}
 }
@@ -403,11 +414,16 @@ bool BST<DataType>::RemoveRecurse(BST_Node<DataType>* pSearchTargetNode, const i
 	}
 	else
 	{
-		ErrorPrint("should not reach here");
+		ErrorPrint("should not reach here while removing! it should be removed on previous call.");
 
 		return false;
 	}
+
+	ErrorPrint("cannot remove because there is no same key in tree!");
+
+	return false;
 }
+
 template <typename DataType>
 bool BST<DataType>::RemoveTarget(BST_Node<DataType>*& pRemoveTargetNode)
 {

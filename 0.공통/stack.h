@@ -63,7 +63,7 @@ public:
 		CopyStack(sourceStack);
 	}
 
-	Stack(Stack&& sourceStack)
+	Stack(Stack&& sourceStack) noexcept
 	{
 		m_pHead = sourceStack.m_pHead;
 		sourceStack.m_pHead = NULL;
@@ -76,7 +76,7 @@ public:
 		return *this;
 	}
 
-	Stack& operator = (Stack&& sourceStack)
+	Stack& operator = (Stack&& sourceStack) noexcept
 	{
 		if (this == &sourceStack)
 		{

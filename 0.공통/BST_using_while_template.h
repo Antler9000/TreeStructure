@@ -16,6 +16,7 @@ public:
 		LogPrint("empty constructor");
 	}
 
+	//TODO : CopyTree(..)가 매개변수를 const로 받지 않아서 이 메소드가 인스턴스화되면 오류가 발생할 것이므로 곤칠 것
 	BST_Template(const BST_Template<NodeType>& sourceBST)
 	{
 		LogPrint("copy constructor");
@@ -71,95 +72,84 @@ public:
 	}
 
 public:
-	bool Insert(int newKey,int newData)
+	bool Insert(int newKey, int newData)
 	{
 		LogPrint("insert");
 
-		NodeType* pDummyNode = NULL;
-		bool isDummySet = Search(newKey, pDummyNode, &BST_Template::SetDummyChild);
-		
-		if (isDummySet == true)
-		{
-			pDummyNode->m_key = newKey;
-			pDummyNode->m_data = newData;
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		NodeType* pNewNode = new NodeType(newKey, newData);
+		return Search(newKey, &BST_Template::InsertNode, pNewNode);
 	}
 
 	bool Retrieve(int targetKey, int& outData)
 	{
 		LogPrint("retrieve");
 
-		return Search(targetKey, outData, &BST_Template::GetNodeData);
+		return Search(targetKey, &BST_Template::RetrieveNode, &outData);
 	}
 
 	bool Remove(int targetKey)
 	{
 		LogPrint("remove one item");
 
-		char dummy = 'd';
-
-		return Search(targetKey, dummy, &BST_Template::RemoveTarget);
+		return Search(targetKey, &BST_Template::RemoveNode, (void*)NULL);
 	}
 
 public:
-	void RemoveTree() noexcept
+	bool RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
 
-		PostorderTraverse(&BST_Template::RemoveTwoChilds, this);
+		bool ret = PostorderTraverse(&BST_Template::RemoveTwoChilds, NULL);
 		delete m_pHead;
 		m_pHead = NULL;
+
+		return ret;
 	}
 
-	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함.
-	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다.
-	void CopyTree(BST_Template& sourceBST)
+	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함
+	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다
+	bool CopyTree(BST_Template& sourceBST)
 	{
 		LogPrint("copy tree");
 
-		sourceBST.PreorderTraverse(&BST_Template::CopyNode, this);
+		return sourceBST.PreorderTraverse(&BST_Template::CopyNode, this);
 	}
 
 	void PreorderPrint()
 	{
 		LogPrint("preorder print");
 
-		PreorderTraverse(&BST_Template::PrintTargetNode, this);
+		PreorderTraverse(&BST_Template::PrintTargetNode, NULL);
 	}
 
 	void InorderPrint()
 	{
 		LogPrint("inorder print");
 
-		InorderTraverse(&BST_Template::PrintTargetNode, this);
+		InorderTraverse(&BST_Template::PrintTargetNode, NULL);
 	}
 
 	void PostorderPrint()
 	{
 		LogPrint("postorder print");
 
-		PostorderTraverse(&BST_Template::PrintTargetNode, this);
+		PostorderTraverse(&BST_Template::PrintTargetNode, NULL);
 	}
 
 protected:
-	//"pToDoWithTargetNode" 메소드 포인터는 특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 인터페이스임.
-	//삽입과 삭제 메소드가 기능하려면 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있어야 하기에, NodeType*&과 같이 레퍼런스 인자를 사용함.
-	template <typename OutType>
-	bool Search(int targetKey, OutType& out, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, OutType&))
+	//"pToDoWithTargetNode" 메소드 포인터는 특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 인터페이스임
+	//작업 메소드에 NodeType*&와 같이 레퍼런스 매개변수를 사용한 이유는, 삽입과 삭제 메소드에서 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있도록 하기 위함이다
+	//argument 매개변수를 ArgumentType*와 같이 포인터 매개변수로 둔 이유는, 검색 메소드에서는 출력용 매개변수를 사용할 수 있도록, 삽입 메소드에서는 노드 복사 전달이 일어나지 않도록, 삭제 메소드에서는 해당 매개변수를 사용하지 않음을 표시할 NULL을 사용할 수 있도록 하기 위함이다
+	template <typename ArgumentType = void>
+	bool Search(int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, ArgumentType*), ArgumentType* argument)
 	{
 		if (m_pHead == NULL)
 		{
-			return (this->*pToDoWithTargetNode)(m_pHead, out);
+			return (this->*pToDoWithTargetNode)(m_pHead, argument);
 		}
 		else if (targetKey == m_pHead->m_key) 
 		{
-			return (this->*pToDoWithTargetNode)(m_pHead, out);
+			return (this->*pToDoWithTargetNode)(m_pHead, argument);
 		}
 		else
 		{
@@ -168,46 +158,67 @@ protected:
 			{
 				if (targetKey < pSearch->m_key)
 				{
-					if (pSearch->m_pLeftChild != NULL && pSearch->m_pLeftChild->m_key != targetKey)
+					if (pSearch->m_pLeftChild == NULL || pSearch->m_pLeftChild->m_key == targetKey)
 					{
-						pSearch = pSearch->m_pLeftChild;
+						return (this->*pToDoWithTargetNode)(pSearch->m_pLeftChild, argument);
 					}
 					else
 					{
-						return (this->*pToDoWithTargetNode)(pSearch->m_pLeftChild, out);
+						pSearch = pSearch->m_pLeftChild;
 					}
 				}
 				else
 				{
-					if (pSearch->m_pRightChild != NULL && pSearch->m_pRightChild->m_key != targetKey)
+					if (pSearch->m_pRightChild == NULL || pSearch->m_pRightChild->m_key == targetKey)
 					{
-						pSearch = pSearch->m_pRightChild;
+						return (this->*pToDoWithTargetNode)(pSearch->m_pRightChild, argument);
 					}
 					else
 					{
-						return (this->*pToDoWithTargetNode)(pSearch->m_pRightChild, out);
+						pSearch = pSearch->m_pRightChild;
 					}
 				}
 			}
 		}
 	}
 
-	bool SetDummyChild(NodeType*& pDummyNode, NodeType*& pOutNode)
+	bool InsertNode(NodeType*& pInsertPosition, NodeType* pNewNode)
 	{
-		pOutNode = pDummyNode = new NodeType(0, 0);
+		if (pInsertPosition != NULL)
+		{
+			ErrorPrint("cannot insert because there is same key in tree already!");
+
+			return false;
+		}
+
+		pInsertPosition = pNewNode;
 
 		return true;
 	}
 
-	bool GetNodeData(NodeType*& pTargetNode, int& outData)
+	bool RetrieveNode(NodeType*& pTargetNode, int* outData)
 	{
-		outData = pTargetNode->m_data;
+		if (pTargetNode == NULL)
+		{
+			ErrorPrint("cannot retrieve because there is no same key in tree!");
+
+			return false;
+		}
+
+		*outData = pTargetNode->m_data;
 
 		return true;
 	}
 
-	bool RemoveTarget(NodeType*& pTargetNode, char& dummyParmeter)
+	bool RemoveNode(NodeType*& pTargetNode, void* pDummyParameter)
 	{
+		if (pTargetNode == NULL)
+		{
+			ErrorPrint("cannot remove because there is no same key in tree!");
+
+			return false;
+		}
+
 		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
 		if (pTargetNode->m_pLeftChild != NULL && pTargetNode->m_pRightChild != NULL)
 		{
@@ -284,27 +295,49 @@ protected:
 
 protected:
 	//"pToDoWhileTraverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
-	//"optional_target_BST" BST 포인터는 앞선 "to_do_while_traverse" 작업에서 대상 BST 포인터가 필요한 경우를 위한 인수임.
-	void PreorderTraverse(void (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTreeParameter)
+	//포인터 매개변수를 이용하는 이유는, 노드나 트리가 구체적인 메소드로 전달될 때 복사가 일어나지 않도록 하기 위함이다
+	bool PreorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
 	{
-		if (m_pHead == NULL) return;
+		if (m_pHead == NULL)
+		{
+			WarningPrint("cannot traverse. becuase tree is empty.");
+
+			return false;
+		}
+
+		bool ret = true;
 
 		Stack<NodeType*> DepthFirstSearchStack;
 		NodeType* pTraverse = NULL;
 		DepthFirstSearchStack.Push(this->m_pHead);
 		while (DepthFirstSearchStack.Pop(pTraverse) == true)
 		{
-			(this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTreeParameter);
+			ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
 
-			if (pTraverse->m_pRightChild != NULL) DepthFirstSearchStack.Push(pTraverse->m_pRightChild);
-			if (pTraverse->m_pLeftChild != NULL) DepthFirstSearchStack.Push(pTraverse->m_pLeftChild);
+			if (pTraverse->m_pRightChild != NULL)
+			{
+				DepthFirstSearchStack.Push(pTraverse->m_pRightChild);
+			}
+			if (pTraverse->m_pLeftChild != NULL)
+			{
+				DepthFirstSearchStack.Push(pTraverse->m_pLeftChild);
+			}
 		}
+
+		return ret;
 	}
 
 	template<typename OptionalType>
-	void InorderTraverse(void (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTreeParameter)
+	bool InorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
 	{
-		if (m_pHead == NULL) return;
+		if (m_pHead == NULL)
+		{
+			WarningPrint("cannot traverse. becuase tree is empty.");
+
+			return false;
+		}
+
+		bool ret = true;
 
 		Stack<NodeType*> DepthFirstSearchStack;
 		DepthFirstSearchStack.Push(m_pHead);
@@ -320,7 +353,7 @@ protected:
 
 			NodeType* pTraverse = NULL;
 			DepthFirstSearchStack.Pop(pTraverse);
-			(this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTreeParameter);
+			ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
 
 			if (pTraverse->m_pRightChild != NULL)
 			{
@@ -332,11 +365,20 @@ protected:
 				newLeftSpine = false;
 			}
 		}
+
+		return ret;
 	}
 
-	void PostorderTraverse(void (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTreeParameter)
+	bool PostorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
 	{
-		if (m_pHead == NULL) return;
+		if (m_pHead == NULL)
+		{
+			WarningPrint("cannot traverse. becuase tree is empty.");
+
+			return false;
+		}
+
+		bool ret = true;
 
 		Stack<NodeType*> DepthFirstSearchStack;
 		DepthFirstSearchStack.Push(m_pHead);
@@ -360,7 +402,7 @@ protected:
 			}
 			else
 			{
-				(this->*pToDoWhileTraverse)(headNode, pOptionalTargetTreeParameter);
+				ret &= (this->*pToDoWhileTraverse)(headNode, pOptionalTargetTree);
 
 				newLeftSpine = false;
 				NodeType* pPrevNode = NULL;
@@ -368,13 +410,21 @@ protected:
 				NodeType* pCurrNode = NULL;
 				DepthFirstSearchStack.GetTop(pCurrNode);
 
-				if (pCurrNode && pCurrNode->m_pRightChild && (pCurrNode->m_pRightChild == pPrevNode)) newRightSpine = false;
-				else newRightSpine = true;
+				if (pCurrNode && pCurrNode->m_pRightChild && (pCurrNode->m_pRightChild == pPrevNode))
+				{
+					newRightSpine = false;
+				}
+				else
+				{
+					newRightSpine = true;
+				}
 			}
 		}
+
+		return ret;
 	}
 
-	void RemoveTwoChilds(NodeType* pTargetNode, BST_Template<NodeType>* nullParameter)
+	bool RemoveTwoChilds(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
 	{
 		if (pTargetNode->m_pLeftChild != NULL)
 		{
@@ -386,20 +436,21 @@ protected:
 			delete pTargetNode->m_pRightChild;
 			pTargetNode->m_pRightChild = NULL;
 		}
+
+		return true;
 	}
 
-	void CopyNode(NodeType* pSourceNode, BST_Template<NodeType>* pDestTree)
+	bool CopyNode(NodeType* pSourceNode, BST_Template<NodeType>* pDestTree)
 	{
-		NodeType* pInsertedNode = NULL;
-		
-		bool ret = pDestTree->Search(pSourceNode->m_key, pInsertedNode, &BST_Template::SetDummyChild);
-
-		*pInsertedNode = *pSourceNode;
+		NodeType* copiedNode = new NodeType(*pSourceNode);
+		return pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, copiedNode);
 	}
 
-	void PrintTargetNode(NodeType* pTargetNode, BST_Template<NodeType>* nullParameter)
+	bool PrintTargetNode(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
 	{
 		cout << "node m_key : " << pTargetNode->m_key << " / node m_data : " << pTargetNode->m_data << endl;
+
+		return true;
 	}
 
 protected:

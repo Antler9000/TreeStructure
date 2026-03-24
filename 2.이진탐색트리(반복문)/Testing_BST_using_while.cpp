@@ -64,6 +64,7 @@ int main()
 
 	cout << "remove test" << endl;
 	testBST.PreorderPrint();
+	cout << endl;
 
 	testBST.Remove(7);
 	testBST.PreorderPrint();

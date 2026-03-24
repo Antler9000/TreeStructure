@@ -22,43 +22,12 @@ private :
 
 	}
 
-	BST_Node& operator = (const BST_Node& sourceNode)
+	BST_Node(const BST_Node& sourceNode)
 	{
-		if (this == &sourceNode)
-		{
-			return *this;
-		}
-
-		RemoveNode();
-
 		m_data = sourceNode.m_data;
 		m_key = sourceNode.m_key;
 		m_pLeftChild = NULL;
 		m_pRightChild = NULL;
-
-		return *this;
-	}
-
-	BST_Node& operator = (BST_Node&& sourceNode) noexcept
-	{
-		if (this == &sourceNode)
-		{
-			return *this;
-		}
-
-		RemoveNode();
-
-		m_data = sourceNode.m_data;
-		m_key = sourceNode.m_key;
-		m_pLeftChild = sourceNode.m_pLeftChild;
-		m_pRightChild = sourceNode.m_pRightChild;
-
-		sourceNode.m_data = 0;
-		sourceNode.m_key = 0;
-		sourceNode.m_pLeftChild = NULL;
-		sourceNode.m_pRightChild = NULL;
-
-		return *this;
 	}
 
 	//트리 클래스에 순회를 이용한 소멸자가 정의되어있으므로 노드의 소멸자 정의는 필요 없음
@@ -70,19 +39,11 @@ private :
 	//쓰이지 않는 노드 생성 방식들
 	BST_Node() = delete;
 
-	BST_Node(const BST_Node& sourceNode) = delete;
-
 	BST_Node(BST_Node&& sourceNode) = delete;
 
-private:
-	//TODO : 트리 높이가 커지면 오류가 발생하므로, 반복문으로 고칠 것
-	bool RemoveNode() noexcept
-	{
-		delete m_pLeftChild;
-		delete m_pRightChild;
+	BST_Node& operator = (const BST_Node& sourceNode) = delete;
 
-		return true;
-	}
+	BST_Node& operator = (BST_Node&& sourceNode) = delete;
 
 private:
 	int m_key;
