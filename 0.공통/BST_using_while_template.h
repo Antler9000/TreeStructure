@@ -16,8 +16,8 @@ public:
 		LogPrint("empty constructor");
 	}
 
-	//TODO : CopyTree(..)가 매개변수를 const로 받지 않아서 이 메소드가 인스턴스화되면 오류가 발생할 것이므로 곤칠 것
-	BST_Template(const BST_Template<NodeType>& sourceBST)
+	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
+	BST_Template(BST_Template<NodeType>& sourceBST)
 	{
 		LogPrint("copy constructor");
 
@@ -32,8 +32,8 @@ public:
 		sourceBST.m_pHead = NULL;
 	}
 
-	//TODO : CopyTree(..)가 매개변수를 const로 받지 않아서 이 메소드가 인스턴스화되면 오류가 발생할 것이므로 곤칠 것
-	BST_Template<NodeType>& operator = (const BST_Template<NodeType>& sourceBST)
+	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
+	BST_Template<NodeType>& operator = (BST_Template<NodeType>& sourceBST)
 	{
 		LogPrint("copy assignment");
 
@@ -72,7 +72,7 @@ public:
 	}
 
 public:
-	bool Insert(int newKey, int newData)
+	bool Insert(const int newKey, const int newData)
 	{
 		LogPrint("insert");
 
@@ -80,14 +80,15 @@ public:
 		return Search(newKey, &BST_Template::InsertNode, pNewNode);
 	}
 
-	bool Retrieve(int targetKey, int& outData)
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
+	bool Retrieve(const int targetKey, int& outData)
 	{
 		LogPrint("retrieve");
 
 		return Search(targetKey, &BST_Template::RetrieveNode, &outData);
 	}
 
-	bool Remove(int targetKey)
+	bool Remove(const int targetKey)
 	{
 		LogPrint("remove one item");
 
@@ -106,6 +107,8 @@ public:
 		return ret;
 	}
 
+	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
+	//
 	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함
 	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다
 	bool CopyTree(BST_Template& sourceBST)
@@ -115,6 +118,7 @@ public:
 		return sourceBST.PreorderTraverse(&BST_Template::CopyNode, this);
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	void PreorderPrint()
 	{
 		LogPrint("preorder print");
@@ -122,6 +126,7 @@ public:
 		PreorderTraverse(&BST_Template::PrintTargetNode, NULL);
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	void InorderPrint()
 	{
 		LogPrint("inorder print");
@@ -129,6 +134,7 @@ public:
 		InorderTraverse(&BST_Template::PrintTargetNode, NULL);
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	void PostorderPrint()
 	{
 		LogPrint("postorder print");
@@ -137,11 +143,13 @@ public:
 	}
 
 protected:
+	//TODO : 하위 작업 메소드가 const이거나 해당 메소드로 넘겨주는 인자가 const인 경우를 명시할 수 있도록 함수 포인터 방식을 개선해야 함
+	// 
 	//"pToDoWithTargetNode" 메소드 포인터는 특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 인터페이스임
 	//작업 메소드에 NodeType*&와 같이 레퍼런스 매개변수를 사용한 이유는, 삽입과 삭제 메소드에서 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있도록 하기 위함이다
 	//argument 매개변수를 ArgumentType*와 같이 포인터 매개변수로 둔 이유는, 검색 메소드에서는 출력용 매개변수를 사용할 수 있도록, 삽입 메소드에서는 노드 복사 전달이 일어나지 않도록, 삭제 메소드에서는 해당 매개변수를 사용하지 않음을 표시할 NULL을 사용할 수 있도록 하기 위함이다
 	template <typename ArgumentType = void>
-	bool Search(int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, ArgumentType*), ArgumentType* argument)
+	bool Search(const int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, ArgumentType*), ArgumentType* argument)
 	{
 		if (m_pHead == NULL)
 		{
@@ -182,6 +190,7 @@ protected:
 		}
 	}
 
+	//TODO : pNewNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
 	bool InsertNode(NodeType*& pInsertPosition, NodeType* pNewNode)
 	{
 		if (pInsertPosition != NULL)
@@ -196,6 +205,8 @@ protected:
 		return true;
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
+	//TODO : pTargetNode는 const NodeType*&여야 함 (함수 포인터 방식을 개선해야함)
 	bool RetrieveNode(NodeType*& pTargetNode, int* outData)
 	{
 		if (pTargetNode == NULL)
@@ -294,8 +305,10 @@ protected:
 	}
 
 protected:
+	//TODO : 하위 작업 메소드가 const이거나 해당 메소드로 넘겨주는 인자가 const인 경우를 명시할 수 있도록 함수 포인터 방식을 개선해야 함
+	// 
 	//"pToDoWhileTraverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
-	//포인터 매개변수를 이용하는 이유는, 노드나 트리가 구체적인 메소드로 전달될 때 복사가 일어나지 않도록 하기 위함이다
+	//포인터 매개변수를 이용하는 이유는, 노드나 트리가 구체적인 메소드로 전달될 때 복사가 일어나지 않도록 하며, 매개변수를 사용하지 않는 경우 NULL을 더미로 넘길 수 있도록 하기 위함이다
 	bool PreorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
 	{
 		if (m_pHead == NULL)
@@ -440,12 +453,16 @@ protected:
 		return true;
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
+	//TODO : pSourceNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
 	bool CopyNode(NodeType* pSourceNode, BST_Template<NodeType>* pDestTree)
 	{
 		NodeType* copiedNode = new NodeType(*pSourceNode);
 		return pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, copiedNode);
 	}
 
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
+	//TODO : pTargetNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
 	bool PrintTargetNode(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
 	{
 		cout << "node m_key : " << pTargetNode->m_key << " / node m_data : " << pTargetNode->m_data << endl;
