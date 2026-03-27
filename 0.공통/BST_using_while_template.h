@@ -320,27 +320,27 @@ protected:
 
 		bool ret = true;
 
-		Stack<NodeType*> DepthFirstSearchStack;
 		NodeType* pTraverse = NULL;
-		DepthFirstSearchStack.Push(this->m_pHead);
-		while (DepthFirstSearchStack.Pop(pTraverse) == true)
+		Stack<NodeType*> rightChildStack;
+		rightChildStack.Push(this->m_pHead);
+		while (rightChildStack.Pop(pTraverse) == true)
 		{
-			ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
+			while (pTraverse != NULL)
+			{
+				ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
 
-			if (pTraverse->m_pRightChild != NULL)
-			{
-				DepthFirstSearchStack.Push(pTraverse->m_pRightChild);
-			}
-			if (pTraverse->m_pLeftChild != NULL)
-			{
-				DepthFirstSearchStack.Push(pTraverse->m_pLeftChild);
+				if (pTraverse->m_pRightChild != NULL)
+				{
+					rightChildStack.Push(pTraverse->m_pRightChild);
+				}
+
+				pTraverse = pTraverse->m_pLeftChild;
 			}
 		}
 
 		return ret;
 	}
 
-	template<typename OptionalType>
 	bool InorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
 	{
 		if (m_pHead == NULL)
@@ -352,30 +352,26 @@ protected:
 
 		bool ret = true;
 
-		Stack<NodeType*> DepthFirstSearchStack;
-		DepthFirstSearchStack.Push(m_pHead);
-		bool newLeftSpine = true;
-		while (!DepthFirstSearchStack.IsEmpty())
+		NodeType* pTraverse = m_pHead;
+		Stack<NodeType*> rightSideAncestorStack;	
+		while (pTraverse != NULL)
 		{
-			NodeType* headNode = DepthFirstSearchStack.GetTop();
-
-			while (newLeftSpine && headNode->m_pLeftChild)
-			{
-				DepthFirstSearchStack.Push(headNode->m_pLeftChild);
-			}
-
-			NodeType* pTraverse = NULL;
-			DepthFirstSearchStack.Pop(pTraverse);
+			rightSideAncestorStack.Push(pTraverse);
+			pTraverse = pTraverse->m_pLeftChild;
+		}
+		while (rightSideAncestorStack.Pop(pTraverse) == true)
+		{
 			ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
 
 			if (pTraverse->m_pRightChild != NULL)
 			{
-				DepthFirstSearchStack.Push(pTraverse->m_pRightChild);
-				newLeftSpine = true;
-			}
-			else
-			{
-				newLeftSpine = false;
+				pTraverse = pTraverse->m_pRightChild;
+
+				while (pTraverse != NULL)
+				{
+					rightSideAncestorStack.Push(pTraverse);
+					pTraverse = pTraverse->m_pLeftChild;
+				}
 			}
 		}
 
@@ -393,44 +389,40 @@ protected:
 
 		bool ret = true;
 
-		Stack<NodeType*> DepthFirstSearchStack;
-		DepthFirstSearchStack.Push(m_pHead);
-		bool newLeftSpine = true;
-		bool newRightSpine = true;
-		while (!DepthFirstSearchStack.IsEmpty())
+		struct Record
 		{
-			NodeType* headNode = NULL;
-			DepthFirstSearchStack.GetTop(headNode);
-
-			while (newLeftSpine && headNode->m_pLeftChild)
+			enum NodeJob
 			{
-				DepthFirstSearchStack.GetTop(headNode);
-				DepthFirstSearchStack.Push(headNode->m_pLeftChild);
-			}
+				KEEP_SEARCH,
+				DO_TODO
+			};
 
-			if (newRightSpine && headNode->m_pRightChild)
+			NodeJob nodeJob;
+			NodeType* pNode;
+		};
+
+		Record traverseRecord;
+		Stack<Record> depthFirstSearchStack;
+		depthFirstSearchStack.Push({ Record::KEEP_SEARCH , m_pHead });
+		while (depthFirstSearchStack.Pop(traverseRecord) == true)
+		{
+			if (traverseRecord.nodeJob == Record::KEEP_SEARCH)
 			{
-				DepthFirstSearchStack.Push(headNode->m_pRightChild);
-				newLeftSpine = true;
-			}
-			else
-			{
-				ret &= (this->*pToDoWhileTraverse)(headNode, pOptionalTargetTree);
+				depthFirstSearchStack.Push({ Record::DO_TODO , traverseRecord.pNode });
 
-				newLeftSpine = false;
-				NodeType* pPrevNode = NULL;
-				DepthFirstSearchStack.Pop(pPrevNode);
-				NodeType* pCurrNode = NULL;
-				DepthFirstSearchStack.GetTop(pCurrNode);
-
-				if (pCurrNode && pCurrNode->m_pRightChild && (pCurrNode->m_pRightChild == pPrevNode))
+				if (traverseRecord.pNode->m_pRightChild != NULL)
 				{
-					newRightSpine = false;
+					depthFirstSearchStack.Push({ Record::KEEP_SEARCH, traverseRecord.pNode->m_pRightChild });
 				}
-				else
+
+				if (traverseRecord.pNode->m_pLeftChild != NULL)
 				{
-					newRightSpine = true;
+					depthFirstSearchStack.Push({ Record::KEEP_SEARCH, traverseRecord.pNode->m_pLeftChild });
 				}
+			}
+			else if(traverseRecord.nodeJob == Record::DO_TODO)
+			{
+				ret &= (this->*pToDoWhileTraverse)(traverseRecord.pNode, pOptionalTargetTree);
 			}
 		}
 
@@ -465,7 +457,7 @@ protected:
 	//TODO : pTargetNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
 	bool PrintTargetNode(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
 	{
-		cout << "node m_key : " << pTargetNode->m_key << " / node m_data : " << pTargetNode->m_data << endl;
+		cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 
 		return true;
 	}

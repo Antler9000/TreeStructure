@@ -48,7 +48,17 @@ int main()
 	testBST.Insert(6, 3636);
 	testBST.Insert(1, 5151);
 	testBST.Insert(8, 5858);
+
+	cout << "preorder print" << endl;
 	testBST.PreorderPrint();
+	cout << endl;
+
+	cout << "ineorder print" << endl;
+	testBST.InorderPrint();
+	cout << endl;
+
+	cout << "postorder print" << endl;
+	testBST.PostorderPrint();
 	cout << endl;
 
 	cout << "retrieve test" << endl;
