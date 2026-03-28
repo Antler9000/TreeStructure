@@ -7,7 +7,7 @@
 #include <utility>					//이동 시맨틱을 사용함
 using namespace std;				//..			
 
-template <class NodeType>
+template <template <typename> class NodeType, typename DataType>
 class BST_Template
 {
 public:
@@ -17,14 +17,14 @@ public:
 	}
 
 	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
-	BST_Template(BST_Template<NodeType>& sourceBST)
+	BST_Template(BST_Template<NodeType, DataType>& sourceBST)
 	{
 		LogPrint("copy constructor");
 
 		CopyTree(sourceBST);
 	}
 
-	BST_Template(BST_Template<NodeType>&& sourceBST) noexcept
+	BST_Template(BST_Template<NodeType, DataType>&& sourceBST) noexcept
 	{
 		LogPrint("move constructor");
 
@@ -33,7 +33,7 @@ public:
 	}
 
 	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
-	BST_Template<NodeType>& operator = (BST_Template<NodeType>& sourceBST)
+	BST_Template<NodeType, DataType>& operator = (BST_Template<NodeType, DataType>& sourceBST)
 	{
 		LogPrint("copy assignment");
 
@@ -47,7 +47,7 @@ public:
 		return *this;
 	}
 
-	BST_Template<NodeType>& operator = (BST_Template<NodeType>&& sourceBST) noexcept
+	BST_Template<NodeType, DataType>& operator = (BST_Template<NodeType, DataType>&& sourceBST) noexcept
 	{
 		LogPrint("move assignment");
 
@@ -72,16 +72,17 @@ public:
 	}
 
 public:
-	bool Insert(const int newKey, const int newData)
+	//TODO : newData는 const lvalue 참조, rvalue 참조 두가지 버전이 있어야 함 (함수 포인터 방식을 개선해야함)
+	bool Insert(const int newKey, DataType newData)
 	{
 		LogPrint("insert");
 
-		NodeType* pNewNode = new NodeType(newKey, newData);
+		NodeType<DataType>* pNewNode = new NodeType<DataType>(newKey, newData);
 		return Search(newKey, &BST_Template::InsertNode, pNewNode);
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	bool Retrieve(const int targetKey, int& outData)
+	bool Retrieve(const int targetKey, DataType& outData)
 	{
 		LogPrint("retrieve");
 
@@ -149,7 +150,7 @@ protected:
 	//작업 메소드에 NodeType*&와 같이 레퍼런스 매개변수를 사용한 이유는, 삽입과 삭제 메소드에서 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있도록 하기 위함이다
 	//argument 매개변수를 ArgumentType*와 같이 포인터 매개변수로 둔 이유는, 검색 메소드에서는 출력용 매개변수를 사용할 수 있도록, 삽입 메소드에서는 노드 복사 전달이 일어나지 않도록, 삭제 메소드에서는 해당 매개변수를 사용하지 않음을 표시할 NULL을 사용할 수 있도록 하기 위함이다
 	template <typename ArgumentType = void>
-	bool Search(const int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType*&, ArgumentType*), ArgumentType* argument)
+	bool Search(const int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType<DataType>*&, ArgumentType*), ArgumentType* argument)
 	{
 		if (m_pHead == NULL)
 		{
@@ -161,7 +162,7 @@ protected:
 		}
 		else
 		{
-			NodeType* pSearch = m_pHead;
+			NodeType<DataType>* pSearch = m_pHead;
 			while (true)
 			{
 				if (targetKey < pSearch->m_key)
@@ -191,7 +192,7 @@ protected:
 	}
 
 	//TODO : pNewNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool InsertNode(NodeType*& pInsertPosition, NodeType* pNewNode)
+	bool InsertNode(NodeType<DataType>*& pInsertPosition, NodeType<DataType>* pNewNode)
 	{
 		if (pInsertPosition != NULL)
 		{
@@ -207,7 +208,7 @@ protected:
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	//TODO : pTargetNode는 const NodeType*&여야 함 (함수 포인터 방식을 개선해야함)
-	bool RetrieveNode(NodeType*& pTargetNode, int* outData)
+	bool RetrieveNode(NodeType<DataType>*& pTargetNode, DataType* outData)
 	{
 		if (pTargetNode == NULL)
 		{
@@ -221,7 +222,7 @@ protected:
 		return true;
 	}
 
-	bool RemoveNode(NodeType*& pTargetNode, void* pDummyParameter)
+	bool RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
 	{
 		if (pTargetNode == NULL)
 		{
@@ -252,10 +253,10 @@ protected:
 		}
 	}
 
-	bool ReplaceWithInorderPredecessor(NodeType*& pTargetNode)
+	bool ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
 	{
-		NodeType* pPrevious = NULL;
-		NodeType* pTraverse = pTargetNode->m_pLeftChild;
+		NodeType<DataType>* pPrevious = NULL;
+		NodeType<DataType>* pTraverse = pTargetNode->m_pLeftChild;
 		while (pTraverse->m_pRightChild != NULL)
 		{
 			pPrevious = pTraverse;
@@ -278,10 +279,10 @@ protected:
 		return true;
 	}
 
-	bool ReplaceWithInorderSuccessor(NodeType*& pTargetNode)
+	bool ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
 	{
-		NodeType* pPrevious = NULL;
-		NodeType* pTraverse = pTargetNode->m_pRightChild;
+		NodeType<DataType>* pPrevious = NULL;
+		NodeType<DataType>* pTraverse = pTargetNode->m_pRightChild;
 		while (pTraverse->m_pLeftChild != NULL)
 		{
 			pPrevious = pTraverse;
@@ -309,7 +310,7 @@ protected:
 	// 
 	//"pToDoWhileTraverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
 	//포인터 매개변수를 이용하는 이유는, 노드나 트리가 구체적인 메소드로 전달될 때 복사가 일어나지 않도록 하며, 매개변수를 사용하지 않는 경우 NULL을 더미로 넘길 수 있도록 하기 위함이다
-	bool PreorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
+	bool PreorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
 	{
 		if (m_pHead == NULL)
 		{
@@ -320,8 +321,8 @@ protected:
 
 		bool ret = true;
 
-		NodeType* pTraverse = NULL;
-		Stack<NodeType*> rightChildStack;
+		NodeType<DataType>* pTraverse = NULL;
+		Stack<NodeType<DataType>*> rightChildStack;
 		rightChildStack.Push(this->m_pHead);
 		while (rightChildStack.Pop(pTraverse) == true)
 		{
@@ -341,7 +342,7 @@ protected:
 		return ret;
 	}
 
-	bool InorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
+	bool InorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
 	{
 		if (m_pHead == NULL)
 		{
@@ -352,8 +353,8 @@ protected:
 
 		bool ret = true;
 
-		NodeType* pTraverse = m_pHead;
-		Stack<NodeType*> rightSideAncestorStack;	
+		NodeType<DataType>* pTraverse = m_pHead;
+		Stack<NodeType<DataType>*> rightSideAncestorStack;
 		while (pTraverse != NULL)
 		{
 			rightSideAncestorStack.Push(pTraverse);
@@ -378,7 +379,7 @@ protected:
 		return ret;
 	}
 
-	bool PostorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType*, BST_Template<NodeType>*), BST_Template<NodeType>* pOptionalTargetTree)
+	bool PostorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
 	{
 		if (m_pHead == NULL)
 		{
@@ -398,7 +399,7 @@ protected:
 			};
 
 			NodeJob nodeJob;
-			NodeType* pNode;
+			NodeType<DataType>* pNode;
 		};
 
 		Record traverseRecord;
@@ -429,7 +430,7 @@ protected:
 		return ret;
 	}
 
-	bool RemoveTwoChilds(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
+	bool RemoveTwoChilds(NodeType<DataType>* pTargetNode, BST_Template<NodeType, DataType>* pDummyParameter)
 	{
 		if (pTargetNode->m_pLeftChild != NULL)
 		{
@@ -447,15 +448,15 @@ protected:
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	//TODO : pSourceNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool CopyNode(NodeType* pSourceNode, BST_Template<NodeType>* pDestTree)
+	bool CopyNode(NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree)
 	{
-		NodeType* copiedNode = new NodeType(*pSourceNode);
+		NodeType<DataType>* copiedNode = new NodeType<DataType>(*pSourceNode);
 		return pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, copiedNode);
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	//TODO : pTargetNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool PrintTargetNode(NodeType* pTargetNode, BST_Template<NodeType>* pDummyParameter)
+	bool PrintTargetNode(NodeType<DataType>* pTargetNode, BST_Template<NodeType, DataType>* pDummyParameter)
 	{
 		cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 
@@ -463,7 +464,7 @@ protected:
 	}
 
 protected:
-	NodeType* m_pHead;
+	NodeType<DataType>* m_pHead;
 };
 
 #endif //BST_USING_WHILE_TEMPLATE_H

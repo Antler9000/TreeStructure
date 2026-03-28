@@ -379,7 +379,7 @@ void SpeedTestMap(const int speedTestRepeat, vector<string> insertTestDatum, con
 	time_point<steady_clock> timeEnd;
 	duration<double> timeDiff;
 
-	cout << endl << "map ·£´ý »ðÀÔ ÃøÁ¤ ½ÃÀÛ" << endl;
+	cout << endl << "map ·£´ý º¹»ç »ðÀÔ ÃøÁ¤ ½ÃÀÛ" << endl;
 	cout << endl << "|------------------|" << endl;
 
 	timeBegin = clock.now();
@@ -394,7 +394,7 @@ void SpeedTestMap(const int speedTestRepeat, vector<string> insertTestDatum, con
 
 	timeEnd = clock.now();
 
-	cout << endl << "map ·£´ý »ðÀÔ ÃøÁ¤ Á¾·á" << endl;
+	cout << endl << "map ·£´ý º¹»ç »ðÀÔ ÃøÁ¤ Á¾·á" << endl;
 
 	timeDiff = timeEnd - timeBegin;
 

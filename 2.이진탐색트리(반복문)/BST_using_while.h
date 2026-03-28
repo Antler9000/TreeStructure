@@ -5,12 +5,13 @@
 #include <utility>									//이동 시맨틱을 사용함
 using namespace std;								//..	
 
+template <typename DataType>
 class BST_Node
 {
-	friend class BST_Template<BST_Node>;
+	friend class BST_Template<BST_Node, DataType>;
 
 private : 
-	BST_Node(int newKey, const int& newData)
+	BST_Node(int newKey, const DataType& newData)
 		: m_key(newKey), m_data(newData), m_pLeftChild(NULL), m_pRightChild(NULL)
 	{
 		
@@ -47,15 +48,16 @@ private :
 
 private:
 	int m_key;
-	int m_data;
+	DataType m_data;
 	BST_Node* m_pLeftChild;
 	BST_Node* m_pRightChild;
 };
 
-class BST : public BST_Template<BST_Node>
+template <typename DataType>
+class BST : public BST_Template<BST_Node, DataType>
 {
 public:
-	BST() : BST_Template()
+	BST() : BST_Template<BST_Node, DataType>()
 	{
 	
 	}
