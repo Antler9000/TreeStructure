@@ -5,6 +5,7 @@
 
 #include "BST_using_recurse.h"	//직접 정의한 BST를 테스팅함
 #include <chrono>;				//속도 테스트를 위해 사용함
+#include <string>;				//..
 #include <numeric>;				//..
 #include <random>;				//..
 #include <map>;					//..
