@@ -10,7 +10,7 @@ class BST_Node
 {
 	friend class BST_Template<BST_Node, DataType>;
 
-private : 
+public : 
 	BST_Node(int newKey, const DataType& newData)
 		: m_key(newKey), m_data(newData), m_pLeftChild(NULL), m_pRightChild(NULL)
 	{
