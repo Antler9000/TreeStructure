@@ -22,7 +22,12 @@ public:
 	{
 		LogPrint("copy constructor");
 
-		CopyTree(sourceBST);
+		BST_Template<NodeType, DataType> tempTree;
+		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &tempTree);
+		if (ret == true)
+		{
+			*this = move(tempTree);
+		}
 	}
 
 	BST_Template(BST_Template<NodeType, DataType>&& sourceBST) noexcept
@@ -43,7 +48,12 @@ public:
 			return *this;
 		}
 
-		CopyTree(sourceBST);
+		BST_Template<NodeType, DataType> tempTree;
+		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &tempTree);
+		if (ret == true)
+		{
+			*this = move(tempTree);
+		}
 
 		return *this;
 	}
@@ -88,6 +98,11 @@ public:
 			ErrorPrint("cannot insert because there is no space in heap!");
 			return false;
 		}
+		catch (exception e)
+		{
+			ErrorPrint("cannot insert because there is something error(but not heap shortage)!");
+			return false;
+		}
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
@@ -106,6 +121,8 @@ public:
 	}
 
 public:
+	//TODO : 스택의 삽입을 이용하기에 nothrow 보장이 없는 PostorderTraverse(..)를 사용하지 않는 방식으로 새로 구현해야 함
+	//RemoveTree(..)와 이를 호출하는 이동 할당 연산자, 트리 소멸자는 noexcept가 실질적인 안전을 보장해주지 못한다
 	bool RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
@@ -127,11 +144,23 @@ public:
 
 		try
 		{
-			return sourceBST.PreorderTraverse(&BST_Template::CopyNode, this);
+			BST_Template<NodeType, DataType> tempTree;
+			bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &tempTree);
+			if (ret == true)
+			{
+				*this = move(tempTree);
+			}
+
+			return ret;
 		}
 		catch (bad_alloc e)
 		{
 			ErrorPrint("cannot copytree because there is no space in heap!");
+			return false;
+		}
+		catch (exception e)
+		{
+			ErrorPrint("cannot copytree because there is something error(but not heap shortage)!");
 			return false;
 		}
 	}
@@ -294,9 +323,8 @@ protected:
 		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
 		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
 
-		NodeType<DataType>* pTrashedTargetNode = pTargetNode;
+		delete pTargetNode;
 		pTargetNode = pTraverse;
-		delete pTrashedTargetNode;
 
 		return true;
 	}
@@ -322,9 +350,8 @@ protected:
 			pTraverse->m_pRightChild = NULL;
 		}
 
-		NodeType<DataType>* pTrashedTargetNode = pTargetNode;
+		delete pTargetNode;
 		pTargetNode = pTraverse;
-		delete pTrashedTargetNode;
 
 		return true;
 	}
