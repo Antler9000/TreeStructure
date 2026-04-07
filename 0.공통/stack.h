@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include <memory>					//유니크 포인터를 사용함
 #include <utility>					//이동 시맨틱을 사용함
 using namespace std;				//..
 
@@ -96,7 +96,6 @@ public:
 		RemoveStack();
 	}
 
-public :
 	bool Push(const DataType& data)
 	{
 		if (m_pHead == NULL)

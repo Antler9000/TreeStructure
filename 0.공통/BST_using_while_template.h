@@ -4,7 +4,7 @@
 #include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
 #include "../0.공통/stack.h"		//정의한 스택을 사용해, 재귀를 반복문으로 모방함
 #include <iostream>					//콘솔 출력을 사용함
-#include <memory>					//스마트 포인터를 사용함
+#include <memory>					//유니크 포인터를 사용함
 #include <utility>					//이동 시맨틱을 사용함
 using namespace std;				//..			
 
@@ -82,7 +82,6 @@ public:
 		RemoveTree();
 	}
 
-public:
 	//TODO : newData는 const lvalue 참조, rvalue 참조 두가지 버전이 있어야 함 (함수 포인터 방식을 개선해야함)
 	bool Insert(const int newKey, DataType newData)
 	{
@@ -120,18 +119,12 @@ public:
 		return Search(targetKey, &BST_Template::RemoveNode, (void*)NULL);
 	}
 
-public:
-	//TODO : 스택의 삽입을 이용하기에 nothrow 보장이 없는 PostorderTraverse(..)를 사용하지 않는 방식으로 새로 구현해야 함
-	//RemoveTree(..)와 이를 호출하는 이동 할당 연산자, 트리 소멸자는 noexcept가 실질적인 안전을 보장해주지 못한다
-	bool RemoveTree() noexcept
+	//트리의 소멸자와 이동 할당 연산자에 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
+	void RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
 
-		bool ret = PostorderTraverse(&BST_Template::RemoveTwoChilds, NULL);
-		delete m_pHead;
-		m_pHead = NULL;
-
-		return ret;
+		KeepRemovingHeadUsingRotationRR();
 	}
 
 	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
@@ -350,6 +343,9 @@ protected:
 			pTraverse->m_pRightChild = NULL;
 		}
 
+		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+
 		delete pTargetNode;
 		pTargetNode = pTraverse;
 
@@ -481,22 +477,6 @@ protected:
 		return ret;
 	}
 
-	bool RemoveTwoChilds(NodeType<DataType>* pTargetNode, BST_Template<NodeType, DataType>* pDummyParameter)
-	{
-		if (pTargetNode->m_pLeftChild != NULL)
-		{
-			delete pTargetNode->m_pLeftChild;
-			pTargetNode->m_pLeftChild = NULL;
-		}
-		if (pTargetNode->m_pRightChild != NULL)
-		{
-			delete pTargetNode->m_pRightChild;
-			pTargetNode->m_pRightChild = NULL;
-		}
-
-		return true;
-	}
-
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	//TODO : pSourceNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
 	bool CopyNode(NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree)
@@ -512,6 +492,28 @@ protected:
 		cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 
 		return true;
+	}
+
+protected:
+	//트리의 소멸자와 이동 할당 연산자의 하위 메소드로 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
+	void KeepRemovingHeadUsingRotationRR() noexcept
+	{
+		while (m_pHead != NULL)
+		{
+			if (m_pHead->m_pRightChild != NULL)
+			{
+				NodeType<DataType>* pNewHeadNode = m_pHead->m_pRightChild;
+				m_pHead->m_pRightChild = m_pHead->m_pRightChild->m_pLeftChild;
+				pNewHeadNode->m_pLeftChild = m_pHead;
+				m_pHead = pNewHeadNode;
+
+				continue;
+			}
+
+			NodeType<DataType>* pTrashNode = m_pHead;
+			m_pHead = m_pHead->m_pLeftChild;
+			delete pTrashNode;
+		}
 	}
 
 protected:
