@@ -1,7 +1,6 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include <memory>					//유니크 포인터를 사용함
 #include <utility>					//이동 시맨틱을 사용함
 using namespace std;				//..
 
@@ -55,7 +54,7 @@ public:
 	Stack()
 		: m_pHead(NULL)
 	{
-	
+
 	}
 
 	Stack(const Stack& sourceStack)
@@ -182,7 +181,7 @@ public:
 		else
 		{
 			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild->m_pChild)
+			while (pTraverse->m_pChild->m_pChild != NULL)
 			{
 				pTraverse = pTraverse->m_pChild;
 			}
@@ -194,11 +193,17 @@ public:
 
 	bool IsEmpty()
 	{
-		if (m_pHead == NULL) return true;
-		else return false;
+		if (m_pHead == NULL)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
-	bool RemoveStack()
+	bool RemoveStack() noexcept
 	{
 		if (m_pHead == NULL)
 		{
@@ -214,7 +219,7 @@ public:
 			pTraverseCurr = pTraverseCurr->m_pChild;
 			delete pTraversePrev;
 		}
-		
+
 		return true;
 	}
 
