@@ -17,7 +17,7 @@ public :
 		
 	}
 
-	BST_Node(int newKey, int&& newData)
+	BST_Node(int newKey, DataType&& newData)
 		: m_key(newKey), m_data(move(newData)), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
 
