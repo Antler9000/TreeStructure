@@ -14,13 +14,13 @@ class StackNode
 
 private:
 	StackNode(const DataType& newData)
-		: m_data(newData), m_pChild(NULL)
+		: m_data(newData), m_pChild(nullptr)
 	{
 
 	}
 
 	StackNode(DataType&& newData)
-		: m_data(move(newData)), m_pChild(NULL)
+		: m_data(move(newData)), m_pChild(nullptr)
 	{
 
 	}
@@ -52,7 +52,7 @@ class Stack
 {
 public:
 	Stack()
-		: m_pHead(NULL)
+		: m_pHead(nullptr)
 	{
 
 	}
@@ -65,7 +65,7 @@ public:
 	Stack(Stack&& sourceStack) noexcept
 	{
 		m_pHead = sourceStack.m_pHead;
-		sourceStack.m_pHead = NULL;
+		sourceStack.m_pHead = nullptr;
 	}
 
 	Stack& operator = (const Stack& sourceStack)
@@ -85,7 +85,7 @@ public:
 		RemoveStack();
 
 		m_pHead = sourceStack.m_pHead;
-		sourceStack.m_pHead = NULL;
+		sourceStack.m_pHead = nullptr;
 
 		return *this;
 	}
@@ -97,7 +97,7 @@ public:
 
 	bool Push(const DataType& data)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			m_pHead = new StackNode<DataType>(data);
 		}
@@ -117,7 +117,7 @@ public:
 
 	bool Push(DataType&& data)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			m_pHead = new StackNode<DataType>(move(data));
 		}
@@ -137,30 +137,30 @@ public:
 
 	bool Pop(DataType& outData)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			return false;
 		}
 
-		if (m_pHead->m_pChild == NULL)
+		if (m_pHead->m_pChild == nullptr)
 		{
 			outData = m_pHead->m_data;
 			delete m_pHead;
-			m_pHead = NULL;
+			m_pHead = nullptr;
 
 			return true;
 		}
 		else
 		{
 			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild->m_pChild != NULL)
+			while (pTraverse->m_pChild->m_pChild != nullptr)
 			{
 				pTraverse = pTraverse->m_pChild;
 			}
 
 			outData = pTraverse->m_pChild->m_data;
 			delete pTraverse->m_pChild;
-			pTraverse->m_pChild = NULL;
+			pTraverse->m_pChild = nullptr;
 
 			return true;
 		}
@@ -168,12 +168,12 @@ public:
 
 	bool GetTop(DataType& outData)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			return false;
 		}
 
-		if (m_pHead->m_pChild == NULL)
+		if (m_pHead->m_pChild == nullptr)
 		{
 			outData = m_pHead->m_data;
 			return true;
@@ -181,7 +181,7 @@ public:
 		else
 		{
 			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild->m_pChild != NULL)
+			while (pTraverse->m_pChild->m_pChild != nullptr)
 			{
 				pTraverse = pTraverse->m_pChild;
 			}
@@ -193,7 +193,7 @@ public:
 
 	bool IsEmpty()
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			return true;
 		}
@@ -205,7 +205,7 @@ public:
 
 	bool RemoveStack() noexcept
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			return true;
 		}
@@ -225,7 +225,7 @@ public:
 
 	bool CopyStack(const Stack<DataType>& sourceStack)
 	{
-		if (sourceStack.m_pHead == NULL)
+		if (sourceStack.m_pHead == nullptr)
 		{
 			return false;
 		}
@@ -235,7 +235,7 @@ public:
 		StackNode<DataType>* pSourceStackTraverse = sourceStack.m_pHead;
 		m_pHead = new StackNode<DataType>(pSourceStackTraverse->m_data);
 		StackNode<DataType>* pDestStackTraverse = m_pHead;
-		while (pSourceStackTraverse->m_pChild != NULL)
+		while (pSourceStackTraverse->m_pChild != nullptr)
 		{
 			pSourceStackTraverse = pSourceStackTraverse->m_pChild;
 			pDestStackTraverse->m_pChild = new StackNode<DataType>(pSourceStackTraverse->m_data);

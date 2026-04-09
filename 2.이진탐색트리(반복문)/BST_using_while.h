@@ -12,13 +12,13 @@ class BST_Node
 
 public : 
 	BST_Node(int newKey, const DataType& newData)
-		: m_key(newKey), m_data(newData), m_pLeftChild(NULL), m_pRightChild(NULL)
+		: m_key(newKey), m_data(newData), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
 		
 	}
 
 	BST_Node(int newKey, int&& newData)
-		: m_key(newKey), m_data(move(newData)), m_pLeftChild(NULL), m_pRightChild(NULL)
+		: m_key(newKey), m_data(move(newData)), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
 
 	}
@@ -27,8 +27,8 @@ public :
 	{
 		m_data = sourceNode.m_data;
 		m_key = sourceNode.m_key;
-		m_pLeftChild = NULL;
-		m_pRightChild = NULL;
+		m_pLeftChild = nullptr;
+		m_pRightChild = nullptr;
 	}
 
 	//트리 클래스에 순회를 이용한 소멸자가 정의되어있으므로 노드의 소멸자 정의는 필요 없음

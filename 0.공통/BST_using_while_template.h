@@ -12,7 +12,7 @@ template <template <typename> class NodeType, typename DataType>
 class BST_Template
 {
 public:
-	BST_Template() : m_pHead(NULL)
+	BST_Template() : m_pHead(nullptr)
 	{
 		LogPrint("empty constructor");
 	}
@@ -35,7 +35,7 @@ public:
 		LogPrint("move constructor");
 
 		m_pHead = sourceBST.m_pHead;
-		sourceBST.m_pHead = NULL;
+		sourceBST.m_pHead = nullptr;
 	}
 
 	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
@@ -70,7 +70,7 @@ public:
 		RemoveTree();
 
 		m_pHead = sourceBST.m_pHead;
-		sourceBST.m_pHead = NULL;
+		sourceBST.m_pHead = nullptr;
 
 		return *this;
 	}
@@ -82,14 +82,16 @@ public:
 		RemoveTree();
 	}
 
-	//TODO : newData는 const lvalue 참조, rvalue 참조 두가지 버전이 있어야 함 (함수 포인터 방식을 개선해야함)
-	bool Insert(const int newKey, DataType newData)
+	//newData가 lvalue 참조와 rvalue 참조인 경우를 각각 다르게 처리하기 위해서 참조 붕괴를 사용했음
+	//TODO : 그러나 랜덤 삽입 워크로드에서 이동 삽입이 복사 삽입과 시간 차이가 나지 않는 결과가 나왔으니 이를 검토해보기
+	template <typename InsertDataType = DataType>
+	bool Insert(const int newKey, InsertDataType&& newData)
 	{
 		LogPrint("insert");
 		
 		try
 		{
-			unique_ptr<NodeType<DataType>> upNewNode = make_unique<NodeType<DataType>>(newKey, newData);
+			unique_ptr<NodeType<DataType>> upNewNode = make_unique<NodeType<DataType>>(newKey, forward<InsertDataType>(newData));
 			return Search(newKey, &BST_Template::InsertNode, move(upNewNode));
 		}
 		catch (bad_alloc e)
@@ -109,14 +111,14 @@ public:
 	{
 		LogPrint("retrieve");
 
-		return Search(targetKey, &BST_Template::RetrieveNode, (DataType*) &outData);
+		return Search(targetKey, &BST_Template::RetrieveNode, outData);
 	}
 
 	bool Remove(const int targetKey)
 	{
 		LogPrint("remove one item");
 
-		return Search(targetKey, &BST_Template::RemoveNode, (void*)NULL);
+		return Search(targetKey, &BST_Template::RemoveNode, nullptr);
 	}
 
 	//트리의 소멸자와 이동 할당 연산자에 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
@@ -124,7 +126,7 @@ public:
 	{
 		LogPrint("remove tree");
 
-		KeepRemovingHeadUsingRotationRR();
+		RemovingTreeByRotationRR();
 	}
 
 	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
@@ -163,7 +165,7 @@ public:
 	{
 		LogPrint("preorder print");
 
-		PreorderTraverse(&BST_Template::PrintTargetNode, NULL);
+		PreorderTraverse(&BST_Template::PrintTargetNode, nullptr);
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
@@ -171,7 +173,7 @@ public:
 	{
 		LogPrint("inorder print");
 
-		InorderTraverse(&BST_Template::PrintTargetNode, NULL);
+		InorderTraverse(&BST_Template::PrintTargetNode, nullptr);
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
@@ -179,25 +181,23 @@ public:
 	{
 		LogPrint("postorder print");
 
-		PostorderTraverse(&BST_Template::PrintTargetNode, NULL);
+		PostorderTraverse(&BST_Template::PrintTargetNode, nullptr);
 	}
 
-protected:
-	//TODO : 하위 작업 메소드가 const이거나 해당 메소드로 넘겨주는 인자가 const인 경우를 명시할 수 있도록 함수 포인터 방식을 개선해야 함
-	// 
-	//"pToDoWithTargetNode" 메소드 포인터는 특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 인터페이스임
-	//작업 메소드에 NodeType*&와 같이 레퍼런스 매개변수를 사용한 이유는, 삽입과 삭제 메소드에서 부모가 자식을 가리키는 포인터 변수를 직접 수정할 수 있도록 하기 위함이다
-	//argument 인자를 move로 하위 작업 메소드로 넘겨주는 이유는, 삽입시 새로 삽입될 노드가 unique_ptr에 담겨(RAII 원칙 때문에) 삽입될 위치까지 이동하기 때문이다. 검색 메소드는 출력 매개변수의 포인터를 이용하고, 삭제 메소드는 이 매개변수에 더미만 넘겨주기에 move(..)로 넘겨줘도 문제는 발생하지 않는다
-	template <typename ArgumentType>
-	bool Search(const int targetKey, bool (BST_Template::* pToDoWithTargetNode)(NodeType<DataType>*&, ArgumentType), ArgumentType argument)
+
+protected:	//제너릭 메소드들
+	//TODO : 상위 메소드와 하위 작업 메소드가 const 메소드인 경우가 가능하도록 수정해야 함
+	//특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 제너릭 메소드임
+	template <typename MethodType, typename ArgumentType>
+	bool Search(const int targetKey, MethodType&& method, ArgumentType&& argument)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
-			return (this->*pToDoWithTargetNode)(m_pHead, move(argument));
+			return (this->*forward<MethodType>(method))(m_pHead, forward<ArgumentType>(argument));
 		}
 		else if (targetKey == m_pHead->m_key) 
 		{
-			return (this->*pToDoWithTargetNode)(m_pHead, move(argument));
+			return (this->*forward<MethodType>(method))(m_pHead, forward<ArgumentType>(argument));
 		}
 		else
 		{
@@ -206,9 +206,9 @@ protected:
 			{
 				if (targetKey < pSearch->m_key)
 				{
-					if (pSearch->m_pLeftChild == NULL || pSearch->m_pLeftChild->m_key == targetKey)
+					if (pSearch->m_pLeftChild == nullptr || pSearch->m_pLeftChild->m_key == targetKey)
 					{
-						return (this->*pToDoWithTargetNode)(pSearch->m_pLeftChild, move(argument));
+						return (this->*forward<MethodType>(method))(pSearch->m_pLeftChild, forward<ArgumentType>(argument));
 					}
 					else
 					{
@@ -217,9 +217,9 @@ protected:
 				}
 				else
 				{
-					if (pSearch->m_pRightChild == NULL || pSearch->m_pRightChild->m_key == targetKey)
+					if (pSearch->m_pRightChild == nullptr || pSearch->m_pRightChild->m_key == targetKey)
 					{
-						return (this->*pToDoWithTargetNode)(pSearch->m_pRightChild, move(argument));
+						return (this->*forward<MethodType>(method))(pSearch->m_pRightChild, forward<ArgumentType>(argument));
 					}
 					else
 					{
@@ -230,136 +230,12 @@ protected:
 		}
 	}
 
-	//TODO : pNewNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool InsertNode(NodeType<DataType>*& pInsertPosition, unique_ptr<NodeType<DataType>> upNewNode)
+	//TODO : 상위 메소드와 하위 작업 메소드가 const 메소드인 경우가 가능하도록 수정해야 함
+	//전위순회로 돌면서 각 노드에 수행할 작업을 수행하는 제너릭 메소드임
+	template <typename MethodType, typename ArgumentType>
+	bool PreorderTraverse(MethodType&& method, ArgumentType&& argument)
 	{
-		if (pInsertPosition != NULL)
-		{
-			ErrorPrint("cannot insert because there is same key in tree already!");
-
-			return false;
-		}
-
-		pInsertPosition = upNewNode.release();
-
-		return true;
-	}
-	
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	//TODO : pTargetNode는 const NodeType*&여야 함 (함수 포인터 방식을 개선해야함)
-	bool RetrieveNode(NodeType<DataType>*& pTargetNode, DataType* outData)
-	{
-		if (pTargetNode == NULL)
-		{
-			ErrorPrint("cannot retrieve because there is no same key in tree!");
-
-			return false;
-		}
-
-		*outData = pTargetNode->m_data;
-
-		return true;
-	}
-
-	bool RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
-	{
-		if (pTargetNode == NULL)
-		{
-			ErrorPrint("cannot remove because there is no same key in tree!");
-
-			return false;
-		}
-
-		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
-		if (pTargetNode->m_pLeftChild != NULL && pTargetNode->m_pRightChild != NULL)
-		{
-			return ReplaceWithInorderSuccessor(pTargetNode);
-		}
-		else if (pTargetNode->m_pLeftChild == NULL && pTargetNode->m_pRightChild != NULL)
-		{
-			return ReplaceWithInorderSuccessor(pTargetNode);
-		}
-		else if (pTargetNode->m_pLeftChild != NULL && pTargetNode->m_pRightChild == NULL)
-		{
-			return ReplaceWithInorderPredecessor(pTargetNode);
-		}
-		else
-		{
-			delete pTargetNode;
-			pTargetNode = NULL;
-
-			return true;
-		}
-	}
-
-	bool ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
-	{
-		NodeType<DataType>* pPrevious = NULL;
-		NodeType<DataType>* pTraverse = pTargetNode->m_pLeftChild;
-		while (pTraverse->m_pRightChild != NULL)
-		{
-			pPrevious = pTraverse;
-			pTraverse = pTraverse->m_pRightChild;
-		}
-
-		if (pPrevious != NULL)
-		{
-			pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
-			pTraverse->m_pLeftChild = NULL;
-		}
-		else
-		{
-			pTargetNode->m_pLeftChild = pTraverse->m_pLeftChild;
-			pTraverse->m_pLeftChild = NULL;
-		}
-
-		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
-		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
-
-		delete pTargetNode;
-		pTargetNode = pTraverse;
-
-		return true;
-	}
-
-	bool ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
-	{
-		NodeType<DataType>* pPrevious = NULL;
-		NodeType<DataType>* pTraverse = pTargetNode->m_pRightChild;
-		while (pTraverse->m_pLeftChild != NULL)
-		{
-			pPrevious = pTraverse;
-			pTraverse = pTraverse->m_pLeftChild;
-		}
-
-		if (pPrevious != NULL)
-		{
-			pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
-			pTraverse->m_pRightChild = NULL;
-		}
-		else
-		{
-			pTargetNode->m_pRightChild = pTraverse->m_pRightChild;
-			pTraverse->m_pRightChild = NULL;
-		}
-
-		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
-		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
-
-		delete pTargetNode;
-		pTargetNode = pTraverse;
-
-		return true;
-	}
-
-protected:
-	//TODO : 하위 작업 메소드가 const이거나 해당 메소드로 넘겨주는 인자가 const인 경우를 명시할 수 있도록 함수 포인터 방식을 개선해야 함
-	// 
-	//"pToDoWhileTraverse" 함수 포인터는 전위순회로 돌면서 각 노드에 수행할 작업을 위한 인터페이스임
-	//포인터 매개변수를 이용하는 이유는, 노드나 트리가 구체적인 메소드로 전달될 때 복사가 일어나지 않도록 하며, 매개변수를 사용하지 않는 경우 NULL을 더미로 넘길 수 있도록 하기 위함이다
-	bool PreorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
-	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			WarningPrint("cannot traverse. becuase tree is empty.");
 
@@ -368,16 +244,16 @@ protected:
 
 		bool ret = true;
 
-		NodeType<DataType>* pTraverse = NULL;
+		NodeType<DataType>* pTraverse = nullptr;
 		Stack<NodeType<DataType>*> rightChildStack;
 		rightChildStack.Push(this->m_pHead);
 		while (rightChildStack.Pop(pTraverse) == true)
 		{
-			while (pTraverse != NULL)
+			while (pTraverse != nullptr)
 			{
-				ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
+				ret &= (this->*forward<MethodType>(method))(pTraverse, forward<ArgumentType>(argument));
 
-				if (pTraverse->m_pRightChild != NULL)
+				if (pTraverse->m_pRightChild != nullptr)
 				{
 					rightChildStack.Push(pTraverse->m_pRightChild);
 				}
@@ -389,9 +265,10 @@ protected:
 		return ret;
 	}
 
-	bool InorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
+	template <typename MethodType, typename ArgumentType>
+	bool InorderTraverse(MethodType&& method, ArgumentType&& argument)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			WarningPrint("cannot traverse. becuase tree is empty.");
 
@@ -402,20 +279,20 @@ protected:
 
 		NodeType<DataType>* pTraverse = m_pHead;
 		Stack<NodeType<DataType>*> rightSideAncestorStack;
-		while (pTraverse != NULL)
+		while (pTraverse != nullptr)
 		{
 			rightSideAncestorStack.Push(pTraverse);
 			pTraverse = pTraverse->m_pLeftChild;
 		}
 		while (rightSideAncestorStack.Pop(pTraverse) == true)
 		{
-			ret &= (this->*pToDoWhileTraverse)(pTraverse, pOptionalTargetTree);
+			ret &= (this->*forward<MethodType>(method))(pTraverse, forward<ArgumentType>(argument));
 
-			if (pTraverse->m_pRightChild != NULL)
+			if (pTraverse->m_pRightChild != nullptr)
 			{
 				pTraverse = pTraverse->m_pRightChild;
 
-				while (pTraverse != NULL)
+				while (pTraverse != nullptr)
 				{
 					rightSideAncestorStack.Push(pTraverse);
 					pTraverse = pTraverse->m_pLeftChild;
@@ -426,9 +303,10 @@ protected:
 		return ret;
 	}
 
-	bool PostorderTraverse(bool (BST_Template::* pToDoWhileTraverse)(NodeType<DataType>*, BST_Template<NodeType, DataType>*), BST_Template<NodeType, DataType>* pOptionalTargetTree)
+	template <typename MethodType, typename ArgumentType>
+	bool PostorderTraverse(MethodType&& method, ArgumentType&& argument)
 	{
-		if (m_pHead == NULL)
+		if (m_pHead == nullptr)
 		{
 			WarningPrint("cannot traverse. becuase tree is empty.");
 
@@ -458,49 +336,168 @@ protected:
 			{
 				depthFirstSearchStack.Push({ Record::DO_TODO , traverseRecord.pNode });
 
-				if (traverseRecord.pNode->m_pRightChild != NULL)
+				if (traverseRecord.pNode->m_pRightChild != nullptr)
 				{
 					depthFirstSearchStack.Push({ Record::KEEP_SEARCH, traverseRecord.pNode->m_pRightChild });
 				}
 
-				if (traverseRecord.pNode->m_pLeftChild != NULL)
+				if (traverseRecord.pNode->m_pLeftChild != nullptr)
 				{
 					depthFirstSearchStack.Push({ Record::KEEP_SEARCH, traverseRecord.pNode->m_pLeftChild });
 				}
 			}
 			else if(traverseRecord.nodeJob == Record::DO_TODO)
 			{
-				ret &= (this->*pToDoWhileTraverse)(traverseRecord.pNode, pOptionalTargetTree);
+				ret &= (this->*forward<MethodType>(method))(traverseRecord.pNode, forward<ArgumentType>(argument));
 			}
 		}
 
 		return ret;
 	}
 
+protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
+	bool InsertNode(NodeType<DataType>*& pInsertPosition, unique_ptr<NodeType<DataType>> upNewNode)
+	{
+		if (pInsertPosition != nullptr)
+		{
+			ErrorPrint("cannot insert because there is same key in tree already!");
+
+			return false;
+		}
+
+		pInsertPosition = upNewNode.release();
+
+		return true;
+	}
+
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	//TODO : pSourceNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool CopyNode(NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree)
+	bool RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData)
+	{
+		if (pTargetNode == nullptr)
+		{
+			ErrorPrint("cannot retrieve because there is no same key in tree!");
+
+			return false;
+		}
+
+		outData = pTargetNode->m_data;
+
+		return true;
+	}
+
+	bool RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
+	{
+		if (pTargetNode == nullptr)
+		{
+			ErrorPrint("cannot remove because there is no same key in tree!");
+
+			return false;
+		}
+
+		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
+		if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild != nullptr)
+		{
+			return ReplaceWithInorderSuccessor(pTargetNode);
+		}
+		else if (pTargetNode->m_pLeftChild == nullptr && pTargetNode->m_pRightChild != nullptr)
+		{
+			return ReplaceWithInorderSuccessor(pTargetNode);
+		}
+		else if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild == nullptr)
+		{
+			return ReplaceWithInorderPredecessor(pTargetNode);
+		}
+		else
+		{
+			delete pTargetNode;
+			pTargetNode = nullptr;
+
+			return true;
+		}
+	}
+
+	bool ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
+	{
+		NodeType<DataType>* pPrevious = nullptr;
+		NodeType<DataType>* pTraverse = pTargetNode->m_pLeftChild;
+		while (pTraverse->m_pRightChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pRightChild;
+		}
+
+		if (pPrevious != nullptr)
+		{
+			pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
+			pTraverse->m_pLeftChild = nullptr;
+		}
+		else
+		{
+			pTargetNode->m_pLeftChild = pTraverse->m_pLeftChild;
+			pTraverse->m_pLeftChild = nullptr;
+		}
+
+		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+
+		delete pTargetNode;
+		pTargetNode = pTraverse;
+
+		return true;
+	}
+
+	bool ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
+	{
+		NodeType<DataType>* pPrevious = nullptr;
+		NodeType<DataType>* pTraverse = pTargetNode->m_pRightChild;
+		while (pTraverse->m_pLeftChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pLeftChild;
+		}
+
+		if (pPrevious != nullptr)
+		{
+			pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
+			pTraverse->m_pRightChild = nullptr;
+		}
+		else
+		{
+			pTargetNode->m_pRightChild = pTraverse->m_pRightChild;
+			pTraverse->m_pRightChild = nullptr;
+		}
+
+		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+
+		delete pTargetNode;
+		pTargetNode = pTraverse;
+
+		return true;
+	}
+
+	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
+	bool CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree)
 	{
 		unique_ptr<NodeType<DataType>> upCopiedNode = make_unique<NodeType<DataType>>(*pSourceNode);
 		return pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, move(upCopiedNode));
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	//TODO : pTargetNode는 const NodeType*여야 함 (함수 포인터 방식을 개선해야함)
-	bool PrintTargetNode(NodeType<DataType>* pTargetNode, BST_Template<NodeType, DataType>* pDummyParameter)
+	bool PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter)
 	{
 		cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 
 		return true;
 	}
 
-protected:
+protected:	//논 제너릭 하위 메소드
 	//트리의 소멸자와 이동 할당 연산자의 하위 메소드로 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
-	void KeepRemovingHeadUsingRotationRR() noexcept
+	void RemovingTreeByRotationRR() noexcept
 	{
-		while (m_pHead != NULL)
+		while (m_pHead != nullptr)
 		{
-			if (m_pHead->m_pRightChild != NULL)
+			if (m_pHead->m_pRightChild != nullptr)
 			{
 				NodeType<DataType>* pNewHeadNode = m_pHead->m_pRightChild;
 				m_pHead->m_pRightChild = m_pHead->m_pRightChild->m_pLeftChild;
