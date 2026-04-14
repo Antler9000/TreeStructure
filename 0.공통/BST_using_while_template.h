@@ -393,18 +393,14 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 			return false;
 		}
 
-		//중위선행자와 중위후속자 둘 다 있으면 그냥 중위후속자를 없애기로함
-		if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild != nullptr)
-		{
-			return ReplaceWithInorderSuccessor(pTargetNode);
-		}
-		else if (pTargetNode->m_pLeftChild == nullptr && pTargetNode->m_pRightChild != nullptr)
-		{
-			return ReplaceWithInorderSuccessor(pTargetNode);
-		}
-		else if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild == nullptr)
+		//중위선행자와 중위후속자 둘 다 있는 경우에는 중위 선행자를 없애도록 함
+		if (pTargetNode->m_pLeftChild != nullptr)
 		{
 			return ReplaceWithInorderPredecessor(pTargetNode);
+		}
+		else if (pTargetNode->m_pRightChild != nullptr)
+		{
+			return ReplaceWithInorderSuccessor(pTargetNode);
 		}
 		else
 		{
@@ -417,62 +413,66 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 
 	bool ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
 	{
-		NodeType<DataType>* pPrevious = nullptr;
-		NodeType<DataType>* pTraverse = pTargetNode->m_pLeftChild;
-		while (pTraverse->m_pRightChild != nullptr)
+		if (pTargetNode->m_pLeftChild->m_pRightChild == nullptr)
 		{
-			pPrevious = pTraverse;
-			pTraverse = pTraverse->m_pRightChild;
-		}
+			NodeType<DataType>* pInorderPredecessor = pTargetNode->m_pLeftChild;
+			pInorderPredecessor->m_pRightChild = pTargetNode->m_pRightChild;
+			delete pTargetNode;
+			pTargetNode = pInorderPredecessor;
 
-		if (pPrevious != nullptr)
-		{
-			pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
-			pTraverse->m_pLeftChild = nullptr;
+			return true;
 		}
 		else
 		{
-			pTargetNode->m_pLeftChild = pTraverse->m_pLeftChild;
-			pTraverse->m_pLeftChild = nullptr;
+			NodeType<DataType>* pPrevious = nullptr;
+			NodeType<DataType>* pTraverse = pTargetNode->m_pLeftChild;
+			while (pTraverse->m_pRightChild != nullptr)
+			{
+				pPrevious = pTraverse;
+				pTraverse = pTraverse->m_pRightChild;
+			}
+
+			pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
+			pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+			pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+
+			delete pTargetNode;
+			pTargetNode = pTraverse;
+
+			return true;
 		}
-
-		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
-		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
-
-		delete pTargetNode;
-		pTargetNode = pTraverse;
-
-		return true;
 	}
 
 	bool ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
 	{
-		NodeType<DataType>* pPrevious = nullptr;
-		NodeType<DataType>* pTraverse = pTargetNode->m_pRightChild;
-		while (pTraverse->m_pLeftChild != nullptr)
+		if (pTargetNode->m_pRightChild->m_pLeftChild == nullptr)
 		{
-			pPrevious = pTraverse;
-			pTraverse = pTraverse->m_pLeftChild;
-		}
+			NodeType<DataType>* pInorderSuccessor = pTargetNode->m_pRightChild;
+			pInorderSuccessor->m_pLeftChild = pTargetNode->m_pLeftChild;
+			delete pTargetNode;
+			pTargetNode = pInorderSuccessor;
 
-		if (pPrevious != nullptr)
-		{
-			pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
-			pTraverse->m_pRightChild = nullptr;
+			return true;
 		}
 		else
 		{
-			pTargetNode->m_pRightChild = pTraverse->m_pRightChild;
-			pTraverse->m_pRightChild = nullptr;
+			NodeType<DataType>* pPrevious = nullptr;
+			NodeType<DataType>* pTraverse = pTargetNode->m_pRightChild;
+			while (pTraverse->m_pLeftChild != nullptr)
+			{
+				pPrevious = pTraverse;
+				pTraverse = pTraverse->m_pLeftChild;
+			}
+
+			pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
+			pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+			pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+
+			delete pTargetNode;
+			pTargetNode = pTraverse;
+
+			return true;
 		}
-
-		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
-		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
-
-		delete pTargetNode;
-		pTargetNode = pTraverse;
-
-		return true;
 	}
 
 	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)

@@ -34,10 +34,18 @@ int main()
 	cout << endl << "삽입 (트리 A)" << endl;
 	intTestBST.Insert(5, 1515);
 	intTestBST.Insert(7, 2727);
-	intTestBST.Insert(3, 1313);
-	intTestBST.Insert(4, 2424);
+	intTestBST.Insert(3, 2323);
+	intTestBST.Insert(4, 3434);
 	intTestBST.Insert(6, 3636);
+	intTestBST.Insert(9, 3939);
+	intTestBST.Insert(2, 3232);
 	intTestBST.PreorderPrint();
+
+	cout << endl << "중위 순회 출력 (트리 A)" << endl;
+	intTestBST.InorderPrint();
+
+	cout << endl << "후위 순회 출력 (트리 A)" << endl;
+	intTestBST.PostorderPrint();
 
 	cout << endl << "검색 (트리 A)" << endl;
 	int intRetrievedData = 0;
@@ -75,6 +83,10 @@ int main()
 	intTestBST.Remove(7);
 	intTestBST.PreorderPrint();
 
+	cout << endl << "요소별 삭제 (트리 A)" << endl;
+	intTestBST.Remove(3);
+	intTestBST.PreorderPrint();
+
 	cout << endl << "전체 삭제 (트리 A)" << endl;
 	intTestBST.RemoveTree();
 	intTestBST.PreorderPrint();
@@ -87,12 +99,20 @@ int main()
 	BST<float> floatTestBST;
 
 	cout << endl << "삽입 (트리 A)" << endl;
-	floatTestBST.Insert(5, 1.515f);
-	floatTestBST.Insert(7, 2.727f);
-	floatTestBST.Insert(3, 1.313f);
-	floatTestBST.Insert(4, 2.424f);
-	floatTestBST.Insert(6, 3.636f);
+	floatTestBST.Insert(5, 0.515f);
+	floatTestBST.Insert(7, 0.727f);
+	floatTestBST.Insert(3, 0.323f);
+	floatTestBST.Insert(4, 0.434f);
+	floatTestBST.Insert(6, 0.636f);
+	floatTestBST.Insert(9, 0.939f);
+	floatTestBST.Insert(2, 0.232f);
 	floatTestBST.PreorderPrint();
+
+	cout << endl << "중위 순회 출력 (트리 A)" << endl;
+	floatTestBST.InorderPrint();
+
+	cout << endl << "후위 순회 출력 (트리 A)" << endl;
+	floatTestBST.PostorderPrint();
 
 	cout << endl << "검색 (트리 A)" << endl;
 	float floatRetrievedData = 0.0f;
@@ -130,6 +150,10 @@ int main()
 	floatTestBST.Remove(7);
 	floatTestBST.PreorderPrint();
 
+	cout << endl << "요소별 삭제 (트리 A)" << endl;
+	floatTestBST.Remove(3);
+	floatTestBST.PreorderPrint();
+
 	cout << endl << "전체 삭제 (트리 A)" << endl;
 	floatTestBST.RemoveTree();
 	floatTestBST.PreorderPrint();
@@ -143,11 +167,19 @@ int main()
 
 	cout << endl << "삽입 (트리 A)" << endl;
 	stringTestBST.Insert(5, "Panther");
-	stringTestBST.Insert(7, "Sherman");
+	stringTestBST.Insert(7, "Comet");
 	stringTestBST.Insert(3, "Crusader");
-	stringTestBST.Insert(4, "Comet");
+	stringTestBST.Insert(4, "Sherman");
 	stringTestBST.Insert(6, "Tiger");
+	stringTestBST.Insert(9, "Mouse");
+	stringTestBST.Insert(2, "Stuart");
 	stringTestBST.PreorderPrint();
+
+	cout << endl << "중위 순회 출력 (트리 A)" << endl;
+	stringTestBST.InorderPrint();
+
+	cout << endl << "후위 순회 출력 (트리 A)" << endl;
+	stringTestBST.PostorderPrint();
 
 	cout << endl << "검색 (트리 A)" << endl;
 	string stringRetrievedData = "";
@@ -185,6 +217,10 @@ int main()
 	stringTestBST.Remove(7);
 	stringTestBST.PreorderPrint();
 
+	cout << endl << "요소별 삭제 (트리 A)" << endl;
+	stringTestBST.Remove(3);
+	stringTestBST.PreorderPrint();
+
 	cout << endl << "전체 삭제 (트리 A)" << endl;
 	stringTestBST.RemoveTree();
 	stringTestBST.PreorderPrint();
@@ -217,11 +253,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 22.7초	|	std::map = 24.8초
-		이동 삽입	: BST = 20.5초	|	std::map = 22.5초
-		검색		: BST = 17.6초	|	std::map = 18.8초
-		삭제		: BST = 37.0초	|	std::map = 27.6초
-		소멸		: BST = 15.8초	|	std::map = 18.6초
+		복사 삽입	: BST = 23.8초	|	std::map = 26.2초
+		이동 삽입	: BST = 20.8초	|	std::map = 24.1초
+		검색		: BST = 17.5초	|	std::map = 20.2초
+		삭제		: BST = 32.1초	|	std::map = 30.5초
+		소멸		: BST = 17.0초	|	std::map = 19.6초
 	*/
 
 	/*	(테스팅 해석)
@@ -248,11 +284,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 34.2초	|	std::map = 0.10초
-		이동 삽입	: BST = 32.3초	|	std::map = 0.08초
-		검색		: BST = 33.2초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.07초
-		소멸		: BST = 0.04초	|	std::map = 0.04초
+		복사 삽입	: BST = 33.2초	|	std::map = 0.11초
+		이동 삽입	: BST = 32.7초	|	std::map = 0.08초
+		검색		: BST = 32.7초	|	std::map = 0.03초
+		삭제		: BST = 0.02초	|	std::map = 0.07초
+		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)
@@ -277,9 +313,9 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 32.8초	|	std::map = 0.09초
-		이동 삽입	: BST = 32.5초	|	std::map = 0.07초
-		검색		: BST = 33.5초	|	std::map = 0.03초
+		복사 삽입	: BST = 31.9초	|	std::map = 0.09초
+		이동 삽입	: BST = 31.6초	|	std::map = 0.07초
+		검색		: BST = 32.3초	|	std::map = 0.03초
 		삭제		: BST = 0.03초	|	std::map = 0.07초
 		소멸		: BST = 0.04초	|	std::map = 0.04초
 	*/
@@ -643,6 +679,6 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int speedTestRe
 
 	cout << endl << "map : " << speedTestRepeat << "번의 삭제 동안 흐른 시간은 : " << timeDiff.count() << endl;
 
-	cout << endl << "BST 소멸자 측정 시작" << endl;
+	cout << endl << "map 소멸자 측정 시작" << endl;
 	return clock.now();
 }
