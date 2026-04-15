@@ -5,54 +5,11 @@
 using namespace std;				//..
 
 template <class DataType>
-class Stack;
-
-template <class DataType>
-class StackNode
-{
-	friend class Stack<DataType>;
-
-private:
-	StackNode(const DataType& newData)
-		: m_data(newData), m_pChild(nullptr)
-	{
-
-	}
-
-	StackNode(DataType&& newData)
-		: m_data(move(newData)), m_pChild(nullptr)
-	{
-
-	}
-
-	//스택 클래스에 순회를 이용한 소멸자가 정의되어있으므로 노드의 소멸자 정의는 필요 없음
-	~StackNode() noexcept
-	{
-
-	}
-
-	//쓰이지 않는 노드 생성 방식들
-	StackNode() = delete;
-
-	StackNode(const StackNode& sourceNode) = delete;
-
-	StackNode(StackNode&& sourceNode) = delete;
-
-	StackNode& operator = (const StackNode& sourceNode) = delete;
-
-	StackNode& operator = (StackNode&& sourceNode) = delete;
-
-private:
-	DataType m_data;
-	StackNode* m_pChild;
-};
-
-template <class DataType>
 class Stack
 {
 public:
 	Stack()
-		: m_pHead(nullptr)
+		: m_pData(nullptr), m_size(0), m_capacity(0)
 	{
 
 	}
@@ -64,8 +21,12 @@ public:
 
 	Stack(Stack&& sourceStack) noexcept
 	{
-		m_pHead = sourceStack.m_pHead;
-		sourceStack.m_pHead = nullptr;
+		m_pData = sourceStack.m_pData;
+		m_size = sourceStack.m_size;
+		m_capacity = sourceStack.m_capacity;
+		sourceStack.m_pData = nullptr;
+		sourceStack.m_size = 0;
+		sourceStack.m_capacity = 0;
 	}
 
 	Stack& operator = (const Stack& sourceStack)
@@ -84,8 +45,12 @@ public:
 
 		RemoveStack();
 
-		m_pHead = sourceStack.m_pHead;
-		sourceStack.m_pHead = nullptr;
+		m_pData = sourceStack.m_pData;
+		m_size = sourceStack.m_size;
+		m_capacity = sourceStack.m_capacity;
+		sourceStack.m_pData = nullptr;
+		sourceStack.m_size = 0;
+		sourceStack.m_capacity = 0;
 
 		return *this;
 	}
@@ -95,105 +60,74 @@ public:
 		RemoveStack();
 	}
 
-	bool Push(const DataType& data)
+	template <typename InsertDataType = DataType>
+	bool Push(InsertDataType&& data)
 	{
-		if (m_pHead == nullptr)
+		if (m_capacity == 0)
 		{
-			m_pHead = new StackNode<DataType>(data);
+			m_pData = new DataType[1];
+			m_capacity = 1;
 		}
-		else
+		else if (m_capacity == m_size)
 		{
-			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild)
+			unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(2 * m_capacity);
+			for (int i = 0; i < m_size; i++)
 			{
-				pTraverse = pTraverse->m_pChild;
+				upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
 			}
 
-			pTraverse->m_pChild = new StackNode<DataType>(data);
+			delete m_pData;
+			m_pData = upNewData.release();
+			m_capacity *= 2;
 		}
-
-		return true;
-	}
-
-	bool Push(DataType&& data)
-	{
-		if (m_pHead == nullptr)
-		{
-			m_pHead = new StackNode<DataType>(move(data));
-		}
-		else
-		{
-			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild)
-			{
-				pTraverse = pTraverse->m_pChild;
-			}
-
-			pTraverse->m_pChild = new StackNode<DataType>(move(data));
-		}
+		
+		m_pData[m_size] = forward<InsertDataType>(data);
+		m_size++;
 
 		return true;
 	}
 
 	bool Pop(DataType& outData)
 	{
-		if (m_pHead == nullptr)
+		if (m_size == 0)
 		{
 			return false;
 		}
 
-		if (m_pHead->m_pChild == nullptr)
-		{
-			outData = m_pHead->m_data;
-			delete m_pHead;
-			m_pHead = nullptr;
+		outData = m_pData[m_size - 1];
+		m_size--;
 
-			return true;
-		}
-		else
+		if (m_size <= (m_capacity / 2))
 		{
-			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild->m_pChild != nullptr)
+			unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(m_capacity / 2);
+			for (int i = 0; i < m_size; i++)
 			{
-				pTraverse = pTraverse->m_pChild;
+				upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
 			}
 
-			outData = pTraverse->m_pChild->m_data;
-			delete pTraverse->m_pChild;
-			pTraverse->m_pChild = nullptr;
-
-			return true;
+			delete m_pData;
+			m_pData = upNewData.release();
+			m_capacity /= 2;
 		}
+
+		return true;
 	}
 
 	bool GetTop(DataType& outData)
 	{
-		if (m_pHead == nullptr)
+		if (m_size == 0)
 		{
 			return false;
 		}
 
-		if (m_pHead->m_pChild == nullptr)
-		{
-			outData = m_pHead->m_data;
-			return true;
-		}
-		else
-		{
-			StackNode<DataType>* pTraverse = m_pHead;
-			while (pTraverse->m_pChild->m_pChild != nullptr)
-			{
-				pTraverse = pTraverse->m_pChild;
-			}
+		outData = m_pData[m_size - 1];
 
-			outData = pTraverse->m_pChild->m_data;
-			return true;
-		}
+		return true;
 	}
 
 	bool IsEmpty()
 	{
-		if (m_pHead == nullptr)
+		if (m_size == 0)
 		{
 			return true;
 		}
@@ -205,48 +139,38 @@ public:
 
 	bool RemoveStack() noexcept
 	{
-		if (m_pHead == nullptr)
-		{
-			return true;
-		}
-
-		StackNode<DataType>* pTraversePrev = m_pHead;
-		StackNode<DataType>* pTraverseCurr = m_pHead->m_pChild;
-		delete pTraversePrev;
-		while (pTraverseCurr)
-		{
-			pTraversePrev = pTraverseCurr;
-			pTraverseCurr = pTraverseCurr->m_pChild;
-			delete pTraversePrev;
-		}
+		delete m_pData;
+		m_pData = nullptr;
+		m_size = 0;
+		m_capacity = 0;
 
 		return true;
 	}
 
 	bool CopyStack(const Stack<DataType>& sourceStack)
 	{
-		if (sourceStack.m_pHead == nullptr)
+		if (sourceStack.m_size == 0)
 		{
 			return false;
 		}
 
 		RemoveStack();
 
-		StackNode<DataType>* pSourceStackTraverse = sourceStack.m_pHead;
-		m_pHead = new StackNode<DataType>(pSourceStackTraverse->m_data);
-		StackNode<DataType>* pDestStackTraverse = m_pHead;
-		while (pSourceStackTraverse->m_pChild != nullptr)
+		m_pData = new DataType[sourceStack.m_capacity];
+		m_size = sourceStack.m_size;
+		m_capacity = sourceStack.m_capacity;
+		for (int i = 0; i < m_size; i++)
 		{
-			pSourceStackTraverse = pSourceStackTraverse->m_pChild;
-			pDestStackTraverse->m_pChild = new StackNode<DataType>(pSourceStackTraverse->m_data);
-			pDestStackTraverse = pDestStackTraverse->m_pChild;
+			m_pData[i] = sourceStack.m_pData[i];
 		}
 
 		return true;
 	}
 
 private:
-	StackNode<DataType>* m_pHead;
+	DataType* m_pData;
+	int m_size;
+	int m_capacity;
 };
 
 #endif //STACK_H

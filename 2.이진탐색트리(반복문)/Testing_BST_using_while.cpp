@@ -92,7 +92,7 @@ int main()
 	intTestBST.PreorderPrint();
 
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
-	intMoveConstructorTestBST.PreorderPrint();
+	intExplicitCopyTestBST.PreorderPrint();
 
 	cout << endl << "testing 2 : BST<float>--------------------------------------------------------------------------" << endl;
 
@@ -159,7 +159,7 @@ int main()
 	floatTestBST.PreorderPrint();
 
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
-	floatMoveConstructorTestBST.PreorderPrint();
+	floatExplicitCopyTestBST.PreorderPrint();
 
 	cout << endl << "testing 3 : BST<string>--------------------------------------------------------------------------" << endl;
 
@@ -226,7 +226,7 @@ int main()
 	stringTestBST.PreorderPrint();
 
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
-	stringMoveConstructorTestBST.PreorderPrint();
+	stringExplicitCopyTestBST.PreorderPrint();
 
 	cout << endl << "testing 4 : Random Workload Speed Test-------------------------------------------------------------------------" << endl;
 
@@ -253,11 +253,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 23.8초	|	std::map = 26.2초
-		이동 삽입	: BST = 20.8초	|	std::map = 24.1초
-		검색		: BST = 17.5초	|	std::map = 20.2초
-		삭제		: BST = 32.1초	|	std::map = 30.5초
-		소멸		: BST = 17.0초	|	std::map = 19.6초
+		복사 삽입	: BST = 22.7초	|	std::map = 25.1초
+		이동 삽입	: BST = 20.4초	|	std::map = 22.6초
+		검색		: BST = 17.5초	|	std::map = 18.7초
+		삭제		: BST = 32.2초	|	std::map = 27.7초
+		소멸		: BST = 15.7초	|	std::map = 18.7초
 	*/
 
 	/*	(테스팅 해석)
@@ -284,9 +284,9 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.2초	|	std::map = 0.11초
-		이동 삽입	: BST = 32.7초	|	std::map = 0.08초
-		검색		: BST = 32.7초	|	std::map = 0.03초
+		복사 삽입	: BST = 29.6초	|	std::map = 0.10초
+		이동 삽입	: BST = 28.2초	|	std::map = 0.08초
+		검색		: BST = 29.6초	|	std::map = 0.02초
 		삭제		: BST = 0.02초	|	std::map = 0.07초
 		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
@@ -313,11 +313,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 31.9초	|	std::map = 0.09초
-		이동 삽입	: BST = 31.6초	|	std::map = 0.07초
-		검색		: BST = 32.3초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.07초
-		소멸		: BST = 0.04초	|	std::map = 0.04초
+		복사 삽입	: BST = 33.7초	|	std::map = 0.09초
+		이동 삽입	: BST = 30.7초	|	std::map = 0.07초
+		검색		: BST = 33.2초	|	std::map = 0.02초
+		삭제		: BST = 0.02초	|	std::map = 0.07초
+		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)

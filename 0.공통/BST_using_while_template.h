@@ -22,11 +22,11 @@ public:
 	{
 		LogPrint("copy constructor");
 
-		BST_Template<NodeType, DataType> tempTree;
-		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &tempTree);
+		BST_Template<NodeType, DataType> newTree;
+		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &newTree);
 		if (ret == true)
 		{
-			*this = move(tempTree);
+			*this = move(newTree);
 		}
 	}
 
@@ -48,11 +48,11 @@ public:
 			return *this;
 		}
 
-		BST_Template<NodeType, DataType> tempTree;
-		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &tempTree);
+		BST_Template<NodeType, DataType> newTree;
+		bool ret = sourceBST.PreorderTraverse(&BST_Template::CopyNode, &newTree);
 		if (ret == true)
 		{
-			*this = move(tempTree);
+			*this = move(newTree);
 		}
 
 		return *this;
@@ -83,7 +83,6 @@ public:
 	}
 
 	//newData가 lvalue 참조와 rvalue 참조인 경우를 각각 다르게 처리하기 위해서 참조 붕괴를 사용했음
-	//TODO : 그러나 랜덤 삽입 워크로드에서 이동 삽입이 복사 삽입과 시간 차이가 나지 않는 결과가 나왔으니 이를 검토해보기
 	template <typename InsertDataType = DataType>
 	bool Insert(const int newKey, InsertDataType&& newData)
 	{
