@@ -12,7 +12,7 @@
 using namespace chrono;			//..
 
 template <typename DataType>
-void RetrieveResultPrint(const int key, const DataType retrievedData);
+void PrintKeyAndData(const int key, const DataType retrievedData);
 
 void RandomWorkloadSpeedTest(const int workloadNum, const int workloadPerDataLen);
 
@@ -50,7 +50,7 @@ int main()
 	cout << endl << "검색 (트리 A)" << endl;
 	int intRetrievedData = 0;
 	intTestBST.Retrieve(3, intRetrievedData);
-	RetrieveResultPrint(3, intRetrievedData);
+	PrintKeyAndData(3, intRetrievedData);
 
 	cout << endl << "명시적 복사 (트리 A -> B)" << endl;
 	BST<int> intExplicitCopyTestBST;
@@ -117,7 +117,7 @@ int main()
 	cout << endl << "검색 (트리 A)" << endl;
 	float floatRetrievedData = 0.0f;
 	floatTestBST.Retrieve(3, floatRetrievedData);
-	RetrieveResultPrint(3, floatRetrievedData);
+	PrintKeyAndData(3, floatRetrievedData);
 
 	cout << endl << "명시적 복사 (트리 A -> B)" << endl;
 	BST<float> floatExplicitCopyTestBST;
@@ -184,7 +184,7 @@ int main()
 	cout << endl << "검색 (트리 A)" << endl;
 	string stringRetrievedData = "";
 	stringTestBST.Retrieve(3, stringRetrievedData);
-	RetrieveResultPrint(3, stringRetrievedData);
+	PrintKeyAndData(3, stringRetrievedData);
 
 	cout << endl << "명시적 복사 (트리 A -> B)" << endl;
 	BST<string> stringExplicitCopyTestBST;
@@ -253,11 +253,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 22.7초	|	std::map = 25.1초
-		이동 삽입	: BST = 20.4초	|	std::map = 22.6초
-		검색		: BST = 17.5초	|	std::map = 18.7초
-		삭제		: BST = 32.2초	|	std::map = 27.7초
-		소멸		: BST = 15.7초	|	std::map = 18.7초
+		복사 삽입	: BST = 24.6초	|	std::map = 26.1초
+		이동 삽입	: BST = 21.9초	|	std::map = 23.6초
+		검색		: BST = 18.9초	|	std::map = 20.1초
+		삭제		: BST = 34.6초	|	std::map = 28.9초
+		소멸		: BST = 16.3초	|	std::map = 19.7초
 	*/
 
 	/*	(테스팅 해석)
@@ -284,11 +284,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 29.6초	|	std::map = 0.10초
-		이동 삽입	: BST = 28.2초	|	std::map = 0.08초
-		검색		: BST = 29.6초	|	std::map = 0.02초
-		삭제		: BST = 0.02초	|	std::map = 0.07초
-		소멸		: BST = 0.03초	|	std::map = 0.04초
+		복사 삽입	: BST = 33.6초	|	std::map = 0.10초
+		이동 삽입	: BST = 32.2초	|	std::map = 0.08초
+		검색		: BST = 33.6초	|	std::map = 0.03초
+		삭제		: BST = 0.03초	|	std::map = 0.08초
+		소멸		: BST = 0.04초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)
@@ -313,10 +313,10 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.7초	|	std::map = 0.09초
-		이동 삽입	: BST = 30.7초	|	std::map = 0.07초
-		검색		: BST = 33.2초	|	std::map = 0.02초
-		삭제		: BST = 0.02초	|	std::map = 0.07초
+		복사 삽입	: BST = 33.9초	|	std::map = 0.09초
+		이동 삽입	: BST = 32.9초	|	std::map = 0.08초
+		검색		: BST = 33.8초	|	std::map = 0.03초
+		삭제		: BST = 0.03초	|	std::map = 0.07초
 		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
 
@@ -334,7 +334,7 @@ int main()
 }
 
 template <typename DataType>
-void RetrieveResultPrint(const int key, const DataType retrievedData)
+void PrintKeyAndData(const int key, const DataType retrievedData)
 {
 	cout << "retrieve key : " << key << ", retrieved data : " << retrievedData << endl;
 }

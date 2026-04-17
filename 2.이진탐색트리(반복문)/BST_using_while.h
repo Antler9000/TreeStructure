@@ -11,6 +11,7 @@ class BST_Node
 	friend class BST_Template<BST_Node, DataType>;
 
 public : 
+
 	BST_Node(int newKey, const DataType& newData)
 		: m_key(newKey), m_data(newData), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
@@ -47,6 +48,7 @@ public :
 	BST_Node& operator = (BST_Node&& sourceNode) = delete;
 
 private:
+
 	int m_key;
 	DataType m_data;
 	BST_Node* m_pLeftChild;
@@ -57,6 +59,7 @@ template <typename DataType>
 class BST : public BST_Template<BST_Node, DataType>
 {
 public:
+
 	BST() : BST_Template<BST_Node, DataType>()
 	{
 	

@@ -61,7 +61,7 @@ public:
 	}
 
 	template <typename InsertDataType = DataType>
-	bool Push(InsertDataType&& data)
+	void Push(InsertDataType&& data)
 	{
 		if (m_capacity == 0)
 		{
@@ -83,10 +83,9 @@ public:
 		
 		m_pData[m_size] = forward<InsertDataType>(data);
 		m_size++;
-
-		return true;
 	}
 
+	//bool 반환값이 false인 경우 : 내부에 데이터가 하나도 없는 경우 
 	bool Pop(DataType& outData)
 	{
 		if (m_size == 0)
@@ -113,6 +112,7 @@ public:
 		return true;
 	}
 
+	//bool 반환값이 false인 경우 : 내부에 데이터가 하나도 없는 경우 
 	bool GetTop(DataType& outData)
 	{
 		if (m_size == 0)
@@ -137,16 +137,15 @@ public:
 		}
 	}
 
-	bool RemoveStack() noexcept
+	void RemoveStack() noexcept
 	{
 		delete m_pData;
 		m_pData = nullptr;
 		m_size = 0;
 		m_capacity = 0;
-
-		return true;
 	}
 
+	//bool 반환값이 false인 경우 : 내부에 데이터가 하나도 없는 경우 
 	bool CopyStack(const Stack<DataType>& sourceStack)
 	{
 		if (sourceStack.m_size == 0)
