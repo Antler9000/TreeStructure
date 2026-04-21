@@ -1,7 +1,15 @@
-//디버그 출력문들을 활성화하고 싶을 시 주석을 해제할 것
+//디버그 출력문들을 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
 //#define TREE_LOG	
 //#define TREE_ERROR
 //#define TREE_WARNING
+
+//디버깅 실행시(F5) 메모리 누수를 확인하고 싶으면 아래 구문의 주석을 해제할 것
+//#define MEMORY_DEBUG
+
+//속도 테스트를 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
+#define RANDOM_WORKLOAD_SPEED_TEST
+#define LINEAR_INCREASE_WORKLOAD_SPEED_TEST
+#define LINEAR_DECREASE_WORKLOAD_SPEED_TEST
 
 #include "BST_using_while.h"	//정의한 BST를 테스팅함
 #include <chrono>;				//속도 테스트를 위해 사용함
@@ -27,6 +35,11 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int workloadNum
 
 int main()
 {
+	//디버깅 실행시 메모리 누수를 확인한다. 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 "Detected memory leaks!"가 출력된다.
+	#ifdef MEMORY_DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	#endif
+
 	cout << endl << "testing 1 : BST<int>--------------------------------------------------------------------------" << endl;
 
 	BST<int> intTestBST;
@@ -228,7 +241,7 @@ int main()
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
 	stringExplicitCopyTestBST.PreorderPrint();
 
-	cout << endl << "testing 4 : Random Workload Speed Test-------------------------------------------------------------------------" << endl;
+	cout << endl << "testing 4 : Random Workload Speed Test---------------------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		- 실행 방법						: 디버깅하지 않고 실행(Ctrl + F5)
@@ -255,11 +268,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 23.5초	|	std::map = 25.5초
-		이동 삽입	: BST = 20.4초	|	std::map = 22.7초
-		검색		: BST = 18.0초	|	std::map = 19.1초
-		삭제		: BST = 32.5초	|	std::map = 28.3초
-		소멸		: BST = 15.9초	|	std::map = 19.2초
+		복사 삽입	: BST = 23.8초	|	std::map = 26.0초
+		이동 삽입	: BST = 21.3초	|	std::map = 23.4초
+		검색		: BST = 17.9초	|	std::map = 19.4초
+		삭제		: BST = 33.7초	|	std::map = 28.6초
+		소멸		: BST = 16.1초	|	std::map = 19.8초
 	*/
 
 	/*	(테스팅 해석)
@@ -267,11 +280,13 @@ int main()
 		키 값들이 정렬된 순서로 삽입되는 아래의 선형 워크로드 테스트도 실행해야함
 	*/
 
+	#ifdef RANDOM_WORKLOAD_SPEED_TEST
 	const int randomWorkloadNum = 10000000;
 	const int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
+	#endif
 
-	cout << endl << "testing 5 : Linear Increasing Workload Safety Test------------------------------------------------------------------------" << endl;
+	cout << endl << "testing 5 : Linear Increasing Workload Safety Test---------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		앞선 테스트와 동일
@@ -286,11 +301,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.0초	|	std::map = 0.10초
-		이동 삽입	: BST = 29.4초	|	std::map = 0.09초
-		검색		: BST = 32.7초	|	std::map = 0.03초
+		복사 삽입	: BST = 29.5초	|	std::map = 0.10초
+		이동 삽입	: BST = 31.7초	|	std::map = 0.09초
+		검색		: BST = 32.9초	|	std::map = 0.03초
 		삭제		: BST = 0.03초	|	std::map = 0.07초
-		소멸		: BST = 0.03초	|	std::map = 0.04초
+		소멸		: BST = 0.04초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)
@@ -299,11 +314,13 @@ int main()
 		다만 BST의 삭제는 헤드에서 바로 삭제가 일어나기에 트리의 높이에 영향을 받지 않으므로 빠른 속도를 보인다. 
 	*/
 
+	#ifdef LINEAR_INCREASE_WORKLOAD_SPEED_TEST
 	const int linearIncreaseWorkloadNum = 100000;
 	const int linearIncreaseWorkloadPerDataLen = 30;
 	LinearIncreaseWorkloadSpeedTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
+	#endif
 
-	cout << endl << "testing 5 : Linear Decreasing Workload Safety Test------------------------------------------------------------------------" << endl;
+	cout << endl << "testing 5 : Linear Decreasing Workload Safety Test---------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		앞선 테스트와 동일
@@ -315,20 +332,22 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.7초	|	std::map = 0.09초
-		이동 삽입	: BST = 33.5초	|	std::map = 0.08초
-		검색		: BST = 32.9초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.08초
-		소멸		: BST = 0.03초	|	std::map = 0.04초
+		복사 삽입	: BST = 33.8초	|	std::map = 0.09초
+		이동 삽입	: BST = 30.5초	|	std::map = 0.08초
+		검색		: BST = 33.4초	|	std::map = 0.03초
+		삭제		: BST = 0.02초	|	std::map = 0.08초
+		소멸		: BST = 0.04초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)
 		앞선 테스트와 동일
 	*/
 
+	#ifdef LINEAR_DECREASE_WORKLOAD_SPEED_TEST
 	const int linearDecreaseWorkloadNum = 100000;
 	const int linearDecreaseWorkloadPerDataLen = 30;
 	LinearDecreaseWorkloadSpeedTest(linearDecreaseWorkloadNum, linearDecreaseWorkloadPerDataLen);
+	#endif
 
 	cout << endl << "testing ended----------------------------------------------------------------------------------" << endl;
 
@@ -383,6 +402,8 @@ void RandomWorkloadSpeedTest(const int workloadNum, const int workloadPerDataLen
 
 	cout << endl << "BST : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << endl;
 
+	cout << endl << "-----------------------------------------------------------" << endl;
+
 	cout << endl << "랜덤 워크로드 복사 중...." << endl;
 	timeBegin = SpeedTestMap(clock, workloadNum, insertTestDatum, insertTestKeys, retrieveTestKeys, removeTestKeys);
 
@@ -429,6 +450,8 @@ void LinearIncreaseWorkloadSpeedTest(const int workloadNum, const int workloadPe
 
 	cout << endl << "BST : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << endl;
 
+	cout << endl << "-----------------------------------------------------------" << endl;
+
 	cout << endl << "선형 증가 워크로드 복사 중...." << endl;
 	timeBegin = SpeedTestMap(clock, workloadNum, insertTestDatum, insertTestKeys, retrieveTestKeys, removeTestKeys);
 
@@ -474,6 +497,8 @@ void LinearDecreaseWorkloadSpeedTest(const int workloadNum, const int workloadPe
 	timeDiff = timeEnd - timeBegin;
 
 	cout << endl << "BST : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << endl;
+
+	cout << endl << "-----------------------------------------------------------" << endl;
 
 	cout << endl << "선형 감소 워크로드 복사 중...." << endl;
 	timeBegin = SpeedTestMap(clock, workloadNum, insertTestDatum, insertTestKeys, retrieveTestKeys, removeTestKeys);

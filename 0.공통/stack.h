@@ -77,7 +77,7 @@ public:
 				upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
 			}
 
-			delete m_pData;
+			delete[] m_pData;
 			m_pData = upNewData.release();
 			m_capacity *= 2;
 		}
@@ -99,15 +99,24 @@ public:
 
 		if (m_size <= (m_capacity / 2))
 		{
-			unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(m_capacity / 2);
-			for (int i = 0; i < m_size; i++)
+			if (m_capacity / 2 == 0)
 			{
-				upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
+				delete[] m_pData;
+				m_pData = nullptr;
+				m_capacity = 0;
 			}
+			else
+			{
+				unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(m_capacity / 2);
+				for (int i = 0; i < m_size; i++)
+				{
+					upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
+				}
 
-			delete m_pData;
-			m_pData = upNewData.release();
-			m_capacity /= 2;
+				delete[] m_pData;
+				m_pData = upNewData.release();
+				m_capacity /= 2;
+			}
 		}
 
 		return true;
@@ -140,7 +149,7 @@ public:
 
 	void RemoveStack() noexcept
 	{
-		delete m_pData;
+		delete[] m_pData;
 		m_pData = nullptr;
 		m_size = 0;
 		m_capacity = 0;
