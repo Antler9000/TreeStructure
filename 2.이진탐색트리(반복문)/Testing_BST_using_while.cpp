@@ -232,6 +232,8 @@ int main()
 
 	/*	(테스팅 환경)
 		- 실행 방법						: 디버깅하지 않고 실행(Ctrl + F5)
+		- CPU							: i5-13600KF, 3500Mhz, 14 코어, 20 논리 프로세서
+		- RAM							: 32GB, DDR4
 		- OS							: Windows 11, 버전 25H2, 빌드 26200.8039
 		- IDE							: Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
 		- 플랫폼 도구 집합				: Visual Studio 2022 (v143)
@@ -253,11 +255,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 24.6초	|	std::map = 26.1초
-		이동 삽입	: BST = 21.9초	|	std::map = 23.6초
-		검색		: BST = 18.9초	|	std::map = 20.1초
-		삭제		: BST = 34.6초	|	std::map = 28.9초
-		소멸		: BST = 16.3초	|	std::map = 19.7초
+		복사 삽입	: BST = 25.4초	|	std::map = 27.2초
+		이동 삽입	: BST = 23.0초	|	std::map = 24.2초
+		검색		: BST = 17.9초	|	std::map = 19.7초
+		삭제		: BST = 33.5초	|	std::map = 28.7초
+		소멸		: BST = 16.7초	|	std::map = 19.5초
 	*/
 
 	/*	(테스팅 해석)
@@ -284,10 +286,10 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.6초	|	std::map = 0.10초
-		이동 삽입	: BST = 32.2초	|	std::map = 0.08초
-		검색		: BST = 33.6초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.08초
+		복사 삽입	: BST = 34.8초	|	std::map = 0.10초
+		이동 삽입	: BST = 29.5초	|	std::map = 0.09초
+		검색		: BST = 33.9초	|	std::map = 0.03초
+		삭제		: BST = 0.03초	|	std::map = 0.07초
 		소멸		: BST = 0.04초	|	std::map = 0.04초
 	*/
 
@@ -313,10 +315,10 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.9초	|	std::map = 0.09초
-		이동 삽입	: BST = 32.9초	|	std::map = 0.08초
+		복사 삽입	: BST = 33.9초	|	std::map = 0.10초
+		이동 삽입	: BST = 29.5초	|	std::map = 0.08초
 		검색		: BST = 33.8초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.07초
+		삭제		: BST = 0.03초	|	std::map = 0.08초
 		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
 

@@ -18,8 +18,7 @@ public:
 		LogPrint("empty constructor");
 	}
 
-	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
-	BST_Template(BST_Template<NodeType, DataType>& sourceBST)
+	BST_Template(const BST_Template<NodeType, DataType>& sourceBST)
 	{
 		LogPrint("copy constructor");
 
@@ -34,8 +33,7 @@ public:
 		sourceBST.m_pHead = nullptr;
 	}
 
-	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
-	BST_Template<NodeType, DataType>& operator = (BST_Template<NodeType, DataType>& sourceBST)
+	BST_Template<NodeType, DataType>& operator = (const BST_Template<NodeType, DataType>& sourceBST)
 	{
 		LogPrint("copy assignment");
 
@@ -85,9 +83,8 @@ public:
 
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
 	//bool 반환값이 false인 경우 : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우
-	bool Retrieve(const int targetKey, DataType& outData)
+	bool Retrieve(const int targetKey, DataType& outData) const
 	{
 		LogPrint("retrieve");
 
@@ -110,10 +107,9 @@ public:
 		RemovingTreeByRotationRR();
 	}
 
-	//TODO : sourceBST는 const여야 함 (함수 포인터 방식을 개선해야함)
 	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함
 	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다
-	void CopyTree(BST_Template& sourceBST)
+	void CopyTree(const BST_Template& sourceBST)
 	{
 		LogPrint("copy tree");
 
@@ -122,24 +118,21 @@ public:
 		*this = move(tempTree);
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	void PreorderPrint()
+	void PreorderPrint() const
 	{
 		LogPrint("preorder print");
 
 		PreorderTraverse(&BST_Template::PrintTargetNode, nullptr);
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	void InorderPrint()
+	void InorderPrint() const
 	{
 		LogPrint("inorder print");
 
 		InorderTraverse(&BST_Template::PrintTargetNode, nullptr);
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	void PostorderPrint()
+	void PostorderPrint() const
 	{
 		LogPrint("postorder print");
 
@@ -149,8 +142,10 @@ public:
 
 protected:	//제너릭 메소드들
 
-	//TODO : 상위 메소드와 하위 작업 메소드가 const 메소드인 경우가 가능하도록 수정해야 함
 	//특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 제너릭 메소드임
+	//상위 메소드와 하위 작업 메소드가 const 메소드인 경우를 지원하기 위한 const 버전의 제너릭 메소드 버전도 같이 있음
+	//TODO : 컴파일 시점에 코드 치환이 확실히 일어나도록 제너릭 프로그래밍 방식을 개선하기
+	//TODO : const 여부에 상관없는 하나의 제너릭 메소드로 통합할 수 있도록 제너럭 프로그래밍 방식을 개선하기
 	template <typename MethodType, typename ArgumentType>
 	bool Search(const int targetKey, MethodType&& method, ArgumentType&& argument)
 	{
@@ -193,10 +188,53 @@ protected:	//제너릭 메소드들
 		}
 	}
 
-	//TODO : 상위 메소드와 하위 작업 메소드가 const 메소드인 경우가 가능하도록 수정해야 함
-	//전위순회로 돌면서 각 노드에 수행할 작업을 수행하는 제너릭 메소드임
 	template <typename MethodType, typename ArgumentType>
-	void PreorderTraverse(MethodType&& method, ArgumentType&& argument)
+	bool Search(const int targetKey, MethodType&& method, ArgumentType&& argument) const
+	{
+		if (m_pHead == nullptr)
+		{
+			return (this->*forward<MethodType>(method))(m_pHead, forward<ArgumentType>(argument));
+		}
+		else if (targetKey == m_pHead->m_key)
+		{
+			return (this->*forward<MethodType>(method))(m_pHead, forward<ArgumentType>(argument));
+		}
+		else
+		{
+			NodeType<DataType>* pSearch = m_pHead;
+			while (true)
+			{
+				if (targetKey < pSearch->m_key)
+				{
+					if (pSearch->m_pLeftChild == nullptr || pSearch->m_pLeftChild->m_key == targetKey)
+					{
+						return (this->*forward<MethodType>(method))(pSearch->m_pLeftChild, forward<ArgumentType>(argument));
+					}
+					else
+					{
+						pSearch = pSearch->m_pLeftChild;
+					}
+				}
+				else
+				{
+					if (pSearch->m_pRightChild == nullptr || pSearch->m_pRightChild->m_key == targetKey)
+					{
+						return (this->*forward<MethodType>(method))(pSearch->m_pRightChild, forward<ArgumentType>(argument));
+					}
+					else
+					{
+						pSearch = pSearch->m_pRightChild;
+					}
+				}
+			}
+		}
+	}
+
+	//전위순회로 돌면서 각 노드에 수행할 작업을 수행하는 제너릭 메소드임
+	//트리 복사의 소스 트리에서 실행되거나, 순회 출력 메소드에서만 사용되므로 const 메소드로 선언하였음
+	//TODO : 컴파일 시점에 코드 치환이 확실히 일어날 수 있도록 제너릭 프로그래밍 방식을 개선하기
+	template <typename MethodType, typename ArgumentType>
+	void PreorderTraverse(MethodType&& method, ArgumentType&& argument) const
 	{
 		if (m_pHead == nullptr)
 		{
@@ -225,7 +263,7 @@ protected:	//제너릭 메소드들
 	}
 
 	template <typename MethodType, typename ArgumentType>
-	void InorderTraverse(MethodType&& method, ArgumentType&& argument)
+	void InorderTraverse(MethodType&& method, ArgumentType&& argument) const
 	{
 		if (m_pHead == nullptr)
 		{
@@ -259,7 +297,7 @@ protected:	//제너릭 메소드들
 	}
 
 	template <typename MethodType, typename ArgumentType>
-	void PostorderTraverse(MethodType&& method, ArgumentType&& argument)
+	void PostorderTraverse(MethodType&& method, ArgumentType&& argument) const
 	{
 		if (m_pHead == nullptr)
 		{
@@ -324,8 +362,7 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 		return true;
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	bool RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData)
+	bool RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData) const
 	{
 		if (pTargetNode == nullptr)
 		{
@@ -422,20 +459,19 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 		}
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	void CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree)
+	void CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree) const
 	{
 		unique_ptr<NodeType<DataType>> upCopiedNode = make_unique<NodeType<DataType>>(*pSourceNode);
 		pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, move(upCopiedNode));
 	}
 
-	//TODO : const 메소드여야 함 (함수 포인터 방식을 개선해야함)
-	void PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter)
+	void PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
 	{
 		cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 	}
 
 protected:	//논 제너릭 하위 메소드
+
 	//트리의 소멸자와 이동 할당 연산자의 하위 메소드로 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
 	void RemovingTreeByRotationRR() noexcept
 	{
