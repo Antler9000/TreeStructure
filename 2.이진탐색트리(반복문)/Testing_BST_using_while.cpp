@@ -255,11 +255,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 25.4초	|	std::map = 27.2초
-		이동 삽입	: BST = 23.0초	|	std::map = 24.2초
-		검색		: BST = 17.9초	|	std::map = 19.7초
-		삭제		: BST = 33.5초	|	std::map = 28.7초
-		소멸		: BST = 16.7초	|	std::map = 19.5초
+		복사 삽입	: BST = 23.5초	|	std::map = 25.5초
+		이동 삽입	: BST = 20.4초	|	std::map = 22.7초
+		검색		: BST = 18.0초	|	std::map = 19.1초
+		삭제		: BST = 32.5초	|	std::map = 28.3초
+		소멸		: BST = 15.9초	|	std::map = 19.2초
 	*/
 
 	/*	(테스팅 해석)
@@ -286,11 +286,11 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 34.8초	|	std::map = 0.10초
-		이동 삽입	: BST = 29.5초	|	std::map = 0.09초
-		검색		: BST = 33.9초	|	std::map = 0.03초
+		복사 삽입	: BST = 33.0초	|	std::map = 0.10초
+		이동 삽입	: BST = 29.4초	|	std::map = 0.09초
+		검색		: BST = 32.7초	|	std::map = 0.03초
 		삭제		: BST = 0.03초	|	std::map = 0.07초
-		소멸		: BST = 0.04초	|	std::map = 0.04초
+		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/
 
 	/*	(테스팅 해석)
@@ -315,9 +315,9 @@ int main()
 
 	/*	(테스팅 결과)
 		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.9초	|	std::map = 0.10초
-		이동 삽입	: BST = 29.5초	|	std::map = 0.08초
-		검색		: BST = 33.8초	|	std::map = 0.03초
+		복사 삽입	: BST = 33.7초	|	std::map = 0.09초
+		이동 삽입	: BST = 33.5초	|	std::map = 0.08초
+		검색		: BST = 32.9초	|	std::map = 0.03초
 		삭제		: BST = 0.03초	|	std::map = 0.08초
 		소멸		: BST = 0.03초	|	std::map = 0.04초
 	*/

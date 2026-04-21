@@ -8,6 +8,7 @@ template <class DataType>
 class Stack
 {
 public:
+
 	Stack()
 		: m_pData(nullptr), m_size(0), m_capacity(0)
 	{
@@ -167,6 +168,7 @@ public:
 	}
 
 private:
+
 	DataType* m_pData;
 	int m_size;
 	int m_capacity;
