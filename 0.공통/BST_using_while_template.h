@@ -1,7 +1,7 @@
 #ifndef BST_USING_WHILE_TEMPLATE_H
 #define BST_USING_WHILE_TEMPLATE_H
 
-#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include "../0.공통/debug.h"	//정의한 디버그 출력 매크로를 사용함
 #include "../0.공통/stack.h"		//정의한 스택을 사용해, 재귀를 반복문으로 모방함
 #include <iostream>					//콘솔 출력을 사용함
 #include <memory>					//유니크 포인터를 사용함
@@ -78,7 +78,7 @@ public:
 	{
 		LogPrint("insert");
 		
-		unique_ptr<NodeType<DataType>> upNewNode = make_unique<NodeType<DataType>>(newKey, forward<InsertDataType>(newData));
+		unique_ptr<NodeType<DataType>> upNewNode = unique_ptr<NodeType<DataType>>(DBG_NEW NodeType<DataType>(newKey, forward<InsertDataType>(newData)));
 		return Search(newKey, &BST_Template::InsertNode, move(upNewNode));
 
 	}
@@ -525,7 +525,7 @@ void BST_Template<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeType<Data
 template <template <typename> class NodeType, typename DataType>
 void BST_Template<NodeType, DataType>::CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree) const
 {
-	unique_ptr<NodeType<DataType>> upCopiedNode = make_unique<NodeType<DataType>>(*pSourceNode);
+	unique_ptr<NodeType<DataType>> upCopiedNode = unique_ptr<NodeType<DataType>>(DBG_NEW NodeType<DataType>(*pSourceNode));
 	pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, move(upCopiedNode));
 }
 

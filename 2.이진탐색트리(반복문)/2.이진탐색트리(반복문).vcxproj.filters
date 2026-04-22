@@ -29,7 +29,7 @@
     <ClInclude Include="..\0.공통\stack.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\0.공통\debug_print.h">
+    <ClInclude Include="..\0.공통\debug.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

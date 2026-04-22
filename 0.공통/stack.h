@@ -66,12 +66,12 @@ public:
 	{
 		if (m_capacity == 0)
 		{
-			m_pData = new DataType[1];
+			m_pData = DBG_NEW DataType[1];
 			m_capacity = 1;
 		}
 		else if (m_capacity == m_size)
 		{
-			unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(2 * m_capacity);
+			unique_ptr<DataType[]> upNewData = unique_ptr<DataType[]>(DBG_NEW DataType[2 * m_capacity]);
 			for (int i = 0; i < m_size; i++)
 			{
 				upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
@@ -107,7 +107,7 @@ public:
 			}
 			else
 			{
-				unique_ptr<DataType[]> upNewData = make_unique<DataType[]>(m_capacity / 2);
+				unique_ptr<DataType[]> upNewData = unique_ptr<DataType[]>(DBG_NEW DataType[m_capacity / 2]);
 				for (int i = 0; i < m_size; i++)
 				{
 					upNewData[i] = m_pData[i];	//DataType의 이동 할당 연산자가 noexcept임이 보장되지 않기에 move(..)를 사용하지 않았다
@@ -165,7 +165,7 @@ public:
 
 		RemoveStack();
 
-		m_pData = new DataType[sourceStack.m_capacity];
+		m_pData = DBG_NEW DataType[sourceStack.m_capacity];
 		m_size = sourceStack.m_size;
 		m_capacity = sourceStack.m_capacity;
 		for (int i = 0; i < m_size; i++)

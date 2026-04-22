@@ -4,7 +4,7 @@
 //#define TREE_WARNING
 
 //디버깅 실행시(F5) 메모리 누수를 확인하고 싶으면 아래 구문의 주석을 해제할 것
-//#define MEMORY_DEBUG
+#define MEMORY_DEBUG
 
 //속도 테스트를 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
 #define RANDOM_WORKLOAD_SPEED_TEST
@@ -35,10 +35,10 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int workloadNum
 
 int main()
 {
-	//디버깅 실행시 메모리 누수를 확인한다. 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 "Detected memory leaks!"가 출력된다.
-	#ifdef MEMORY_DEBUG
+//디버깅 실행시 메모리 누수를 확인한다. 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 메모리 누수 정보가 출력된다
+#ifdef MEMORY_DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	#endif
+#endif
 
 	cout << endl << "testing 1 : BST<int>--------------------------------------------------------------------------" << endl;
 
