@@ -3,9 +3,6 @@
 //#define TREE_ERROR
 //#define TREE_WARNING
 
-//디버깅 실행시(F5) 메모리 누수를 확인하고 싶으면 아래 구문의 주석을 해제할 것
-#define MEMORY_DEBUG
-
 //속도 테스트를 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
 #define RANDOM_WORKLOAD_SPEED_TEST
 #define LINEAR_INCREASE_WORKLOAD_SPEED_TEST
@@ -35,10 +32,11 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int workloadNum
 
 int main()
 {
-//디버깅 실행시 메모리 누수를 확인한다. 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 메모리 누수 정보가 출력된다
-#ifdef MEMORY_DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
+	//Configuration(구성)이 Debug이고, 디버깅 실행(F5)를 실행시 메모리 누수를 확인한다
+	//프로그램이 종료될 시점에 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 누수 정보가 출력된다
+	#ifdef _DEBUG
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	#endif
 
 	cout << endl << "testing 1 : BST<int>--------------------------------------------------------------------------" << endl;
 
@@ -244,20 +242,28 @@ int main()
 	cout << endl << "testing 4 : Random Workload Speed Test---------------------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
-		- 실행 방법						: 디버깅하지 않고 실행(Ctrl + F5)
-		- CPU							: i5-13600KF, 3500Mhz, 14 코어, 20 논리 프로세서
-		- RAM							: 32GB, DDR4
-		- OS							: Windows 11, 버전 25H2, 빌드 26200.8039
-		- IDE							: Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
-		- 플랫폼 도구 집합				: Visual Studio 2022 (v143)
-		- C++ 언어 표준					: 기본값(ISO C++ 14 표준)
-		- 컴파일러 버전					: x86용 Microsoft(R) C / C++ 최적화 컴파일러 버전 19.44.35222
-		- 링커 스택 크기 설정			: 프로젝트 기본 설정(공란)
-		- C / C++ 최적화 설정			: 최대 최적화(속도 우선)(/O2)
-		- C / C++ 인라인 함수 확장		: 적합한 것 모두 확장(/Ob2)
-		- C / C++ 내장 함수 사용		: 예(/Oi)
-		- C / C++ 크기 또는 속도		: 코드 속도 우선(/Ot)
-		- C / C++ 기본 런타임 검사		: 기본값
+		[기본]
+		- CPU									: i5-13600KF, 3500Mhz, 14 코어, 20 논리 프로세서
+		- RAM									: 32GB, DDR4
+		- OS									: Windows 11, 버전 25H2, 빌드 26200.8039
+		- IDE									: Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
+		- 플랫폼 도구 집합						: Visual Studio 2022 (v143)
+		- 컴파일러 버전							: x86용 Microsoft(R) C / C++ 최적화 컴파일러 버전 19.44.35222
+		- C++ 언어 표준							: 기본값(ISO C++ 14 표준)
+
+		[상세]
+		- 구성 선택								: Release x64
+		- 디버깅 여부							: 디버깅하지 않고 시작(Ctrl + F5)
+		- C / C++ 최적화 설정					: 최대 최적화(속도 우선)(/O2)
+		- C / C++ 인라인 함수 확장				: 적합한 것 모두 확장(/Ob2)
+		- C / C++ 내장 함수 사용				: 예(/Oi)
+		- C / C++ 크기 또는 속도				: 코드 속도 우선(/Ot)
+		- C / C++ 전체 프로그램 최적화			: 예(/GL)
+		- C / C++ 기본 런타임 검사				: 기본값
+		- C / C++ 디버그 정보 형식				: 프로그램 데이터베이스(/Zi)
+		- C / C++ 코드 생성 런타임 라이브러리	: 다중 스레드 DLL(/MD)
+		- C / C++ 전처리기 정의					: NDEBUG;_CONSOLE;%(PreprocessorDefinitions)
+		- 링커 링크 타임 코드 생성				: 빠른 링크 타임 코드 생성 사용(/LTCG:incremental)
 	*/
 
 	/*	(테스팅 방법)
@@ -267,12 +273,12 @@ int main()
 	*/
 
 	/*	(테스팅 결과)
-		(randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 23.8초	|	std::map = 26.0초
-		이동 삽입	: BST = 21.3초	|	std::map = 23.4초
-		검색		: BST = 17.9초	|	std::map = 19.4초
-		삭제		: BST = 33.7초	|	std::map = 28.6초
-		소멸		: BST = 16.1초	|	std::map = 19.8초
+		[randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30]
+		복사 삽입	: BST = 14.9초	|	std::map = 14.9초
+		이동 삽입	: BST = 13.9초	|	std::map = 13.9초
+		검색		: BST = 13.9초	|	std::map = 15.8초
+		삭제		: BST = 19.9초	|	std::map = 18.6초
+		소멸		: BST = 4.3초	|	std::map = 4.3초
 	*/
 
 	/*	(테스팅 해석)
@@ -300,12 +306,12 @@ int main()
 	*/
 
 	/*	(테스팅 결과)
-		(linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 29.5초	|	std::map = 0.10초
-		이동 삽입	: BST = 31.7초	|	std::map = 0.09초
-		검색		: BST = 32.9초	|	std::map = 0.03초
-		삭제		: BST = 0.03초	|	std::map = 0.07초
-		소멸		: BST = 0.04초	|	std::map = 0.04초
+		[linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30]
+		복사 삽입	: BST = 18.2초	|	std::map = 0.01초
+		이동 삽입	: BST = 18.4초	|	std::map = 0.00초
+		검색		: BST = 17.9초	|	std::map = 0.00초
+		삭제		: BST = 0.00초	|	std::map = 0.00초
+		소멸		: BST = 0.00초	|	std::map = 0.00초
 	*/
 
 	/*	(테스팅 해석)
@@ -331,12 +337,12 @@ int main()
 	*/
 
 	/*	(테스팅 결과)
-		(linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30)
-		복사 삽입	: BST = 33.8초	|	std::map = 0.09초
-		이동 삽입	: BST = 30.5초	|	std::map = 0.08초
-		검색		: BST = 33.4초	|	std::map = 0.03초
-		삭제		: BST = 0.02초	|	std::map = 0.08초
-		소멸		: BST = 0.04초	|	std::map = 0.04초
+		[linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30]
+		복사 삽입	: BST = 20.4초	|	std::map = 0.01초
+		이동 삽입	: BST = 18.1초	|	std::map = 0.00초
+		검색		: BST = 20.6초	|	std::map = 0.00초
+		삭제		: BST = 0.00초	|	std::map = 0.00초
+		소멸		: BST = 0.00초	|	std::map = 0.00초
 	*/
 
 	/*	(테스팅 해석)
@@ -575,6 +581,7 @@ time_point<steady_clock> SpeedTestBST(steady_clock& clock, const int workloadNum
 		if (i % ((workloadNum / 20) + 1) == 0) cout << "*";
 
 		copyInsertTestBST.Retrieve(insertKeyWorkload[i], retrievedData);
+		retrievedData += 'a';			//최적화로 검색 메소드 호출 자체가 캔슬 되는 경우가 없도록 하기 위한 추가 연산이다
 	}
 	cout << endl;
 
@@ -662,8 +669,6 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int speedTestRe
 
 	cout << endl << "map : " << speedTestRepeat << "번의 이동 삽입 동안 흐른 시간은 : " << timeDiff.count() << endl;
 
-	int retrievedData = 0;
-
 	cout << endl << "map 검색 측정 시작" << endl;
 	cout << endl << "|------------------|" << endl;
 
@@ -673,7 +678,8 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int speedTestRe
 	{
 		if (i % ((speedTestRepeat / 20) + 1) == 0) cout << "*";
 
-		copyInsertTestMap.find(retrieveTestKeys[i]);
+		auto iterator = copyInsertTestMap.find(retrieveTestKeys[i]);
+		iterator->second += 'a';			//최적화로 검색 메소드 호출 자체가 캔슬 되는 경우가 없도록 하기 위한 추가 연산이다
 	}
 	cout << endl;
 

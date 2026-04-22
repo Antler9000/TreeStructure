@@ -1,7 +1,7 @@
 #ifndef BST_USING_WHILE_TEMPLATE_H
 #define BST_USING_WHILE_TEMPLATE_H
 
-#include "../0.공통/debug.h"	//정의한 디버그 출력 매크로를 사용함
+#include "../0.공통/debug.h"		//정의한 디버그 출력 매크로를 사용함
 #include "../0.공통/stack.h"		//정의한 스택을 사용해, 재귀를 반복문으로 모방함
 #include <iostream>					//콘솔 출력을 사용함
 #include <memory>					//유니크 포인터를 사용함
@@ -195,7 +195,7 @@ protected:
 
 template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
-bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& method, ArgumentType&& argument)
+inline bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& method, ArgumentType&& argument)
 {
 	if (m_pHead == nullptr)
 	{
@@ -238,7 +238,7 @@ bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& 
 
 template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
-bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& method, ArgumentType&& argument) const
+inline bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& method, ArgumentType&& argument) const
 {
 	if (m_pHead == nullptr)
 	{
@@ -281,7 +281,7 @@ bool BST_Template<NodeType, DataType>::Search(const int targetKey, MethodType&& 
 
 template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
-void BST_Template<NodeType, DataType>::PreorderTraverse(MethodType&& method, ArgumentType&& argument) const
+inline void BST_Template<NodeType, DataType>::PreorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
 	if (m_pHead == nullptr)
 	{
@@ -311,7 +311,7 @@ void BST_Template<NodeType, DataType>::PreorderTraverse(MethodType&& method, Arg
 
 template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
-void BST_Template<NodeType, DataType>::InorderTraverse(MethodType&& method, ArgumentType&& argument) const
+inline void BST_Template<NodeType, DataType>::InorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
 	if (m_pHead == nullptr)
 	{
@@ -346,7 +346,7 @@ void BST_Template<NodeType, DataType>::InorderTraverse(MethodType&& method, Argu
 
 template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
-void BST_Template<NodeType, DataType>::PostorderTraverse(MethodType&& method, ArgumentType&& argument) const
+inline void BST_Template<NodeType, DataType>::PostorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
 	if (m_pHead == nullptr)
 	{
@@ -396,7 +396,7 @@ void BST_Template<NodeType, DataType>::PostorderTraverse(MethodType&& method, Ar
 }
 
 template <template <typename> class NodeType, typename DataType>
-bool BST_Template<NodeType, DataType>::InsertNode(NodeType<DataType>*& pInsertPosition, unique_ptr<NodeType<DataType>> upNewNode)
+inline bool BST_Template<NodeType, DataType>::InsertNode(NodeType<DataType>*& pInsertPosition, unique_ptr<NodeType<DataType>> upNewNode)
 {
 	if (pInsertPosition != nullptr)
 	{
@@ -411,7 +411,7 @@ bool BST_Template<NodeType, DataType>::InsertNode(NodeType<DataType>*& pInsertPo
 }
 
 template <template <typename> class NodeType, typename DataType>
-bool BST_Template<NodeType, DataType>::RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData) const
+inline bool BST_Template<NodeType, DataType>::RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData) const
 {
 	if (pTargetNode == nullptr)
 	{
@@ -426,7 +426,7 @@ bool BST_Template<NodeType, DataType>::RetrieveNode(const NodeType<DataType>* pT
 }
 
 template <template <typename> class NodeType, typename DataType>
-bool BST_Template<NodeType, DataType>::RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
+inline bool BST_Template<NodeType, DataType>::RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
 {
 	if (pTargetNode == nullptr)
 	{
@@ -465,7 +465,7 @@ bool BST_Template<NodeType, DataType>::RemoveNode(NodeType<DataType>*& pTargetNo
 }
 
 template <template <typename> class NodeType, typename DataType>
-void BST_Template<NodeType, DataType>::ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
+inline void BST_Template<NodeType, DataType>::ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
 {
 	if (pTargetNode->m_pLeftChild->m_pRightChild == nullptr)
 	{
@@ -494,7 +494,7 @@ void BST_Template<NodeType, DataType>::ReplaceWithInorderPredecessor(NodeType<Da
 }
 
 template <template <typename> class NodeType, typename DataType>
-void BST_Template<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
+inline void BST_Template<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
 {
 	if (pTargetNode->m_pRightChild->m_pLeftChild == nullptr)
 	{
@@ -523,20 +523,20 @@ void BST_Template<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeType<Data
 }
 
 template <template <typename> class NodeType, typename DataType>
-void BST_Template<NodeType, DataType>::CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree) const
+inline void BST_Template<NodeType, DataType>::CopyNode(const NodeType<DataType>* pSourceNode, BST_Template<NodeType, DataType>* pDestTree) const
 {
 	unique_ptr<NodeType<DataType>> upCopiedNode = unique_ptr<NodeType<DataType>>(DBG_NEW NodeType<DataType>(*pSourceNode));
 	pDestTree->Search(pSourceNode->m_key, &BST_Template::InsertNode, move(upCopiedNode));
 }
 
 template <template <typename> class NodeType, typename DataType>
-void BST_Template<NodeType, DataType>::PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
+inline void BST_Template<NodeType, DataType>::PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
 {
 	cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
 }
 
 template <template <typename> class NodeType, typename DataType>
-void BST_Template<NodeType, DataType>::RemovingTreeByRotationRR() noexcept
+inline void BST_Template<NodeType, DataType>::RemovingTreeByRotationRR() noexcept
 {
 	while (m_pHead != nullptr)
 	{
