@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <iostream>		//로그, 경고, 에러 등의 콘솔 출력을 위한 매크로를 사용함
+#include <iostream>		//콘솔 출력을 사용함
 using namespace std;
 
 #ifdef TREE_LOG
@@ -22,10 +22,9 @@ using namespace std;
 	#define WarningPrint(statement)
 #endif
 
-//메모리 누수로 이어진 new 할당을 추적하기 위해선 기존 new가 아니라 오버로딩된 특별한 new를 사용하여야 한다
-//이를 명시적으로 사용하여야 하기 위해서, make_unique를 사용하기 보다는 unique_ptr<T>(DBG_NEW T(argument))와 같은 방식을 사용한다
+//메모리 누수로 이어진 new 할당을 추적하기 위해선 기존 new가 아니라 오버로딩된 특별한 new를 사용하여야 함
+//이를 명시적으로 사용하여야 하므로, make_unique를 사용하지 말고 unique_ptr<T>(DBG_NEW T(argument))와 같은 방식을 사용하기로 함
 #ifdef _DEBUG
-	#define _CRTDBG_MAP_ALLOC
 	#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
 #else
 	#define DBG_NEW new

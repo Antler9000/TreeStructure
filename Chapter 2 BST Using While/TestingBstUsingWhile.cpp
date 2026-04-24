@@ -1,4 +1,4 @@
-//디버그 출력문들을 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
+//로그 출력문들을 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
 //#define TREE_LOG	
 //#define TREE_ERROR
 //#define TREE_WARNING
@@ -25,15 +25,14 @@ void LinearIncreaseWorkloadSpeedTest(const int workloadNum, const int workloadPe
 
 void LinearDecreaseWorkloadSpeedTest(const int workloadNum, const int workloadPerDataLen);
 
-//insertDataWorkload은 복사 비용이 크지만, 그럼에도 하나의 워크로드를 BST와 map에 반복해서 사용할 수 있도록 값복사가 일어나는 기본 인자로 둔다
+//insertDataWorkload는 복사 비용이 크지만, 그럼에도 하나의 워크로드를 BST와 map에 반복해서 사용할 수 있도록 값복사 형식의 매개변수를 사용함
 time_point<steady_clock> SpeedTestBST(steady_clock& clock, const int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
 
 time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
 
 int main()
 {
-	//Configuration(구성)이 Debug이고, 디버깅 실행(F5)를 실행시 메모리 누수를 확인한다
-	//프로그램이 종료될 시점에 누수가 존재할 시 Visual Studio의 하단에 위치한 출력(output)에 누수 정보가 출력된다
+	//디버깅 실행이 종료될 시점에도 해제되지 않은 동적 메모리 누수가 존재할 시, Visual Studio의 하단의 출력창(output)에 해당 누수에 대한 정보가 출력됨
 	#ifdef _DEBUG
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	#endif
@@ -274,11 +273,11 @@ int main()
 
 	/*	(테스팅 결과)
 		[randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30]
-		복사 삽입	: BST = 14.9초	|	std::map = 14.9초
-		이동 삽입	: BST = 13.9초	|	std::map = 13.9초
-		검색		: BST = 13.9초	|	std::map = 15.8초
-		삭제		: BST = 19.9초	|	std::map = 18.6초
-		소멸		: BST = 4.3초	|	std::map = 4.3초
+		복사 삽입	: BST = 15.4초	|	std::map = 14.2초
+		이동 삽입	: BST = 14.0초	|	std::map = 13.2초
+		검색		: BST = 14.2초	|	std::map = 15.4초
+		삭제		: BST = 20.0초	|	std::map = 17.8초
+		소멸		: BST = 4.1초	|	std::map = 4.2초
 	*/
 
 	/*	(테스팅 해석)
@@ -292,7 +291,7 @@ int main()
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 	#endif
 
-	cout << endl << "testing 5 : Linear Increasing Workload Safety Test---------------------------------------------" << endl;
+	cout << endl << "testing 5 : Linear Increasing Workload Speed Test----------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		앞선 테스트와 동일
@@ -307,17 +306,17 @@ int main()
 
 	/*	(테스팅 결과)
 		[linearIncreaseWorkloadNum = 100,000  |  linearIncreaseWorkloadPerDataLen = 30]
-		복사 삽입	: BST = 18.2초	|	std::map = 0.01초
-		이동 삽입	: BST = 18.4초	|	std::map = 0.00초
-		검색		: BST = 17.9초	|	std::map = 0.00초
+		복사 삽입	: BST = 18.5초	|	std::map = 0.01초
+		이동 삽입	: BST = 18.1초	|	std::map = 0.00초
+		검색		: BST = 18.2초	|	std::map = 0.00초
 		삭제		: BST = 0.00초	|	std::map = 0.00초
 		소멸		: BST = 0.00초	|	std::map = 0.00초
 	*/
 
 	/*	(테스팅 해석)
 		트리 균형이 유지되는 std::map과 달리, 여기서 구현된 BST는 균형을 유지하지 않으므로,
-		테스트에 nlog(n)의 시간복잡도를 가지는 std::map과 달리, BST는 n^2의 시간 복잡도가 걸리기에 큰 차이가 난다.
-		다만 BST의 삭제는 헤드에서 바로 삭제가 일어나기에 트리의 높이에 영향을 받지 않으므로 빠른 속도를 보인다. 
+		테스트에 nlog(n)의 시간복잡도를 가지는 std::map과 달리, BST는 n^2의 시간 복잡도가 걸리기에 큰 차이가 남
+		다만 BST의 삭제는 헤드에서 바로 삭제가 일어나기에 트리의 높이에 영향을 받지 않으므로 빠른 속도를 보임. 
 	*/
 
 	#ifdef LINEAR_INCREASE_WORKLOAD_SPEED_TEST
@@ -326,7 +325,7 @@ int main()
 	LinearIncreaseWorkloadSpeedTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 	#endif
 
-	cout << endl << "testing 5 : Linear Decreasing Workload Safety Test---------------------------------------------" << endl;
+	cout << endl << "testing 6 : Linear Decreasing Workload Speed Test----------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		앞선 테스트와 동일
@@ -338,9 +337,9 @@ int main()
 
 	/*	(테스팅 결과)
 		[linearDecreaseWorkloadNum = 100,000  |  linearDecreaseWorkloadPerDataLen = 30]
-		복사 삽입	: BST = 20.4초	|	std::map = 0.01초
-		이동 삽입	: BST = 18.1초	|	std::map = 0.00초
-		검색		: BST = 20.6초	|	std::map = 0.00초
+		복사 삽입	: BST = 21.1초	|	std::map = 0.01초
+		이동 삽입	: BST = 18.3초	|	std::map = 0.00초
+		검색		: BST = 21.4초	|	std::map = 0.00초
 		삭제		: BST = 0.00초	|	std::map = 0.00초
 		소멸		: BST = 0.00초	|	std::map = 0.00초
 	*/
@@ -581,7 +580,7 @@ time_point<steady_clock> SpeedTestBST(steady_clock& clock, const int workloadNum
 		if (i % ((workloadNum / 20) + 1) == 0) cout << "*";
 
 		copyInsertTestBST.Retrieve(insertKeyWorkload[i], retrievedData);
-		retrievedData += 'a';			//최적화로 검색 메소드 호출 자체가 캔슬 되는 경우가 없도록 하기 위한 추가 연산이다
+		retrievedData += 'a';			//컴파일, 링킹 최적화로 테스트 중의 검색 메소드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
 	}
 	cout << endl;
 
@@ -679,7 +678,7 @@ time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int speedTestRe
 		if (i % ((speedTestRepeat / 20) + 1) == 0) cout << "*";
 
 		auto iterator = copyInsertTestMap.find(retrieveTestKeys[i]);
-		iterator->second += 'a';			//최적화로 검색 메소드 호출 자체가 캔슬 되는 경우가 없도록 하기 위한 추가 연산이다
+		iterator->second += 'a';			//컴파일, 링킹 최적화로 테스트 중의 검색 메소드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
 	}
 	cout << endl;
 

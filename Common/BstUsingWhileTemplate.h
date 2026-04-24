@@ -1,8 +1,8 @@
 #ifndef BST_USING_WHILE_TEMPLATE_H
 #define BST_USING_WHILE_TEMPLATE_H
 
-#include "../Common/Debug.h"		//정의한 디버그 출력 매크로를 사용함
-#include "../Common/Stack.h"		//정의한 스택을 사용해, 재귀를 반복문으로 모방함
+#include "../Common/Debug.h"		//정의한 로그 출력 매크로를 사용함
+#include "../Common/Stack.h"		//정의한 스택을 사용함
 #include <iostream>					//콘솔 출력을 사용함
 #include <memory>					//유니크 포인터를 사용함
 #include <utility>					//이동 시맨틱을 사용함
@@ -80,7 +80,6 @@ public:
 		
 		unique_ptr<NodeType<DataType>> upNewNode = unique_ptr<NodeType<DataType>>(DBG_NEW NodeType<DataType>(newKey, forward<InsertDataType>(newData)));
 		return Search(newKey, &BstTemplate::InsertNode, move(upNewNode));
-
 	}
 
 	//bool 반환값이 false인 경우 : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우
@@ -99,7 +98,7 @@ public:
 		return Search(targetKey, &BstTemplate::RemoveNode, nullptr);
 	}
 
-	//트리의 소멸자와 이동 할당 연산자에 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
+	//트리의 소멸자와 이동 할당 연산자에 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였음
 	void RemoveTree() noexcept
 	{
 		LogPrint("remove tree");
@@ -108,7 +107,7 @@ public:
 	}
 
 	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함
-	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다
+	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 남
 	void CopyTree(const BstTemplate& sourceBST)
 	{
 		LogPrint("copy tree");
@@ -185,7 +184,7 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 
 protected:	//논 제너릭 하위 메소드
 
-	//트리의 소멸자와 이동 할당 연산자의 하위 메소드로 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였다
+	//트리의 소멸자와 이동 할당 연산자의 하위 메소드로 사용되므로 실패를 반환하거나 예외를 던지는 경우가 없도록 하였음
 	void RemovingTreeByRotationRR() noexcept;
 
 protected:
@@ -532,7 +531,7 @@ inline void BstTemplate<NodeType, DataType>::CopyNode(const NodeType<DataType>* 
 template <template <typename> class NodeType, typename DataType>
 inline void BstTemplate<NodeType, DataType>::PrintTargetNode(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
 {
-	cout << "pNode m_key : " << pTargetNode->m_key << " / pNode m_data : " << pTargetNode->m_data << endl;
+	cout << "key : " << pTargetNode->m_key << " / data : " << pTargetNode->m_data << endl;
 }
 
 template <template <typename> class NodeType, typename DataType>
