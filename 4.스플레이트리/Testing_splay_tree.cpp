@@ -2,7 +2,7 @@
 
 int main()
 {
-	SplayTree& testTree = *(new SplayTree());
+	SplayTree<int> testTree;
 
 	testTree.Insert(5, 1515);
 	testTree.Insert(7, 2727);
@@ -13,56 +13,61 @@ int main()
 	testTree.Insert(8, 5858);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 8" << endl;
+	cout << endl << "Retrieve test 8" << endl;
 	testTree.Retrieve(8);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 4" << endl;
+	cout << endl << "Retrieve test 4" << endl;
 	testTree.Retrieve(4);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 3" << endl;
+	cout << endl << "Retrieve test 3" << endl;
 	testTree.Retrieve(3);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 3" << endl;
+	cout << endl << "Retrieve test 3" << endl;
 	testTree.Retrieve(3);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 7" << endl;
+	cout << endl << "Retrieve test 7" << endl;
 	testTree.Retrieve(7);
 	testTree.PreorderPrint();
 
-	cout << "Retrieve test 5" << endl;
+	cout << endl << "Retrieve test 5" << endl;
 	testTree.Retrieve(5);
 	testTree.PreorderPrint();
 
-
-	SplayTree& copied_test_tree = *(new SplayTree());
-	copied_test_tree.CopyFrom(&testTree);
+	SplayTree<int> copied_test_tree;
+	copied_test_tree.CopyTree(testTree);
 	copied_test_tree.PreorderPrint();
 
+	cout << endl << "Remove test 7" << endl;
 	testTree.Remove(7);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 3" << endl;
 	testTree.Remove(3);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 5" << endl;
 	testTree.Remove(5);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 4" << endl;
 	testTree.Remove(4);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 6" << endl;
 	testTree.Remove(6);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 1" << endl;
 	testTree.Remove(1);
 	testTree.PreorderPrint();
 
+	cout << endl << "Remove test 8" << endl;
 	testTree.Remove(8);
 	testTree.PreorderPrint();
 
-	delete& testTree;
 	return 0;
 }
