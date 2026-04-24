@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\0.공통\debug.h" />
     <ClInclude Include="BST_using_recurse.h" />
   </ItemGroup>
   <ItemGroup>

@@ -18,6 +18,9 @@
     <ClInclude Include="BST_using_recurse.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="..\0.공통\debug.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Testing_BST_using_recurse.cpp">

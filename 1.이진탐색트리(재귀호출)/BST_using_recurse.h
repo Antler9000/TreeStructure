@@ -1,7 +1,7 @@
 #ifndef BST_USING_RECURSE_H
 #define BST_USING_RECURSE_H
 
-#include "../0.공통/debug_print.h"	//정의한 디버그 출력 매크로를 사용함
+#include "../0.공통/debug.h"		//정의한 디버그 출력 매크로를 사용함
 #include <iostream>					//콘솔 출력을 사용함
 #include <utility>					//이동 시맨틱을 사용함
 using namespace std;				//..
