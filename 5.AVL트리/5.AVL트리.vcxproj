@@ -127,11 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AVL_tree.cpp" />
     <ClCompile Include="Testing_AVL_tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\0.공통\BST_using_while_template.h" />
+    <ClInclude Include="..\0.공통\debug.h" />
     <ClInclude Include="..\0.공통\stack.h" />
     <ClInclude Include="AVL_tree.h" />
   </ItemGroup>
