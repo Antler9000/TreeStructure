@@ -128,10 +128,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Testing_red_black_tree.cpp" />
-    <ClCompile Include="red_black_tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\0.공통\BST_using_while_template.h" />
+    <ClInclude Include="..\0.공통\debug.h" />
     <ClInclude Include="..\0.공통\stack.h" />
     <ClInclude Include="red_black_tree.h" />
   </ItemGroup>

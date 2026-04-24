@@ -5,11 +5,10 @@
 
 enum NodeColor { RED, BLACK };
 
-//이상하게 여기에만 정의해놨는데도 이 연산자 오버로딩에서는 중복정의 에러가 떠서, 그냥 inline 키워드를 사용해놓음.
-//ostream 클래스는 복사생성자가 없으므로, 값복사가 아니라 레퍼런스 방식으로 전달 받도록 함.
-inline ostream& operator <<(ostream& out, NodeColor m_color)
+//여러 번역 단위에 include되는 헤더 파일에다가 함수 정의를 했을 때 생기는 중복 정의 문제를 피하기 위해 inline 키워드를 사용함
+inline ostream& operator <<(ostream& out, NodeColor color)
 {
-	if (m_color == RED)
+	if (color == RED)
 	{
 		out << "RED";
 	}
@@ -17,23 +16,36 @@ inline ostream& operator <<(ostream& out, NodeColor m_color)
 	{
 		out << "BLACK";
 	}
-	
+
 	return out;
 }
 
+template <typename DataType>
+class RedBlackNode;
+
+template <typename DataType>
+class RedBlackTree;
+
+template <typename DataType>
 class RedBlackNode
 {
 private:
-	friend class BST_Template<RedBlackNode>;
-	friend class RedBlackTree;
+	friend class BST_Template<RedBlackNode, DataType>;
+	friend class RedBlackTree<DataType>;
+	friend ostream& operator <<(ostream& out, const RedBlackNode<DataType>& targetNode)
+	{
+		out << "key : " << targetNode.m_key << " / data : " << targetNode.m_data << " / color : " << targetNode.m_color;
+
+		return out;
+	}
 
 	int m_key;
-	int m_data;
+	DataType m_data;
 	NodeColor m_color;
 	RedBlackNode* m_pLeftChild;
 	RedBlackNode* m_pRightChild;
 
-	RedBlackNode(int newKey, int newData)
+	RedBlackNode(int newKey, DataType newData)
 	{
 		m_key = newKey;
 		m_data = newData;
@@ -42,21 +54,33 @@ private:
 		m_pRightChild = NULL;
 	}
 
+	RedBlackNode(const RedBlackNode& sourceNode)
+	{
+		m_data = sourceNode.m_data;
+		m_key = sourceNode.m_key;
+		m_color = sourceNode.m_color;
+		m_pLeftChild = nullptr;
+		m_pRightChild = nullptr;
+	}
+
 	void PrintNode()
 	{
 		cout << "node newKey : " << m_key << " / node newData : " << m_data << " / node m_color : " << m_color << endl;
 	}
 };
 
-class RedBlackTree : public BST_Template<RedBlackNode>
+template <typename DataType>
+class RedBlackTree : public BST_Template<RedBlackNode, DataType>
 {
 private:
 	//삽입 메소드에서 삽입 위치를 찾기 위해 빈 리프노드 자리로 탐색하는 과정에서 매번 호출되는 메소드다.
 	//4노드가 있으면 이를 쪼개놓고 내려가는 로직을 수행한다.
-	void CheckAndResolve4NodesWhileDescent(Stack<RedBlackNode*>* pRouteStack)
+	void CheckAndResolve4NodesWhileDescent(Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
-		RedBlackNode* pTarget = pRouteStack->Pop();
-		RedBlackNode* pParent = pRouteStack->Pop();
+		RedBlackNode<DataType>* pTarget = nullptr;
+		pRouteStack->Pop(pTarget);
+		RedBlackNode<DataType>* pParent = nullptr;
+		pRouteStack->Pop(pParent);
 
 		if (Is4Node(pTarget))
 		{
@@ -64,8 +88,10 @@ private:
 			pTarget->m_pRightChild->m_color = BLACK;
 			if (pParent != NULL && pParent->m_color == RED)
 			{
-				RedBlackNode* pGrandParent = pRouteStack->Pop();
-				RedBlackNode* pGreatGrandParent = pRouteStack->Pop();
+				RedBlackNode<DataType>* pGrandParent = nullptr;
+				pRouteStack->Pop(pGrandParent);
+				RedBlackNode<DataType>* pGreatGrandParent = nullptr;
+				pRouteStack->Pop(pGreatGrandParent);
 
 				DoProperRotation(true, pTarget, pParent, pGrandParent, pGreatGrandParent);
 
@@ -79,7 +105,7 @@ private:
 		pRouteStack->Push(pTarget);
 	}
 
-	bool Is4Node(RedBlackNode* pTarget)
+	bool Is4Node(RedBlackNode<DataType>* pTarget)
 	{
 		if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL)
 		{
@@ -91,32 +117,36 @@ private:
 		return false;
 	}
 
-	void Split4Node(RedBlackNode* pTarget)
+	void Split4Node(RedBlackNode<DataType>* pTarget)
 	{
-		if (pTarget != m_pHead) pTarget->m_color = RED;
+		if (pTarget != this->m_pHead) pTarget->m_color = RED;
 	}
 
 	//삽입 메소드에서는 빈 리프노드에 레드 노드의 형태로 삽입이 일어난다.
 	//그렇게 삽입이 일어났는데 "조부노드-부모노드-삽입노드"가 "블랙-레드-레드"이렇게 연속적인 레드로 구성될 경우,
 	//이를 확인하고 회전으로 해결하기 위한 메소드다.
-	void CheckAndResolve4NodesOnDestination(Stack<RedBlackNode*>* pRouteStack)
+	void CheckAndResolve4NodesOnDestination(Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
-		RedBlackNode* targetNode = pRouteStack->Pop();
-		RedBlackNode* parentNode = pRouteStack->Pop();
+		RedBlackNode<DataType>* targetNode = nullptr;
+		pRouteStack->Pop(targetNode);
+		RedBlackNode<DataType>* parentNode = nullptr;
+		pRouteStack->Pop(parentNode);
 
 		if (parentNode->m_color == RED)
 		{
-			RedBlackNode* pGrandParent = pRouteStack->Pop();
-			RedBlackNode* pGreatGrandParent = pRouteStack->Pop();
+			RedBlackNode<DataType>* pGrandParent = nullptr;
+			pRouteStack->Pop(pGrandParent);
+			RedBlackNode<DataType>* pGreatGrandParent = nullptr;
+			pRouteStack->Pop(pGreatGrandParent);
 			DoProperRotation(true, targetNode, parentNode, pGrandParent, pGreatGrandParent);
 		}
 	}
 
-	void DoProperRotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode* pGrandParent, RedBlackNode* pGreatGrandParent)
+	void DoProperRotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>* pGrandParent, RedBlackNode<DataType>* pGreatGrandParent)
 	{
 		if (pGreatGrandParent == NULL)
 		{
-			SelectProperRotation(isDoubleRed, pTarget, pParent, m_pHead);
+			SelectProperRotation(isDoubleRed, pTarget, pParent, this->m_pHead);
 		}
 		else if (pGreatGrandParent->m_pLeftChild == pGrandParent)
 		{
@@ -130,7 +160,7 @@ private:
 
 	//회전으로 인해 조부 노드의 위치가 변하면, 증조부 노드의 자식 포인터도 그에 맞게 업데이트해줘야 한다.
 	//따라서 조부 노드의 경우에는 단순히 해당 노드의 포인터를 값으로 받아오지 않고, 증조부 노드의 자식 포인터의 레퍼런스 인자로 받아왔다.
-	void SelectProperRotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode*& pGrandParent)
+	void SelectProperRotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>*& pGrandParent)
 	{
 		if (pGrandParent->m_pLeftChild == pParent)
 		{
@@ -156,7 +186,7 @@ private:
 		}
 	}
 
-	void LL_Rotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode*& pGrandParent)
+	void LL_Rotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>*& pGrandParent)
 	{
 		if (isDoubleRed == true)
 		{
@@ -170,7 +200,7 @@ private:
 		pGrandParent = pParent;
 	}
 
-	void LR_Rotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode*& pGrandParent)
+	void LR_Rotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>*& pGrandParent)
 	{
 		pGrandParent->m_pLeftChild = pTarget;
 		pParent->m_pRightChild = pTarget->m_pLeftChild;
@@ -178,7 +208,7 @@ private:
 		LL_Rotation(isDoubleRed, pParent, pTarget, pGrandParent);
 	}
 
-	void RL_Rotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode*& pGrandParent)
+	void RL_Rotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>*& pGrandParent)
 	{
 		pGrandParent->m_pRightChild = pTarget;
 		pParent->m_pLeftChild = pTarget->m_pRightChild;
@@ -186,7 +216,7 @@ private:
 		RR_Rotation(isDoubleRed, pParent, pTarget, pGrandParent);
 	}
 
-	void RR_Rotation(bool isDoubleRed, RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode*& pGrandParent)
+	void RR_Rotation(bool isDoubleRed, RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>*& pGrandParent)
 	{
 		if (isDoubleRed == true)
 		{
@@ -202,7 +232,7 @@ private:
 
 	//삭제 대상이 리프 노드여서 아에 삭제되는 경우,
 	//그 노드를 가리키는 부모노드의 자식 포인터를 null로 해야하기에 레퍼런스 인자를 두었다.
-	void RemoveTarget(RedBlackNode*& pTarget, Stack<RedBlackNode*>* pRouteStack)
+	void RemoveTarget(RedBlackNode<DataType>*& pTarget, Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
 		if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL)	//두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
 		{
@@ -224,11 +254,11 @@ private:
 
 	//이진탐색트리에서의 replace_with_inorder_predecessor(...)과 차이점은,
 	//중위 선행자나 후속자의 삭제 문제로 대체할 때, 트리의 블랙 노드의 균형이 깨지는 것을 방지하기 위해서 다음을 수행한다는 점이다.
-	void ReplaceWithInorderPredecessor(RedBlackNode*& pTarget, Stack<RedBlackNode*>* pRouteStack)
+	void ReplaceWithInorderPredecessor(RedBlackNode<DataType>*& pTarget, Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
 		if (pTarget->m_pLeftChild != NULL)
 		{
-			RedBlackNode* traversePtr = pTarget->m_pLeftChild;
+			RedBlackNode<DataType>* traversePtr = pTarget->m_pLeftChild;
 			pRouteStack->Push(traversePtr);
 			while (traversePtr->m_pRightChild != NULL)
 			{
@@ -237,17 +267,20 @@ private:
 			}
 		}
 		
-		RedBlackNode* pPredecessor = pRouteStack->Pop();
-		RedBlackNode* pParentOfPredecessor = pRouteStack->Pop();
-		RedBlackNode* pGrandParentOfPredecessor = pRouteStack->Pop();
+		RedBlackNode<DataType>* pPredecessor = nullptr;
+		pRouteStack->Pop(pPredecessor);
+		RedBlackNode<DataType>* pParentOfPredecessor = nullptr;
+		pRouteStack->Pop(pParentOfPredecessor);
+		RedBlackNode<DataType>* pGrandParentOfPredecessor = nullptr;
+		pRouteStack->Pop(pGrandParentOfPredecessor);
 		pTarget->m_key = pPredecessor->m_key;
 		pTarget->m_data = pPredecessor->m_data;
 
 		//트리에 헤드 노드만 하나 남은 경우
 		if (pParentOfPredecessor == NULL)
 		{
-			delete m_pHead;
-			m_pHead = NULL;
+			delete this->m_pHead;
+			this->m_pHead = NULL;
 
 			return;
 		}
@@ -269,7 +302,7 @@ private:
 			pPredecessor->m_key = pPredecessor->m_pLeftChild->m_key;
 			pPredecessor->m_data = pPredecessor->m_pLeftChild->m_data;
 			delete pPredecessor->m_pLeftChild;
-			pPredecessor->m_pLeftChild == NULL;
+			pPredecessor->m_pLeftChild = NULL;
 
 			return;
 		}
@@ -279,11 +312,11 @@ private:
 		return;
 	}
 
-	void ReplaceWithInorderSuccessor(RedBlackNode*& pTarget, Stack<RedBlackNode*>* pRouteStack)
+	void ReplaceWithInorderSuccessor(RedBlackNode<DataType>*& pTarget, Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
 		if (pTarget->m_pRightChild != NULL)
 		{
-			RedBlackNode* traversePtr = pTarget->m_pRightChild;
+			RedBlackNode<DataType>* traversePtr = pTarget->m_pRightChild;
 			pRouteStack->Push(traversePtr);
 			while (traversePtr->m_pLeftChild != NULL)
 			{
@@ -292,16 +325,19 @@ private:
 			}
 		}
 
-		RedBlackNode* pSuccessor = pRouteStack->Pop();
-		RedBlackNode* pParentOfSuccessor = pRouteStack->Pop();
-		RedBlackNode* pGrandParentOfSuccessor = pRouteStack->Pop();
+		RedBlackNode<DataType>* pSuccessor = nullptr;
+		pRouteStack->Pop(pSuccessor);
+		RedBlackNode<DataType>* pParentOfSuccessor = nullptr;
+		pRouteStack->Pop(pParentOfSuccessor);
+		RedBlackNode<DataType>* pGrandParentOfSuccessor = nullptr;
+		pRouteStack->Pop(pGrandParentOfSuccessor);
 		pTarget->m_key = pSuccessor->m_key;
 		pTarget->m_data = pSuccessor->m_data;
 
 		//트리에 헤드 노드만 하나 남은 경우
 		if (pParentOfSuccessor == NULL) {
-			delete m_pHead;
-			m_pHead = NULL;
+			delete this->m_pHead;
+			this->m_pHead = NULL;
 
 			return;
 		}
@@ -322,7 +358,7 @@ private:
 			pSuccessor->m_key = pSuccessor->m_pRightChild->m_key;
 			pSuccessor->m_data = pSuccessor->m_pRightChild->m_data;
 			delete pSuccessor->m_pRightChild;
-			pSuccessor->m_pRightChild == NULL;
+			pSuccessor->m_pRightChild = NULL;
 
 			return;
 		}
@@ -334,15 +370,14 @@ private:
 		BalanceTheBlackNodeByFamily(pSuccessor, pParentOfSuccessor, pGrandParentOfSuccessor, pRouteStack);
 	}
 
-	void BalanceTheBlackNodeByFamily(RedBlackNode* pTarget, RedBlackNode* pParent, RedBlackNode* pGrandParent, Stack<RedBlackNode*>* pRouteStack)
+	void BalanceTheBlackNodeByFamily(RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pParent, RedBlackNode<DataType>* pGrandParent, Stack<RedBlackNode<DataType>*>* pRouteStack)
 	{
 		//3.앞선 경우들도 아니라면, 균형을 맞추기 위해 댕겨올 자매노드의 자식(=조카) 레드 노드가 있는가?
 		// -> 그렇다면 회전이나 조정을 통해서 블랙 노드의 균형을 맞추면 된다.
-		RedBlackNode* pBrother;
+		RedBlackNode<DataType>* pBrother;
 		if (pParent->m_pLeftChild != NULL && pParent->m_pLeftChild != pTarget) pBrother = pParent->m_pLeftChild;
 		else if (pParent->m_pRightChild != NULL && pParent->m_pRightChild != pTarget) pBrother = pParent->m_pRightChild;
 		else pBrother = NULL;
-
 
 		if (pBrother != NULL)
 		{
@@ -369,7 +404,7 @@ private:
 				}
 				else if (pGrandParent == NULL)
 				{
-					DoProperAdjustment(pTarget, pBrother, m_pHead);
+					DoProperAdjustment(pTarget, pBrother, this->m_pHead);
 
 					return;
 				}
@@ -456,7 +491,8 @@ private:
 		{
 			pTarget = pParent;
 			pParent = pGrandParent;
-			pGrandParent = pRouteStack->Pop();
+			pGrandParent = nullptr;
+			pRouteStack->Pop(pGrandParent);
 
 			BalanceTheBlackNodeByFamily(pTarget, pParent, pGrandParent, pRouteStack);
 		}
@@ -465,10 +501,9 @@ private:
 	}
 	
 	//삭제되는 중위 선행자나 후속자의 부모 노드의 교체를 원활히 교체하기 위해서, 일반 변수가 아니라 레퍼런스 변수로 이를 지칭하였다.
-	void DoProperAdjustment(RedBlackNode* pTarget, RedBlackNode* pBrother, RedBlackNode*& pParent)
+	void DoProperAdjustment(RedBlackNode<DataType>* pTarget, RedBlackNode<DataType>* pBrother, RedBlackNode<DataType>*& pParent)
 	{
-
-		RedBlackNode* pOriginalParent = pParent;
+		RedBlackNode<DataType>* pOriginalParent = pParent;
 
 		if (pOriginalParent->m_pLeftChild == pBrother)
 		{
@@ -615,21 +650,20 @@ private:
 		}
 	}
 
-
 public :
-	RedBlackTree() : BST_Template() {}
+	RedBlackTree() : BST_Template<RedBlackNode, DataType>() {}
 
-	void Insert(int newKey, int newData)
+	void Insert(int newKey, DataType newData)
 	{
-		if (m_pHead == NULL)
+		if (this->m_pHead == NULL)
 		{
-			m_pHead = new RedBlackNode(newKey, newData);
+			this->m_pHead = new RedBlackNode<DataType>(newKey, newData);
 
 			return;
 		}
 
-		RedBlackNode* pTraverse = m_pHead;
-		Stack<RedBlackNode*> pRouteStack;
+		RedBlackNode<DataType>* pTraverse = this->m_pHead;
+		Stack<RedBlackNode<DataType>*> pRouteStack;
 		while (true)
 		{
 			pRouteStack.Push(pTraverse);
@@ -643,7 +677,7 @@ public :
 				}
 				else
 				{
-					pTraverse->m_pLeftChild = new RedBlackNode(newKey, newData);
+					pTraverse->m_pLeftChild = new RedBlackNode<DataType>(newKey, newData);
 					pTraverse->m_pLeftChild->m_color = RED;
 					pRouteStack.Push(pTraverse->m_pLeftChild);
 					CheckAndResolve4NodesOnDestination(&pRouteStack);
@@ -659,7 +693,7 @@ public :
 				}
 				else
 				{
-					pTraverse->m_pRightChild = new RedBlackNode(newKey, newData);
+					pTraverse->m_pRightChild = new RedBlackNode<DataType>(newKey, newData);
 					pTraverse->m_pRightChild->m_color = RED;
 					pRouteStack.Push(pTraverse->m_pRightChild);
 					CheckAndResolve4NodesOnDestination(&pRouteStack);
@@ -678,17 +712,17 @@ public :
 
 	void Remove(int targetKey)
 	{
-		Stack<RedBlackNode*> pRouteStack;
+		Stack<RedBlackNode<DataType>*> pRouteStack;
 
-		if (m_pHead->m_key == targetKey)
+		if (this->m_pHead->m_key == targetKey)
 		{
-			pRouteStack.Push(m_pHead);
-			RemoveTarget(m_pHead, &pRouteStack);
+			pRouteStack.Push(this->m_pHead);
+			RemoveTarget(this->m_pHead, &pRouteStack);
 
 			return;
 		}
 
-		RedBlackNode* pTraverse = m_pHead;
+		RedBlackNode<DataType>* pTraverse = this->m_pHead;
 		while (true)
 		{
 			if (targetKey < pTraverse->m_key)
@@ -721,7 +755,8 @@ public :
 			}
 			else
 			{
-				RedBlackNode* pParent = pRouteStack.GetTop();
+				RedBlackNode<DataType>* pParent = nullptr;
+				pRouteStack.GetTop(pParent);
 				pRouteStack.Push(pTraverse);
 				if (pParent->m_pLeftChild == pTraverse)
 				{
