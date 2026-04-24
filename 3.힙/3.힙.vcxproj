@@ -127,10 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="heap.cpp" />
     <ClCompile Include="Testing_heap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\0.공통\debug.h" />
     <ClInclude Include="heap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
