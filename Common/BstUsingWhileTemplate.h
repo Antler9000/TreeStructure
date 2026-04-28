@@ -142,8 +142,8 @@ protected:	//제너릭 메소드들
 
 	//특정 target_key를 가진 노드의 위치에 대해 수행할 작업을 넘겨주는 제너릭 메소드임
 	//상위 메소드와 하위 작업 메소드가 const 메소드인 경우를 지원하기 위한 const 버전의 제너릭 메소드 버전도 같이 있음
-	//TODO : 컴파일 시점에 코드 치환이 확실히 일어나도록 제너릭 프로그래밍 방식을 개선하기
-	//TODO : const 여부에 상관없는 하나의 제너릭 메소드로 통합할 수 있도록 제너럭 프로그래밍 방식을 개선하기
+	//TODO : InsertNode(..) 하위 작업 메소드의 호출이 인라이닝될 수 있도록 제너릭 프로그래밍 방식을 개선하기
+	//TODO : const 여부에 상관없는 하나의 제너릭 메소드로 통합할 수 있도록 제너릭 프로그래밍 방식을 개선하기
 	//TODO : 하위 작업 메소드에 전달되는 매개변수 개수를 유동적으로 템플릿할 수 있도록 제너릭 프로그래밍 방식을 개선하기
 	template <typename MethodType, typename ArgumentType>
 	bool Search(const int targetKey, MethodType&& method, ArgumentType&& argument);
@@ -153,7 +153,6 @@ protected:	//제너릭 메소드들
 
 	//전위순회로 돌면서 각 노드에 수행할 작업을 수행하는 제너릭 메소드임
 	//트리 복사의 소스 트리에서 실행되거나, 순회 출력 메소드에서만 사용되므로 const 메소드로 선언하였음
-	//TODO : 컴파일 시점에 코드 치환이 확실히 일어날 수 있도록 제너릭 프로그래밍 방식을 개선하기
 	//TODO : 하위 작업 메소드에 전달되는 매개변수 개수를 유동적으로 템플릿할 수 있도록 제너릭 프로그래밍 방식을 개선하기
 	template <typename MethodType, typename ArgumentType>
 	void PreorderTraverse(MethodType&& method, ArgumentType&& argument) const;
@@ -173,6 +172,7 @@ protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 
 	//삭제 위치를 가리키는 자식 포인터를 곤칠 수 있도록 레퍼런스 인자를 사용함
 	//TODO : 제너릭 메소드들에 전달되는 매개변수의 개수가 유동적으로 조정될 수 있게 되면 더미 매개변수를 지우기
+	//TODO : 하위 메소드 호출이 인라이닝화 될 수 있도록 로직 개선하기
 	bool RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter);
 
 	void ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode);

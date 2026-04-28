@@ -181,9 +181,9 @@ public:
 	{
 		LogPrint("copy tree");
 
-		RemoveTree();
-		
-		CopyTreeRecurse(sourceBST.m_pHead);
+		Bst<DataType> tempTree;
+		tempTree.CopyTreeRecurse(sourceBST.m_pHead);
+		*this = move(tempTree);
 	}
 
 	void PreorderPrint() const
@@ -345,9 +345,7 @@ bool Bst<DataType>::RemoveRecurse(BstNode<DataType>* pSearchTargetNode, const in
 		}
 		else
 		{
-			RemoveRecurse(pSearchTargetNode->m_pLeftChild, removeTargetKey);
-
-			return true;
+			return RemoveRecurse(pSearchTargetNode->m_pLeftChild, removeTargetKey);
 		}
 	}
 	else if (removeTargetKey > pSearchTargetNode->m_key)
@@ -360,9 +358,7 @@ bool Bst<DataType>::RemoveRecurse(BstNode<DataType>* pSearchTargetNode, const in
 		}
 		else
 		{
-			RemoveRecurse(pSearchTargetNode->m_pRightChild, removeTargetKey);
-
-			return true;
+			return RemoveRecurse(pSearchTargetNode->m_pRightChild, removeTargetKey);
 		}
 	}
 	else
@@ -410,61 +406,73 @@ inline void Bst<DataType>::RemoveTarget(BstNode<DataType>*& pRemoveTargetNode)
 template <typename DataType>
 inline void Bst<DataType>::ReplaceWithInorderPredecessor(BstNode<DataType>*& pRemoveTargetNode)
 {
-	BstNode<DataType>* pPrevious = nullptr;
-	BstNode<DataType>* pTraverse = pRemoveTargetNode->m_pLeftChild;
-	while (pTraverse->m_pRightChild != nullptr)
+	if (pRemoveTargetNode->m_pLeftChild->m_pRightChild == nullptr)
 	{
-		pPrevious = pTraverse;
-		pTraverse = pTraverse->m_pRightChild;
-	}
+		BstNode<DataType>* pInorderPredecessor = pRemoveTargetNode->m_pLeftChild;
+		pInorderPredecessor->m_pRightChild = pRemoveTargetNode->m_pRightChild;
 
-	if (pPrevious != nullptr)
-	{
-		pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
-		pTraverse->m_pLeftChild = nullptr;
+		pRemoveTargetNode->m_pLeftChild = nullptr;
+		pRemoveTargetNode->m_pRightChild = nullptr;
+		delete pRemoveTargetNode;
+
+		pRemoveTargetNode = pInorderPredecessor;
 	}
 	else
 	{
-		pRemoveTargetNode->m_pLeftChild = pTraverse->m_pLeftChild;
-		pTraverse->m_pLeftChild = nullptr;
-	}
+		BstNode<DataType>* pPrevious = nullptr;
+		BstNode<DataType>* pTraverse = pRemoveTargetNode->m_pLeftChild;
+		while (pTraverse->m_pRightChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pRightChild;
+		}
 
-	pTraverse->m_pLeftChild = pRemoveTargetNode->m_pLeftChild;
-	pTraverse->m_pRightChild = pRemoveTargetNode->m_pRightChild;
-	pRemoveTargetNode->m_pLeftChild = nullptr;
-	pRemoveTargetNode->m_pRightChild = nullptr;
-	delete pRemoveTargetNode;
-	pRemoveTargetNode = pTraverse;
+		pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
+		pTraverse->m_pLeftChild = pRemoveTargetNode->m_pLeftChild;
+		pTraverse->m_pRightChild = pRemoveTargetNode->m_pRightChild;
+
+		pRemoveTargetNode->m_pLeftChild = nullptr;
+		pRemoveTargetNode->m_pRightChild = nullptr;
+		delete pRemoveTargetNode;
+
+		pRemoveTargetNode = pTraverse;
+	}
 }
 
 template <typename DataType>
 inline void Bst<DataType>::ReplaceWithInorderSuccessor(BstNode<DataType>*& pRemoveTargetNode)
 {
-	BstNode<DataType>* pPrevious = nullptr;
-	BstNode<DataType>* pTraverse = pRemoveTargetNode->m_pRightChild;
-	while (pTraverse->m_pLeftChild != nullptr)
+	if (pRemoveTargetNode->m_pRightChild->m_pLeftChild == nullptr)
 	{
-		pPrevious = pTraverse;
-		pTraverse = pTraverse->m_pLeftChild;
-	}
+		BstNode<DataType>* pInorderSuccessor = pRemoveTargetNode->m_pRightChild;
+		pInorderSuccessor->m_pLeftChild = pRemoveTargetNode->m_pLeftChild;
 
-	if (pPrevious != nullptr)
-	{
-		pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
-		pTraverse->m_pRightChild = nullptr;
+		pRemoveTargetNode->m_pLeftChild = nullptr;
+		pRemoveTargetNode->m_pRightChild = nullptr;
+		delete pRemoveTargetNode;
+
+		pRemoveTargetNode = pInorderSuccessor;
 	}
 	else
 	{
-		pRemoveTargetNode->m_pRightChild = pTraverse->m_pRightChild;
-		pTraverse->m_pRightChild = nullptr;
-	}
+		BstNode<DataType>* pPrevious = nullptr;
+		BstNode<DataType>* pTraverse = pRemoveTargetNode->m_pRightChild;
+		while (pTraverse->m_pLeftChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pLeftChild;
+		}
 
-	pTraverse->m_pLeftChild = pRemoveTargetNode->m_pLeftChild;
-	pTraverse->m_pRightChild = pRemoveTargetNode->m_pRightChild;
-	pRemoveTargetNode->m_pLeftChild = nullptr;
-	pRemoveTargetNode->m_pRightChild = nullptr;
-	delete pRemoveTargetNode;
-	pRemoveTargetNode = pTraverse;
+		pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
+		pTraverse->m_pRightChild = pRemoveTargetNode->m_pRightChild;
+		pTraverse->m_pLeftChild = pRemoveTargetNode->m_pLeftChild;
+
+		pRemoveTargetNode->m_pLeftChild = nullptr;
+		pRemoveTargetNode->m_pRightChild = nullptr;
+		delete pRemoveTargetNode;
+
+		pRemoveTargetNode = pTraverse;
+	}
 }
 
 template <typename DataType>

@@ -4,10 +4,10 @@
 //#define TREE_WARNING
 
 //속도, 안전성 테스트를 활성화하고 싶을 시 아래 구문의 주석을 해제할 것
-//#define RANDOM_WORKLOAD_SPEED_TEST
+#define RANDOM_WORKLOAD_SPEED_TEST
 #define LINEAR_WORKLOAD_SAFETY_TEST
 
-#include "BstUsingRecurse.h"	//정의한 BST를 테스팅함
+#include "BstUsingRecurse.h"	//정의한 Bst를 테스팅함
 #include <chrono>;				//속도 테스트를 위해 사용함
 #include <string>;				//..
 #include <numeric>;				//..
@@ -22,7 +22,7 @@ void RandomWorkloadSpeedTest(const int workloadNum, const int workloadPerDataLen
 
 void LinearWorkloadSafetyTest(const int workloadNum, const int workloadPerDataLen);
 
-//insertDataWorkload는 복사 비용이 크지만, 그럼에도 하나의 워크로드를 BST와 map에 반복해서 사용할 수 있도록 값복사 형식의 매개변수를 사용함
+//insertDataWorkload는 복사 비용이 크지만, 그럼에도 하나의 워크로드를 Bst와 map에 반복해서 사용할 수 있도록 값복사 형식의 매개변수를 사용함
 time_point<steady_clock> SpeedTestBST(steady_clock& clock, const int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
 
 time_point<steady_clock> SpeedTestMap(steady_clock& clock, const int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
@@ -250,15 +250,16 @@ int main()
 		[상세]
 		- 구성 선택								: Release x64
 		- 디버깅 여부							: 디버깅하지 않고 시작(Ctrl + F5)
+		- C / C++ 디버그 정보 형식				: 프로그램 데이터베이스(/Zi)
 		- C / C++ 최적화 설정					: 최대 최적화(속도 우선)(/O2)
 		- C / C++ 인라인 함수 확장				: 적합한 것 모두 확장(/Ob2)
 		- C / C++ 내장 함수 사용				: 예(/Oi)
 		- C / C++ 크기 또는 속도				: 코드 속도 우선(/Ot)
 		- C / C++ 전체 프로그램 최적화			: 예(/GL)
 		- C / C++ 기본 런타임 검사				: 기본값
-		- C / C++ 디버그 정보 형식				: 프로그램 데이터베이스(/Zi)
 		- C / C++ 코드 생성 런타임 라이브러리	: 다중 스레드 DLL(/MD)
 		- C / C++ 전처리기 정의					: NDEBUG;_CONSOLE;%(PreprocessorDefinitions)
+		- C / C++ 출력 파일 어셈블러 출력		: 소스 코드로 구성된 어셈블리(/FAs)
 		- 링커 링크 타임 코드 생성				: 빠른 링크 타임 코드 생성 사용(/LTCG:incremental)
 	*/
 
@@ -270,18 +271,18 @@ int main()
 
 	/*	(테스팅 결과)
 		[randomWorkloadNum = 10,000,000  |  randomWorkloadPerDataLen = 30]
-		복사 삽입	: BST = xx.x초	|	std::map = xx.x초
-		이동 삽입	: BST = xx.x초	|	std::map = xx.x초
-		검색		: BST = xx.x초	|	std::map = xx.x초
-		삭제		: BST = xx.x초	|	std::map = xx.x초
-		소멸		: BST = xx.x초	|	std::map = xx.x초
+		복사 삽입	: Bst = 15.4초	|	std::map = 14.6초
+		이동 삽입	: Bst = 15.1초	|	std::map = 13.7초
+		검색		: Bst = 14.1초	|	std::map = 15.7초
+		삭제		: Bst = 20.3초	|	std::map = 18.3초
+		소멸		: Bst = 4.2초	|	std::map = 4.3초
 	*/
 
 	/*	(테스팅 해석)
-		트리 균형을 유지하기 위한 연산들이 있는 std::map과 달리 여기서 구현된 BST는 균형을 유지하는데 필요한 연산들을 수행하지 않으므로,
-		트리의 균형이 어느정도 자동으로 보장되는 랜던 워크로드에서는 삽입과 검색에서 BST가 더 빠른 속도를 보임
-		반대로 삭제 연산에서는 std::map의 구현인 레드 블랙 트리의 특성상 몇몇 삭제 연산들이 단순히 노드의 색깔이 바뀌는 것으로 완료되므로,
-		삭제 연산에서는 std::map이 더 빠른 속도를 보이는 것으로 추정
+		빌드된 어셈블리 파일과 아래 안전성 테스트 결과를 종합하여 보았을 때,
+		Bst의 삽입-검색-삭제 메소드는 꼬리 재귀 최적화를 통해 반복문으로 변환되므로, 재귀 호출이 속도 저하의 원인은 아님
+		또한 랜덤 워크로드를 통해 트리 균형은 유지되었을 것이니, 균형 트리가 아니라는 점이 속도 저하의 원인은 아님
+		따라서 현 테스트에서 Bst가 std::map에 비해 가진 속도 열세는 구현 과정에서 마이크로 최적화 수준의 차이 때문인 듯함.
 	*/
 
 #ifdef RANDOM_WORKLOAD_SPEED_TEST
@@ -290,36 +291,36 @@ int main()
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 #endif
 
-	cout << endl << "testing 5 : Linear Workload Safety Test-------------------------------------------------------" << endl;
+	cout << endl << "testing 5 : Linear Workload Safety Test--------------------------------------------------------" << endl;
 
 	/*	(테스팅 환경)
 		앞선 테스트와 동일
 	*/
 
 	/*	(테스팅 방법)
-		하나의 트리에 linearIncreaseWorkloadNum 횟수만큼 복사 삽입, 이동 삽입, 검색, 삭제과 트리의 소멸을 수행함
-		삽입과 검색 키는 [0,linearIncreaseWorkloadNum-1]의 선형 키값들을 사용함
-		삭제 키는 [linearIncreaseWorkloadNum-1, 0]의 역순으로 선형 키값들을 사용함(최대 높이를 거쳐 삭제가 일어나도록 하기 위함)
-		데이터는 linearIncreaseWorkloadPerDataLen으로 지정된 길이의 string 객체를 linearIncreaseWorkloadNum 개 만들어놓고 사용함
-		편향 삽입이 이뤄지므로 linearIncreaseWorkloadNum의 높이인 트리를 형성하도록 함
+		하나의 트리에 linearWorkloadNum 횟수만큼 복사 삽입, 이동 삽입, 검색, 삭제과 트리의 소멸을 수행함
+		삽입과 검색 키는 [0,linearWorkloadNum-1]의 선형 키값들을 사용함
+		삭제 키는 [linearWorkloadNum-1, 0]의 역순으로 선형 키값들을 사용함(최대 높이를 거쳐 삭제가 일어나도록 하기 위함)
+		데이터는 linearWorkloadPerDataLen으로 지정된 길이의 string 객체를 linearWorkloadNum 개 만들어놓고 사용함
+		편향 삽입이 이뤄지므로 linearWorkloadNum의 높이인 트리를 형성하도록 함
 	*/
 
 	/*	(테스팅 결과)
 		[linearIncreaseWorkloadPerDataLen = 30]
-		복사 삽입 : linearIncreaseWorkloadNum = 100,000 까지 문제 없음
+		복사 삽입 : linearWorkloadNum = 100,000 까지 문제 없음
 		이동 삽입 : ..
 		검색	  : ..
-		삭제	  : linearIncreaseWorkloadNum = 약 21,500에서 스택 오버플로우 발생
-		소멸	  : linearIncreaseWorkloadNum = 약 11,000에서 스택 오버플로우 발생
+		삭제	  : ..
+		소멸	  : linearWorkloadNum = 약 17,000에서 스택 오버플로우 발생
 	*/
 
 	/*	(테스팅 해석)
-		삽입, 검색 메소드는 꼬리재귀 최적화와 같은 방식이 컴파일러에 의해 적용되어서 스택 오버플로우가 발생하지 않는 것으로 추정
-		다만 삭제와 소멸 메소드는 어떤 이유로 꼬리재귀 최적화 등이 적용되지 않아 재귀로 인해 스택 오버플로우가 발생하는 것으로 추정
+		삽입, 검색, 삭제 메소드는 꼬리 재귀 형식으로 작성되어서 컴파일러가 재귀 호출을 반복문으로 최적화해줌
+		반면 노드 소멸자는 꼬리 재귀의 형식이 아니기에 컴파일러가 반복문으로 최적화해주지 못하는 것으로 추정함
 	*/
 
 #ifdef LINEAR_WORKLOAD_SAFETY_TEST
-	const int linearWorkloadNum = 11000;
+	const int linearWorkloadNum = 16000;
 	const int linearWorkloadPerDataLen = 30;
 	LinearWorkloadSafetyTest(linearWorkloadNum, linearWorkloadPerDataLen);
 #endif
