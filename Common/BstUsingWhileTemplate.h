@@ -71,8 +71,8 @@ public:
 		RemoveTree();
 	}
 
-	//newData가 lvalue 참조와 rvalue 참조인 경우를 각각 다르게 처리하기 위해서 참조 붕괴를 사용했음
 	//bool 반환값이 false인 경우 : newKey와 같은 키의 노드가 이미 존재하는 경우 
+	//newData가 lvalue 참조와 rvalue 참조인 경우를 각각 다르게 처리하기 위해서 참조 붕괴를 사용했음
 	template <typename InsertDataType = DataType>
 	bool Insert(const int newKey, InsertDataType&& newData)
 	{
@@ -166,10 +166,12 @@ protected:	//제너릭 메소드들
 
 protected:	//제너릭 메소드에 전달되는 하위 작업 메소드들
 
+	//삽입 위치를 가리키는 자식 포인터를 곤칠 수 있도록 레퍼런스 인자를 사용함
 	bool InsertNode(NodeType<DataType>*& pInsertPosition, unique_ptr<NodeType<DataType>> upNewNode);
 
 	bool RetrieveNode(const NodeType<DataType>* pTargetNode, DataType& outData) const;
 
+	//삭제 위치를 가리키는 자식 포인터를 곤칠 수 있도록 레퍼런스 인자를 사용함
 	//TODO : 제너릭 메소드들에 전달되는 매개변수의 개수가 유동적으로 조정될 수 있게 되면 더미 매개변수를 지우기
 	bool RemoveNode(NodeType<DataType>*& pTargetNode, void* pDummyParameter);
 
@@ -282,13 +284,6 @@ template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
 inline void BstTemplate<NodeType, DataType>::PreorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
-	if (m_pHead == nullptr)
-	{
-		WarningPrint("cannot traverse. becuase tree is empty.");
-
-		return;
-	}
-
 	NodeType<DataType>* pTraverse = nullptr;
 	Stack<NodeType<DataType>*> rightChildStack;
 	rightChildStack.Push(this->m_pHead);
@@ -312,13 +307,6 @@ template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
 inline void BstTemplate<NodeType, DataType>::InorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
-	if (m_pHead == nullptr)
-	{
-		WarningPrint("cannot traverse. becuase tree is empty.");
-
-		return;
-	}
-
 	NodeType<DataType>* pTraverse = m_pHead;
 	Stack<NodeType<DataType>*> rightSideAncestorStack;
 	while (pTraverse != nullptr)
@@ -347,13 +335,6 @@ template <template <typename> class NodeType, typename DataType>
 template <typename MethodType, typename ArgumentType>
 inline void BstTemplate<NodeType, DataType>::PostorderTraverse(MethodType&& method, ArgumentType&& argument) const
 {
-	if (m_pHead == nullptr)
-	{
-		WarningPrint("cannot traverse. becuase tree is empty.");
-
-		return;
-	}
-
 	struct Record
 	{
 		enum NodeJob
@@ -399,7 +380,7 @@ inline bool BstTemplate<NodeType, DataType>::InsertNode(NodeType<DataType>*& pIn
 {
 	if (pInsertPosition != nullptr)
 	{
-		ErrorPrint("cannot insert because there is same key in tree already!");
+		WarningPrint("cannot insert because there is same key in tree already!");
 
 		return false;
 	}
@@ -414,7 +395,7 @@ inline bool BstTemplate<NodeType, DataType>::RetrieveNode(const NodeType<DataTyp
 {
 	if (pTargetNode == nullptr)
 	{
-		ErrorPrint("cannot retrieve because there is no same key in tree!");
+		WarningPrint("cannot retrieve because there is no same key in tree!");
 
 		return false;
 	}
@@ -429,12 +410,12 @@ inline bool BstTemplate<NodeType, DataType>::RemoveNode(NodeType<DataType>*& pTa
 {
 	if (pTargetNode == nullptr)
 	{
-		ErrorPrint("cannot remove because there is no same key in tree!");
+		WarningPrint("cannot remove because there is no same key in tree!");
 
 		return false;
 	}
 
-	//중위선행자와 중위후속자 둘 다 있는 경우에는 대체할 대상을 다소 무작위적으로 선택함
+	//중위선행자와 중위후속자 둘 다 있는 경우에는 균형 유지에 조금이나마 도움이 되기 위해서, 대체할 대상을 다소 무작위적으로 선택함
 	if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild != nullptr)
 	{
 		if (pTargetNode->m_key % 2 == 0)

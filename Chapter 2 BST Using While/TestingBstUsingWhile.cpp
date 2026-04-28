@@ -299,7 +299,7 @@ int main()
 
 	/*	(테스팅 방법)
 		하나의 트리에 linearIncreaseWorkloadNum 횟수만큼 복사 삽입, 이동 삽입, 검색, 삭제과 트리의 소멸을 수행함
-		키는 [0,linearIncreaseWorkloadNum-1]의 선형 키값들을 일렬로 사용함
+		키는 [0,linearIncreaseWorkloadNum-1]의 선형 키값들을 사용함
 		데이터는 linearIncreaseWorkloadPerDataLen으로 지정된 길이의 string 객체를 linearIncreaseWorkloadNum 개 만들어놓고 사용함
 		편향 삽입이 이뤄지므로 linearIncreaseWorkloadNum의 높이인 트리를 형성하도록 함
 	*/
