@@ -241,11 +241,10 @@ int main()
 		[기본]
 		- CPU									: i5-13600KF, 3500Mhz, 14 코어, 20 논리 프로세서
 		- RAM									: 32GB, DDR4
-		- OS									: Windows 11, 버전 25H2, 빌드 26200.8039
-		- IDE									: Microsoft Visual Studio Community 2022 (64 - bit) 버전 17.14.23
-		- 플랫폼 도구 집합						: Visual Studio 2022 (v143)
-		- 컴파일러 버전							: x86용 Microsoft(R) C / C++ 최적화 컴파일러 버전 19.44.35222
-		- C++ 언어 표준							: 기본값(ISO C++ 14 표준)
+		- OS									: Windows 11, 버전 25H2, 빌드 26200.8246
+		- IDE									: Microsoft Visual Studio Community 2026 (64 - bit) 버전 18.5.2
+		- 플랫폼 도구 집합						: v145 for Microsoft C++ Build Tools
+		- 컴파일러 버전							: x86용 Microsoft (R) C/C++ 최적화 컴파일러 버전 19.50.35730
 
 		[상세]
 		- 구성 선택								: Release x64
@@ -259,6 +258,7 @@ int main()
 		- C / C++ 기본 런타임 검사				: 기본값
 		- C / C++ 코드 생성 런타임 라이브러리	: 다중 스레드 DLL(/MD)
 		- C / C++ 전처리기 정의					: NDEBUG;_CONSOLE;%(PreprocessorDefinitions)
+		- C / C++ 언어 표준						: 기본값(ISO C++ 14 표준)
 		- C / C++ 출력 파일 어셈블러 출력		: 소스 코드로 구성된 어셈블리(/FAs)
 		- 링커 링크 타임 코드 생성				: 빠른 링크 타임 코드 생성 사용(/LTCG:incremental)
 	*/
@@ -290,7 +290,6 @@ int main()
 	const int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 #endif
-
 	cout << endl << "testing 5 : Linear Workload Safety Test--------------------------------------------------------" << endl;
 
 	/*	(테스팅 환경)

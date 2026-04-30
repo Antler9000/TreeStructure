@@ -175,8 +175,8 @@ public:
 		m_pHead = nullptr;
 	}
 
-	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함.
-	//복사 생성자가 호출되는 것은 성능에도 안 좋으나, 무엇보다 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로, CopyTree가 복사 생성자를 이용하면 순환 오류가 난다.
+	//트리의 값전달로 인해 복사생성자가 실행되는 것을 막기 위해 레퍼런스 인자를 사용함
+	//복사를 통한 인자 전달은 성능에도 안 좋고, 게다가 복사 생성자가 CopyTree(..)를 이용해 구현되어있으므로 CopyTree가 복사 생성자를 이용하면 순환 오류가 남
 	void CopyTree(const Bst<DataType>& sourceBST)
 	{
 		LogPrint("copy tree");
@@ -376,7 +376,7 @@ bool Bst<DataType>::RemoveRecurse(BstNode<DataType>* pSearchTargetNode, const in
 template <typename DataType>
 inline void Bst<DataType>::RemoveTarget(BstNode<DataType>*& pRemoveTargetNode)
 {
-	//중위선행자와 중위후속자 둘 다 있는 경우에는 균형 유지에 조금이나마 도움이 되기 위해서, 대체할 대상을 다소 무작위적으로 선택함
+	//중위선행자와 중위후속자가 둘 다 있는 경우에는 균형 유지에 조금이나마 도움이 되기 위해서 대체할 대상을 다소 무작위적으로 선택함
 	if (pRemoveTargetNode->m_pLeftChild != nullptr && pRemoveTargetNode->m_pRightChild != nullptr)
 	{
 		if (pRemoveTargetNode->m_key % 2 == 0)
