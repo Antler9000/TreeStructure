@@ -1,185 +1,238 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "../Common/Debug.h"
-#include <iostream>
+#include "../Common/Debug.h"	//정의한 로그 출력 매크로를 사용함
+#include <utility>				//이동 시맨틱을 사용함
 using namespace std;
 
 class Heap
 {
-protected:
-	int* m_pDatum;
-	int m_itemNum;
-	int m_maxNum;
+public:
 
-	int getLeftChildIndex(int dataIndex)
+	Heap()
+	{
+		LogPrint("empty constructor");
+
+		m_pData = DBG_NEW int[50];
+		m_size = 0;
+		m_capacity = 50;
+	}
+
+	Heap(const Heap& sourceHeap)
+	{
+		LogPrint("copy constructor");
+
+		m_pData = DBG_NEW int[sourceHeap.m_capacity];
+		m_capacity = sourceHeap.m_capacity;
+		m_size = sourceHeap.m_size;
+
+		for (int i = 0; i < m_size; i++)
+		{
+			m_pData[i] = sourceHeap.m_pData[i];
+		}
+	}
+
+	Heap(Heap&& sourceHeap) noexcept
+	{
+		LogPrint("move constructor");
+
+		m_pData = sourceHeap.m_pData;
+		sourceHeap.m_pData = nullptr;
+
+		m_capacity = sourceHeap.m_capacity;
+		m_size = sourceHeap.m_size;
+	}
+
+	Heap& operator = (const Heap& sourceHeap)
+	{
+		LogPrint("copy assignment");
+
+		if (this == &sourceHeap)
+		{
+			return *this;
+		}
+
+		RemoveAll();
+
+		m_pData = DBG_NEW int[sourceHeap.m_capacity];
+		m_capacity = sourceHeap.m_capacity;
+		m_size = sourceHeap.m_size;
+
+		for (int i = 0; i < m_size; i++)
+		{
+			m_pData[i] = sourceHeap.m_pData[i];
+		}
+	}
+
+	Heap& operator = (Heap&& sourceHeap) noexcept
+	{
+		LogPrint("move assignment");
+
+		if (this == &sourceHeap)
+		{
+			return *this;
+		}
+
+		RemoveAll();
+
+		m_pData = sourceHeap.m_pData;
+		sourceHeap.m_pData = nullptr;
+
+		m_capacity = sourceHeap.m_capacity;
+		m_size = sourceHeap.m_size;
+	}
+
+	~Heap() noexcept
+	{
+		LogPrint("destructor");
+
+		delete[] m_pData;
+		m_pData = nullptr;
+		m_size = 0;
+		m_capacity = 0;
+	}
+
+	void Push(int newData)
+	{
+		LogPrint("push");
+
+		if (m_size >= m_capacity)
+		{
+			GiveLargerMemorySpace();
+		}
+
+		m_pData[m_size] = newData;
+		m_size++;
+		ReorderByPromoting();
+	}
+
+	int GetTop()
+	{
+		LogPrint("get top");
+
+		if (m_size <= 0)
+		{
+			WarningPrint("can't get item from heap because heap is empty.");
+			return 0;
+		}
+
+		return m_pData[0];
+	}
+
+	int Pop()
+	{
+		LogPrint("pop");
+
+		if (m_size <= 0)
+		{
+			WarningPrint("cannot pop item from heap because heap is empty.");
+			return 0;
+		}
+
+		int poppedData = m_pData[0];
+
+		m_size--;
+		m_pData[0] = m_pData[m_size];
+		ReorderByDemoting();
+
+		return poppedData;
+	}
+
+	void RemoveAll()
+	{
+		LogPrint("remove all");
+
+		delete[] m_pData;
+		m_size = 0;
+		m_capacity = 0;
+	}
+
+protected:
+
+	int GetLeftChildIndex(int dataIndex)
 	{
 		return (dataIndex * 2 + 1);
 	}
 
-	int getRightChildIndex(int dataIndex)
+	int GetRightChildIndex(int dataIndex)
 	{
 		return (dataIndex * 2 + 2);
 	}
 
-	int getParentIndex(int dataIndex)
+	int GetParentIndex(int dataIndex)
 	{
 		return ((dataIndex - 1) / 2);
 	}
 
 	void Swap(int& dataA, int& dataB)
 	{
-		int temp = dataA;
-		dataA = dataB;
-		dataB = temp;
+		int temp = move(dataA);
+		dataA = move(dataB);
+		dataB = move(temp);
 	}
 
-	virtual bool IsNotOrdered(int parentIndex, int childIndex) = 0;				//상속된 최소힙, 최대힙에서 구체적으로 명시.
+	virtual bool IsNotOrdered(int parentIndex, int childIndex) = 0;					//상속된 최소힙 or 최대힙에서 각기 방식으로 구체화함
 
-	virtual bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex) = 0;		//상속된 최소힙, 최대힙에서 구체적으로 명시.
+	virtual bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex) = 0;	//상속된 최소힙 or 최대힙에서 각기 방식으로 구체화함
 
 	void ReorderByPromoting();
 
 	void ReorderByDemoting();
 
-	void GiveTwiceMemorySpace()
+	void GiveLargerMemorySpace()
 	{
-		int newSize = 2 * m_maxNum;
-		int* newData = new int[newSize];
+		int newCapacity = (m_capacity == 0) ? (50) : (2 * m_capacity);
+		int* newData = DBG_NEW int[newCapacity];
 
-		for (int i = 0; i < m_maxNum; i++)
+		for (int i = 0; i < m_size; i++)
 		{
-			newData[i] = m_pDatum[i];
+			newData[i] = m_pData[i];
 		}
 
-		delete m_pDatum;
-		m_pDatum = newData;
+		delete[] m_pData;
+		m_pData = newData;
+		m_capacity = newCapacity;
 	}
 
-public:
-	//일단 기본 크기는 50으로 시작. 이를 넘도록 push가 일어나면 기존 크기의 2배를 배정해준다.
-	Heap()
-	{
-		cout << "heap is being made" << endl;
-		m_pDatum = new int[50];
-		m_itemNum = 0;
-		m_maxNum = 50;
-	}
+protected:
 
-	~Heap()
-	{
-		cout << "heap is being removed" << endl;
-		delete m_pDatum;
-		m_pDatum = NULL;
-	}
-
-	void Push(int newData)
-	{
-		if (m_itemNum >= m_maxNum)
-		{
-			cout << "cannot Push item into heap. heap is fulled." << endl;
-			cout << "moving to bigger space...." << endl;
-			GiveTwiceMemorySpace();
-		}
-
-		m_pDatum[m_itemNum] = newData;
-		m_itemNum++;
-		ReorderByPromoting();
-	}
-
-	int GetTop()
-	{
-		if (m_itemNum <= 0)
-		{
-			cout << "cannot GetTop item from heap. heap is emptied." << endl;
-			return 0;
-		}
-
-		return m_pDatum[0];
-	}
-
-	int Pop() {
-		if (m_itemNum <= 0)
-		{
-			cout << "cannot GetTop item from heap. heap is emptied." << endl;
-			return 0;
-		}
-
-		m_itemNum--;
-		int poppedData = m_pDatum[0];
-		m_pDatum[0] = m_pDatum[m_itemNum];
-		ReorderByDemoting();
-		return poppedData;
-	}
-
-	void RemoveAll()
-	{
-		m_itemNum = 0;
-	}
-};
-
-class MinHeap : public Heap
-{
-	bool IsNotOrdered(int parentIndex, int childIndex)
-	{
-		if (m_pDatum[parentIndex] > m_pDatum[childIndex]) return true;
-		else return false;
-	}
-
-	bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex)
-	{
-		if (m_pDatum[leftChildIndex] < m_pDatum[rightChildIndex]) return true;
-		else return false;
-	}
-
-public :
-	MinHeap() : Heap() {}
-};
-
-class MaxHeap : public Heap
-{
-	bool IsNotOrdered(int parentIndex, int childIndex)
-	{
-		if (m_pDatum[parentIndex] < m_pDatum[childIndex]) return true;
-		else return false;
-	}
-
-	bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex)
-	{
-		if (m_pDatum[leftChildIndex] > m_pDatum[rightChildIndex]) return true;
-		else return false;
-	}
-
-public :
-	MaxHeap() : Heap() {}
+	int* m_pData;
+	int m_size;
+	int m_capacity;
 };
 
 void Heap::ReorderByPromoting()
 {
-	int targetIndex = m_itemNum - 1;
-	int parentIndex = getParentIndex(targetIndex);
+	int targetIndex = m_size - 1;
+	int parentIndex = GetParentIndex(targetIndex);
 
-	while ((targetIndex > 0) && IsNotOrdered(parentIndex, targetIndex))
+	while (targetIndex != parentIndex && IsNotOrdered(parentIndex, targetIndex))
 	{
-		Swap(m_pDatum[targetIndex], m_pDatum[parentIndex]);
+		Swap(m_pData[targetIndex], m_pData[parentIndex]);
 		targetIndex = parentIndex;
-		parentIndex = getParentIndex(targetIndex);
+		parentIndex = GetParentIndex(targetIndex);
 	}
 }
 
 void Heap::ReorderByDemoting()
 {
 	int targetIndex = 0;
-	int leftChildIndex = getLeftChildIndex(targetIndex);
-	int rightChildIndex = getRightChildIndex(targetIndex);
+	int leftChildIndex = GetLeftChildIndex(targetIndex);
+	int rightChildIndex = GetRightChildIndex(targetIndex);
 	int targetChildIndex;
 
-	while (leftChildIndex <= m_itemNum)
+	while (leftChildIndex < m_size)
 	{
-		if (rightChildIndex <= m_itemNum)
+		if (rightChildIndex < m_size)
 		{
-			if (IsLeftChildTarget(leftChildIndex, rightChildIndex)) targetChildIndex = leftChildIndex;
-			else targetChildIndex = rightChildIndex;
+			if (IsLeftChildTarget(leftChildIndex, rightChildIndex))
+			{
+				targetChildIndex = leftChildIndex;
+			}
+			else
+			{
+				targetChildIndex = rightChildIndex;
+			}
 		}
 		else
 		{
@@ -188,10 +241,11 @@ void Heap::ReorderByDemoting()
 
 		if (IsNotOrdered(targetIndex, targetChildIndex))
 		{
-			Swap(m_pDatum[targetIndex], m_pDatum[targetChildIndex]);
+			Swap(m_pData[targetIndex], m_pData[targetChildIndex]);
+
 			targetIndex = targetChildIndex;
-			leftChildIndex = getLeftChildIndex(targetIndex);
-			rightChildIndex = getRightChildIndex(targetIndex);
+			leftChildIndex = GetLeftChildIndex(targetIndex);
+			rightChildIndex = GetRightChildIndex(targetIndex);
 		}
 		else
 		{
@@ -199,5 +253,71 @@ void Heap::ReorderByDemoting()
 		}
 	}
 }
+
+class MinHeap : public Heap
+{
+public:
+
+	MinHeap() : Heap() {}
+
+private:
+
+	bool IsNotOrdered(int parentIndex, int childIndex)
+	{
+		if (m_pData[parentIndex] > m_pData[childIndex])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex)
+	{
+		if (m_pData[leftChildIndex] < m_pData[rightChildIndex])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+
+class MaxHeap : public Heap
+{
+public:
+
+	MaxHeap() : Heap() {}
+
+private:
+
+	bool IsNotOrdered(int parentIndex, int childIndex)
+	{
+		if (m_pData[parentIndex] < m_pData[childIndex])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool IsLeftChildTarget(int leftChildIndex, int rightChildIndex)
+	{
+		if (m_pData[leftChildIndex] > m_pData[rightChildIndex])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
 
 #endif //HEAP_H
