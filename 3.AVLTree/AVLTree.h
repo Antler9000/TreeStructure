@@ -6,13 +6,13 @@
 #include <cstdint>
 
 template <typename DataType>
-class AvlTree;
+class AVLTree;
 
 template <typename DataType>
 class AVL_Node
 {	
 	friend class BSTTemplate<AVL_Node, DataType>;
-	friend class AvlTree<DataType>;
+	friend class AVLTree<DataType>;
 
 	friend std::ostream& operator <<(std::ostream& out, const AVL_Node<DataType>& printedNode)
 	{
@@ -51,10 +51,10 @@ private:
 };
 
 template <typename DataType>
-class AvlTree : public BSTTemplate<AVL_Node, DataType>
+class AVLTree : public BSTTemplate<AVL_Node, DataType>
 {
 public:
-	AvlTree() : BSTTemplate<AVL_Node, DataType>()
+	AVLTree() : BSTTemplate<AVL_Node, DataType>()
 	{
 	
 	}
@@ -93,7 +93,7 @@ private:
 };
 
 template <typename DataType>
-inline void AvlTree<DataType>::RemoveTarget(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::RemoveTarget(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
 {
 	if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL) //두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
 	{
@@ -114,7 +114,7 @@ inline void AvlTree<DataType>::RemoveTarget(AVL_Node<DataType>*& pTarget, Stack<
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::ReplaceWithInorderPredecessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::ReplaceWithInorderPredecessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
 {
 	AVL_Node<DataType>* pPrevious = NULL;
 	AVL_Node<DataType>* pTraverse = pTarget->m_pLeftChild;
@@ -135,7 +135,7 @@ inline void AvlTree<DataType>::ReplaceWithInorderPredecessor(AVL_Node<DataType>*
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::ReplaceWithInorderSuccessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::ReplaceWithInorderSuccessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
 {
 	AVL_Node<DataType>* pPrevious = NULL;
 	AVL_Node<DataType>* pTraverse = pTarget->m_pRightChild;
@@ -156,7 +156,7 @@ inline void AvlTree<DataType>::ReplaceWithInorderSuccessor(AVL_Node<DataType>*& 
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::BalancingAllTargetToRoot(Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::BalancingAllTargetToRoot(Stack<AVL_Node<DataType>*>* pRouteStack)
 {
 	while (pRouteStack->IsEmpty() == false)
 	{
@@ -166,14 +166,12 @@ inline void AvlTree<DataType>::BalancingAllTargetToRoot(Stack<AVL_Node<DataType>
 		pRouteStack->GetTop(pParentOfRetraverse);
 		UpdateHeight(pRetraverse);
 
-		std::cout << "node's height : " << pRetraverse->m_height << std::endl;
-
 		BalancingTargetNode(pRetraverse, pParentOfRetraverse);
 	}
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::BalancingTargetNode(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::BalancingTargetNode(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
 {
 	std::int32_t leftHeight = 0;
 	std::int32_t rightHeight = 0;
@@ -226,10 +224,8 @@ inline void AvlTree<DataType>::BalancingTargetNode(AVL_Node<DataType>* pTarget, 
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::RotationLL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationLL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
 {
-	std::cout << "LL 회전" << std::endl;
-
 	if (pParent == NULL)
 	{
 		this->m_pHead = pTarget->m_pLeftChild;
@@ -256,10 +252,8 @@ inline void AvlTree<DataType>::RotationLL(AVL_Node<DataType>* pTarget, AVL_Node<
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::RotationLR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationLR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
 {
-	std::cout << "LR 회전" << std::endl;
-
 	AVL_Node<DataType>* pLR_Location = pTarget->m_pLeftChild->m_pRightChild;
 	pTarget->m_pLeftChild->m_pRightChild = pLR_Location->m_pLeftChild;
 	pLR_Location->m_pLeftChild = pTarget->m_pLeftChild;
@@ -273,10 +267,8 @@ inline void AvlTree<DataType>::RotationLR(AVL_Node<DataType>* pTarget, AVL_Node<
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::RotationRL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationRL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
 {
-	std::cout << "RL 회전" << std::endl;
-
 	AVL_Node<DataType>* pRL_Location = pTarget->m_pRightChild->m_pLeftChild;
 	pTarget->m_pRightChild->m_pLeftChild = pRL_Location->m_pRightChild;
 	pRL_Location->m_pRightChild = pTarget->m_pRightChild;
@@ -290,10 +282,8 @@ inline void AvlTree<DataType>::RotationRL(AVL_Node<DataType>* pTarget, AVL_Node<
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::RotationRR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationRR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
 {
-	std::cout << "RR 회전" << std::endl;
-
 	if (pParent == NULL)
 	{
 		this->m_pHead = pTarget->m_pRightChild;
@@ -320,7 +310,7 @@ inline void AvlTree<DataType>::RotationRR(AVL_Node<DataType>* pTarget, AVL_Node<
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::Insert(std::int32_t newKey, DataType newData)
+inline void AVLTree<DataType>::Insert(std::int32_t newKey, DataType newData)
 {
 	if (this->m_pHead == NULL)
 	{
@@ -366,7 +356,7 @@ inline void AvlTree<DataType>::Insert(std::int32_t newKey, DataType newData)
 }
 
 template <typename DataType>
-inline void AvlTree<DataType>::Remove(std::int32_t targetKey)
+inline void AVLTree<DataType>::Remove(std::int32_t targetKey)
 {
 	if (this->m_pHead == NULL)
 	{

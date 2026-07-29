@@ -253,8 +253,8 @@ int main()
 		[randomWorkloadNum			= 10,000,000]
 		[randomWorkloadPerDataLen	= 30]
 
-		복사 삽입	: BST = 16.46초	|	std::map = 15.83초 -4%
-		이동 삽입	: BST = 15.77초	|	std::map = 14.58초 -8%
+		복사 삽입	: BST = 16.46초	|	std::map = 15.83초
+		이동 삽입	: BST = 15.77초	|	std::map = 14.58초
 		검색		: BST = 16.97초	|	std::map = 17.64초
 		삭제		: BST = 21.92초	|	std::map = 18.61초
 		소멸		: BST =  4.51초	|	std::map =  4.38초
