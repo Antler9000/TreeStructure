@@ -36,7 +36,7 @@ int main()
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	cout << endl << "기능 테스트 1/4 : 균형 유지 확인----------------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 1/4 : Balancing----------------------------------------------------------------------" << endl;
 
 	AVLTree<int> balancingTestAVLTree;
 
@@ -80,7 +80,7 @@ int main()
 	balancingTestAVLTree.Remove(3);
 	balancingTestAVLTree.PreorderPrint();
 
-	cout << endl << "삭제 4" << endl;
+	cout << endl << "삭제 5" << endl;
 	balancingTestAVLTree.Remove(5);
 	balancingTestAVLTree.PreorderPrint();
 

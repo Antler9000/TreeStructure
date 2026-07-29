@@ -37,7 +37,102 @@ int main()
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	cout << endl << "기능 테스트 1/3 : SplayTree<int>-------------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 1/4 : Splaying-----------------------------------------------------------------------" << endl;
+
+	SplayTree<int> splayingTestSplayTree;
+
+	cout << endl << "삽입 5" << endl;
+	splayingTestSplayTree.Insert(5, 55);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 9" << endl;
+	splayingTestSplayTree.Insert(9, 99);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 8" << endl;
+	splayingTestSplayTree.Insert(8, 88);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 7" << endl;
+	splayingTestSplayTree.Insert(7, 77);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 1" << endl;
+	splayingTestSplayTree.Insert(1, 11);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 2" << endl;
+	splayingTestSplayTree.Insert(2, 22);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삽입 3" << endl;
+	splayingTestSplayTree.Insert(3, 33);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 2" << endl;
+	int out2 = 0;
+	splayingTestSplayTree.Retrieve(2, out2);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 5" << endl;
+	int out5 = 0;
+	splayingTestSplayTree.Retrieve(5, out5);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 8" << endl;
+	int out8 = 0;
+	splayingTestSplayTree.Retrieve(8, out8);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 1" << endl;
+	int out1 = 0;
+	splayingTestSplayTree.Retrieve(1, out1);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 3" << endl;
+	int out3 = 0;
+	splayingTestSplayTree.Retrieve(3, out3);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 7" << endl;
+	int out7 = 0;
+	splayingTestSplayTree.Retrieve(7, out7);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "검색 9" << endl;
+	int out9 = 0;
+	splayingTestSplayTree.Retrieve(9, out9);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 1" << endl;
+	splayingTestSplayTree.Remove(1);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 2" << endl;
+	splayingTestSplayTree.Remove(2);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 3" << endl;
+	splayingTestSplayTree.Remove(3);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 5" << endl;
+	splayingTestSplayTree.Remove(5);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 7" << endl;
+	splayingTestSplayTree.Remove(7);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 8" << endl;
+	splayingTestSplayTree.Remove(8);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "삭제 9" << endl;
+	splayingTestSplayTree.Remove(9);
+	splayingTestSplayTree.PreorderPrint();
+
+	cout << endl << "기능 테스트 2/4 : SplayTree<int>-------------------------------------------------------------" << endl;
 
 	SplayTree<int> intTestSplayTree;
 
@@ -104,7 +199,7 @@ int main()
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
 	intExplicitCopyTestSplayTree.PreorderPrint();
 
-	cout << endl << "기능 테스트 2/3 : SplayTree<float>-----------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 3/4 : SplayTree<float>-----------------------------------------------------------" << endl;
 
 	SplayTree<float> floatTestSplayTree;
 
@@ -171,7 +266,7 @@ int main()
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
 	floatExplicitCopyTestSplayTree.PreorderPrint();
 
-	cout << endl << "기능 테스트 3/3 : SplayTree<string>----------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 4/4 : SplayTree<string>----------------------------------------------------------" << endl;
 
 	SplayTree<string> stringTestSplayTree;
 
