@@ -406,7 +406,7 @@ int main()
 	*/
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
-	constexpr int randomLocalWorkloadPerDataLen = randomWorkloadPerDataLen;
+	constexpr int randomLocalWorkloadPerDataLen	= randomWorkloadPerDataLen;
 	constexpr int localBlockSize = 10;
 	RandomLocalWorkloadTest(randomLocalWorkloadNum, randomLocalWorkloadPerDataLen, localBlockSize);
 

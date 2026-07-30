@@ -324,7 +324,7 @@ int main()
 		삽입, 삭제 메소드의 속도가 std::map에 비해 크게 느린 것으로 보아 관련 메소드들을 최적화할 필요성이 있음
 	*/
 
-	constexpr int randomWorkloadNum = 10000000;
+	constexpr int randomWorkloadNum	= 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
@@ -377,7 +377,7 @@ int main()
 		그러나 랜덤 워크로드 테스트와 마찬가지로 회전 관련 로직들의 최적화가 필요함을 보임
 	*/
 
-	constexpr int linearIncreaseWorkloadNum = randomWorkloadNum;
+	constexpr int linearIncreaseWorkloadNum	= randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
