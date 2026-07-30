@@ -243,60 +243,11 @@ int main()
 
 	cout << endl << "속도 테스트 1/4 : 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		randomWorkloadNum 횟수만큼 복사 삽입(트리 A), 이동 삽입(트리 B), 검색(트리 A), 삭제(트리 A)와 소멸(트리 B)을 수행함
-		키는 [0,randomWorkloadNum-1] 의 중복되지 않는 키 값들을 랜덤하게 셔플해놓고 사용함(삽입, 검색, 삭제의 키 값들은 각각 독립으로 셔플됨)
-		데이터는 randomWorkloadPerDataLen 으로 지정된 길이의 string 객체를 randomWorkloadNum 개 만들어놓고 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[randomWorkloadNum			= 10,000,000]
-		[randomWorkloadPerDataLen	= 30]
-
-		복사 삽입	: BST = 16.46초	|	std::map = 15.83초
-		이동 삽입	: BST = 15.77초	|	std::map = 14.58초
-		검색		: BST = 16.97초	|	std::map = 17.64초
-		삭제		: BST = 21.92초	|	std::map = 18.61초
-		소멸		: BST =  4.51초	|	std::map =  4.38초
-	*/
-
-	/*	(테스팅 해석)
-		본 트리는 반복문으로 구현되었기에, 컴파일러의 최적화에 상관없이 재귀 호출은 무조건 일어나지 않음
-		
-		빌드된 어셈블리 코드를 보았을 때 삽입과 검색 메소드는 모두 인라이닝 되었고 이로 인해 std::map과 속도 차이가 적음
-		그럼에도 상대적으로 10% 정도 느린 속도는 상세적인 최적화가 부족하기 때문으로 추정함
-		
-		삭제 메소드의 하위 작업 호출이 인라이닝되지 못한 것을 확인하였고 std::map과의 속도 차이도 크게 나타남
-		삭제 메소드는 하위 작업 메소드의 크기가 커서 인라이닝되지 못한 것으로 추정함 
-	*/
-
 	constexpr int randomWorkloadNum = 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 2/4 : 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키 값들이 localBlockSize 단위로 내부에서 선형 증가 연속성을 가지도록 하였음
-	*/
-
-	/*	(테스팅 결과)
-		[randomLocalWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[randomLocalWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[localBlockSize					= 10]
-
-		복사 삽입	: BST =  7.75초	|	std::map =  4.09초
-		이동 삽입	: BST =  6.74초	|	std::map =  3.34초
-		검색		: BST =  6.60초	|	std::map =  3.65초
-		삭제		: BST =  7.70초	|	std::map =  4.11초
-		소멸		: BST =  3.51초	|	std::map =  3.38초
-	*/
-
-	/*	(테스팅 해석)
-		워크로드가 지역 선형성을 가지게 되므로 1번 랜덤 워크로드 테스트에 비해서 BST의 트리 높이는 더 높아짐
-		그럼에도 1번 랜덤 워크로드 테스트에 비해서 BST의 삽입, 검색, 삭제 메소드가 더 빨라진 이유는 캐시 히트율이 높아졌기 때문으로 추정함
-		본 테스트에서 BST와 std::map의 속도 차이가 벌어진 이유는 설계와 구현상에서 캐시 히트율 고려에 대한 수준 차이 때문으로 추정함
-	*/
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
 	constexpr int randomLocalWorkloadPerDataLen	= randomWorkloadPerDataLen;
@@ -305,55 +256,11 @@ int main()
 
 	cout << endl << "속도 테스트 3/4 : 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키값들을 뒤섞지 않고 선형 그대로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearIncreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearIncreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: BST = 시간초과|	std::map =  1.79초
-		이동 삽입	: BST = 시간초과|	std::map =  1.51초
-		검색		: BST = 시간초과|	std::map =  0.66초
-		삭제		: BST =  0.02초	|	std::map =  1.84초
-		소멸		: BST =  0.36초 |	std::map =  1.32초
-	*/
-
-	/*	(테스팅 해석)
-		선형 워크로드는 BST를 편향시켜 리스트와 같은 형상이 되도록 함
-		
-		삽입 메소드와 검색 메소드는 리스트와 같은 모양이 되어서 나타나는 O(N^2)의 시간 복잡도 때문에 시간 초과가 남
-		시간초과로 삽입이 덜 이루어졌으므로, 이후의 '삭제', '소멸'의 측정 시간은 신뢰할 수 없음
-		
-		BST와 달리 std::map은 균형을 유지하는 트리이기 때문에 선형 워크로드에 대해서도 O(NlogN)의 시간 복잡도를 가져 매우 빠른 속도를 보임
-		게다가 선형 워크로드가 가진 지역성으로 캐시 히트율이 증가해 1번 랜덤 워크로드 테스트보다 훨씬 빠른 속도를 보이는 것으로 추정함
-	*/
-
 	constexpr int linearIncreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 4/4 : 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 3번 선형 증가 워크로드 테스트와 비슷하나, 키를 역순으로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearDecreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearDecreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: BST = 시간초과|	std::map =  1.89초
-		이동 삽입	: BST = 시간초과|	std::map =  1.46초
-		검색		: BST = 시간초과|	std::map =  0.68초
-		삭제		: BST =  0.02초	|	std::map =  1.64초
-		소멸		: BST =  0.35초 |	std::map =  1.98초
-	*/
-
-	/*	(테스팅 해석)
-		앞선 3번 선형 증가 워크로드 테스트와 같음
-	*/
 
 	constexpr int linearDecreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearDecreaseWorkloadPerDataLen = randomWorkloadPerDataLen;

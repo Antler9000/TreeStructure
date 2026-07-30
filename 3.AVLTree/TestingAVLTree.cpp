@@ -303,52 +303,11 @@ int main()
 
 	cout << endl << "속도 테스트 1/4 : 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		randomWorkloadNum 횟수만큼 복사 삽입(트리 A), 이동 삽입(트리 B), 검색(트리 A), 삭제(트리 A)와 소멸(트리 B)을 수행함
-		키는 [0,randomWorkloadNum-1] 의 중복되지 않는 키 값들을 랜덤하게 셔플해놓고 사용함(삽입, 검색, 삭제의 키 값들은 각각 독립으로 셔플됨)
-		데이터는 randomWorkloadPerDataLen 으로 지정된 길이의 string 객체를 randomWorkloadNum 개 만들어놓고 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[randomWorkloadNum			= 10,000,000]
-		[randomWorkloadPerDataLen	= 30]
-
-		복사 삽입	: AVLTree = 22.83초	|	std::map = 14.24초
-		이동 삽입	: AVLTree = 20.89초	|	std::map = 13.12초
-		검색		: AVLTree = 11.79초	|	std::map = 15.05초
-		삭제		: AVLTree = 24.85초	|	std::map = 17.52초
-		소멸		: AVLTree =  4.46초	|	std::map =  4.37초
-	*/
-
-	/*	(테스팅 해석)
-		삽입, 삭제 메소드의 속도가 std::map에 비해 크게 느린 것으로 보아 관련 메소드들을 최적화할 필요성이 있음
-	*/
-
 	constexpr int randomWorkloadNum	= 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 2/4 : 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키 값들이 localBlockSize 단위로 내부에서 선형 증가 연속성을 가지도록 하였음
-	*/
-
-	/*	(테스팅 결과)
-		[randomLocalWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[randomLocalWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[localBlockSize					= 10]
-
-		복사 삽입	: AVLTree =  7.35초	|	std::map =  3.83초
-		이동 삽입	: AVLTree =  7.00초	|	std::map =  3.23초
-		검색		: AVLTree =  2.34초	|	std::map =  3.48초
-		삭제		: AVLTree =  8.49초	|	std::map =  3.89초
-		소멸		: AVLTree =  3.23초	|	std::map =  3.12초
-	*/
-
-	/*	(테스팅 해석)
-		BST에서의 테스트와 비슷한 결과가 나왔으므로, 아무래도 캐시 히트율 차이로 인해 std::map과의 속도 차이가 난 듯함
-	*/
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
 	constexpr int randomLocalWorkloadPerDataLen = randomWorkloadPerDataLen;
@@ -357,51 +316,11 @@ int main()
 
 	cout << endl << "속도 테스트 3/4 : 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키값들을 뒤섞지 않고 선형 그대로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearIncreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearIncreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: AVLTree =  4.98초	|	std::map =  1.95초
-		이동 삽입	: AVLTree =  4.65초	|	std::map =  1.52초
-		검색		: AVLTree =  0.66초	|	std::map =  0.70초
-		삭제		: AVLTree =  4.05초	|	std::map =  1.86초
-		소멸		: AVLTree =  0.97초 |	std::map =  0.93초
-	*/
-
-	/*	(테스팅 해석)
-		균형이 유지되므로 이전 BST와 달리 삽입과 검색에서 시간 초과가 나지 않게 되었음
-		그러나 랜덤 워크로드 테스트와 마찬가지로 회전 관련 로직들의 최적화가 필요함을 보임
-	*/
-
 	constexpr int linearIncreaseWorkloadNum	= randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 4/4 : 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 3번 선형 증가 워크로드 테스트와 비슷하나, 키를 역순으로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearDecreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearDecreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: AVLTree =  5.00초	|	std::map =  1.82초
-		이동 삽입	: AVLTree =  4.70초	|	std::map =  1.49초
-		검색		: AVLTree =  0.67초	|	std::map =  0.64초
-		삭제		: AVLTree = 10.07초	|	std::map =  2.18초
-		소멸		: AVLTree =  1.06초 |	std::map =  1.34초
-	*/
-
-	/*	(테스팅 해석)
-		선형 증가 워크로드 테스트와 비교해서 특이하게 삭제에서의 시간 소요가 2배로 늘어났음
-		원인을 파악할 예정임
-	*/
 
 	constexpr int linearDecreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearDecreaseWorkloadPerDataLen = randomWorkloadPerDataLen;

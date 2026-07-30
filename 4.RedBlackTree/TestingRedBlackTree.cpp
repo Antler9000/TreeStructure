@@ -499,52 +499,11 @@ int main()
 
 	cout << endl << "속도 테스트 1/4 : 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		randomWorkloadNum 횟수만큼 복사 삽입(트리 A), 이동 삽입(트리 B), 검색(트리 A), 삭제(트리 A)와 소멸(트리 B)을 수행함
-		키는 [0,randomWorkloadNum-1] 의 중복되지 않는 키 값들을 랜덤하게 셔플해놓고 사용함(삽입, 검색, 삭제의 키 값들은 각각 독립으로 셔플됨)
-		데이터는 randomWorkloadPerDataLen 으로 지정된 길이의 string 객체를 randomWorkloadNum 개 만들어놓고 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[randomWorkloadNum			= 10,000,000]
-		[randomWorkloadPerDataLen	= 30]
-
-		복사 삽입	: RedBlackTree = 26.45초	|	std::map = ??.??초
-		이동 삽입	: RedBlackTree = 24.45초	|	std::map = ??.??초
-		검색		: RedBlackTree = 12.47초	|	std::map = ??.??초
-		삭제		: RedBlackTree = 오류발생	|	std::map = ??.??초
-		소멸		: RedBlackTree = ??.??초	|	std::map = ??.??초
-	*/
-
-	/*	(테스팅 해석)
-		삭제가 10% 정도 수행되고 있을 때 "Cannot Remove! Cannot find such target node!" 오류 출력됨
-	*/
-
 	constexpr int randomWorkloadNum = 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadSpeedTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 2/4 : 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키 값들이 localBlockSize 단위로 내부에서 선형 증가 연속성을 가지도록 하였음
-	*/
-
-	/*	(테스팅 결과)
-		[randomLocalWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[randomLocalWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[localBlockSize					= 10]
-
-		복사 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		이동 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		검색		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		삭제		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		소멸		: RedBlackTree = ??.??초	|	std::map = ??.??초
-	*/
-
-	/*	(테스팅 해석)
-		앞선 테스트의 오류로 측정 불가함
-	*/
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
 	constexpr int randomLocalWorkloadPerDataLen = randomWorkloadPerDataLen;
@@ -553,49 +512,11 @@ int main()
 
 	cout << endl << "속도 테스트 3/4 : 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키값들을 뒤섞지 않고 선형 그대로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearIncreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearIncreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		이동 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		검색		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		삭제		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		소멸		: RedBlackTree = ??.??초	|	std::map = ??.??초
-	*/
-
-	/*	(테스팅 해석)
-		앞선 테스트의 오류로 측정 불가함
-	*/
-
 	constexpr int linearIncreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 4/4 : 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 3번 선형 증가 워크로드 테스트와 비슷하나, 키를 역순으로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearDecreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearDecreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		이동 삽입	: RedBlackTree = ??.??초	|	std::map = ??.??초
-		검색		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		삭제		: RedBlackTree = ??.??초	|	std::map = ??.??초
-		소멸		: RedBlackTree = ??.??초	|	std::map = ??.??초
-	*/
-
-	/*	(테스팅 해석)
-		앞선 테스트의 오류로 측정 불가함
-	*/
 
 	constexpr int linearDecreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearDecreaseWorkloadPerDataLen = randomWorkloadPerDataLen;

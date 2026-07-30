@@ -339,71 +339,11 @@ int main()
 
 	cout << endl << "속도 테스트 1/4 : 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		randomWorkloadNum 횟수만큼 복사 삽입(트리 A), 이동 삽입(트리 B), 검색(트리 A), 삭제(트리 A)와 소멸(트리 B)을 수행함
-		키는 [0,randomWorkloadNum-1] 의 중복되지 않는 키 값들을 랜덤하게 셔플해놓고 사용함(삽입, 검색, 삭제의 키 값들은 각각 독립으로 셔플됨)
-		데이터는 randomWorkloadPerDataLen 으로 지정된 길이의 string 객체를 randomWorkloadNum 개 만들어놓고 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[randomWorkloadNum			= 10,000,000]
-		[randomWorkloadPerDataLen	= 30]
-		복사 삽입	: SplayTree = 18.20초	|	std::map = 16.47초
-		이동 삽입	: SplayTree = 17.20초	|	std::map = 16.06초
-		검색		: SplayTree = 시간초과	|	std::map = 17.01초
-		삭제		: SplayTree = 시간초과	|	std::map = 21.99초
-		소멸		: SplayTree =  9.42초	|	std::map =  5.03초
-	*/
-
-	/*	(테스팅 해석)
-		현재 구현에서는 splay가 검색 메소드에서 1~2 높이로만 적용되고 있음
-
-		조정이 일어나지 않는 삭제 메소드도 느린 것으로 보아,
-		앞선 검색 메소드 수행 과정이 트리를 편향시켜서 속도를 느리게 하는 것으로 추정함
-
-		따라서, 우선은 편향 문제가 해결하기 위해서 검색 과정에 splay를 보다 온전히 적용해보고자 함
-		그리고 만일 편향 문제가 해결되어 삭제 메소드의 속도는 개선되었지만 여전히 검색 메소드가 느리다면, stack 삽입 과정을 최적화해볼 예정
-		그리고 편향이 해결되지 않더라도, 삭제에도 splay가 적용되도록 하여 이를 극복할 수 있는지 확인할 예정
-	*/
-
 	constexpr int randomWorkloadNum = 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 2/4 : 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키 값들이 localBlockSize 단위로 내부에서 선형 증가 연속성을 가지도록 하였음
-	*/
-
-	/*	(테스팅 결과)
-		[randomLocalWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[randomLocalWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[localBlockSize					= 10]
-
-		복사 삽입	: SplayTree =  7.88초	|	std::map =  4.02초
-		이동 삽입	: SplayTree =  7.34초	|	std::map =  3.35초
-		검색		: SplayTree = 시간초과	|	std::map =  3.65초
-		삭제		: SplayTree = 시간초과	|	std::map =  4.21초
-		소멸		: SplayTree =  6.81초	|	std::map =  3.18초
-	*/
-
-	/*	(테스팅 해석)
-		우선 워크로드가 지역 선형성을 띄면서 트리의 높이가 1번 랜덤 워크로드 테스트에 비해 높아질 것임에도 불구하고,
-		
-		
-		
-		와 std::map 둘 다 1번 랜덤 워크로드 테스트에서보다 더 빠른 속도를 보이는 이유는 지역성을 통한 캐시 히트율 상승 때문으로 추정함
-
-		삽입에서의 속도보다 검색의 속도가 느리다는 점, 그리고 검색 이후 삭제 메소드에서도 속도가 느려졌다는 점 등을 보았을 때,
-		앞선 1번 랜덤 워크로드 테스트와 마찬가지로 검색 메소드 중 수행하는 splay 조정이 트리를 편향시키는 것으로 추정함
-
-		그리고 그러한 트리의 모양이 3번 선형 증가 워크로드에서 검색 이후 트리의 상태처럼 좌하향 편향 트리에 비슷한 모양이 되기에
-		3번 선형 증가 워크로드에서의 삭제 메소드의 속도와 비슷한 속도로 현 테스트에서 검색과 삭제가 이뤄지는 것으로 추정함
-		
-		다만 3번 선형 증가 워크로드에 테스트와 달리 검색에서도 느린 속도가 나타나는 이유는
-		삽입과 검색의 키가 동일한 3번 테스트와 달리 현 테스트는 삽입과 검색 메소드가 각각 셔플되기에 검색 대상 노드가 루트에 미리 대기하지 못하기 때문으로 추정함
-	*/
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
 	constexpr int randomLocalWorkloadPerDataLen	= randomWorkloadPerDataLen;
@@ -412,55 +352,11 @@ int main()
 
 	cout << endl << "속도 테스트 3/4 : 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
 
-	/*	(테스팅 방법)
-		앞선 1번 랜덤 워크로드 테스트와 비슷하나, 키값들을 뒤섞지 않고 선형 그대로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearIncreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearIncreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: SplayTree = 시간초과	|	std::map =  1.98초
-		이동 삽입	: SplayTree = 시간초과	|	std::map =  1.46초
-		검색		: SplayTree =  0.28초	|	std::map =  0.72초
-		삭제		: SplayTree = 40.67초	|	std::map =  1.78초
-		소멸		: SplayTree =  0.40초	|	std::map =  1.30초
-	*/
-
-	/*	(테스팅 해석)
-		검색에서는 splay로 인해 다음 검색 대상이 항상 루트의 자식 노드로 오게 되므로 매우 빠른 속도를 보임
-		반대로 삭제는 앞선 검색으로 인해 트리가 조정되어 삭제할 노드가 루트 노드에 위치하지 않게 되므로 검색보다 느린 것으로 추정함
-		삭제 메소드에도 검색처럼 splay 조정을 수행하도록 할 시 속도가 개선될 거라 생각함
-		삽입이 느린 이유는 균형 트리가 아닌 이진 탐색 트리의 단점을 그대로 가진 것이나, 삽입에도 splay 조정이 수행되도록 하여 이것이 개선되는지 확인해볼 예정
-	
-		BST와 달리 std::map은 균형을 유지하는 트리이기 때문에 선형 워크로드에 대해서도 O(NlogN)의 시간 복잡도를 가져 매우 빠른 속도를 보임
-		게다가 선형 워크로드가 가진 지역성으로 캐시 히트율이 증가해 1번 랜덤 워크로드 테스트보다 훨씬 빠른 속도를 보이는 것으로 추정함
-	*/
-
 	constexpr int linearIncreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
 	cout << endl << "속도 테스트 4/4 : 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
-
-	/*	(테스팅 방법)
-		앞선 3번 선형 증가 워크로드 테스트와 비슷하나, 키를 역순으로 사용함
-	*/
-
-	/*	(테스팅 결과)
-		[linearDecreaseWorkloadNum			= 앞선 1번 랜덤 워크로드 테스트와 동일]
-		[linearDecreaseWorkloadPerDataLen	= 앞선 1번 랜덤 워크로드 테스트와 동일]
-
-		복사 삽입	: SplayTree = 시간초과	|	std::map =  2.11초
-		이동 삽입	: SplayTree = 시간초과	|	std::map =  1.74초
-		검색		: SplayTree =  0.31초	|	std::map =  0.74초
-		삭제		: SplayTree = 시간초과	|	std::map =  1.82초
-		소멸		: SplayTree =  0.42초	|	std::map =  2.46초
-	*/
-
-	/*	(테스팅 해석)
-		앞선 3번 선형 증가 워크로드 테스트와 동일
-	*/
 
 	constexpr int linearDecreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearDecreaseWorkloadPerDataLen = randomWorkloadPerDataLen;

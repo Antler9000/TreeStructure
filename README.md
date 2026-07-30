@@ -3,7 +3,7 @@ C++을 이용하여 구현 중인 이진 탐색 계열 트리 자료구조입니
 
 STL에 근접한 속도와 예외 안전성을 가지는 것을 목표로 하고 있습니다. 
 
-현재 Splay Tree, AVL Tree, Red Black Tree의 테스팅 및 다듬기 과정에 있습니다.
+현재 BST, Splay 트리, AVL 트리의 최적화와 레드-블랙 트리의 오류 해결 중에 있습니다.
 
 <br>
 
@@ -40,39 +40,39 @@ STL에 근접한 속도와 예외 안전성을 가지는 것을 목표로 하고
 
 - ***생성자, 할당 연산자, 소멸자***
 ```cpp
-    BST()
+    BST();
 
-    BST(const BST<DataType>& sourceTree)
+    BST(const BST<DataType>& sourceTree);
 
-    BST(BST<DataType>&& sourceTree) noexcept
+    BST(BST<DataType>&& sourceTree) noexcept;
 
-    BST<DataType>& operator = (const BST<DataType>& sourceTree)
+    BST<DataType>& operator = (const BST<DataType>& sourceTree);
 
-    BST<DataType>& operator = (BST<DataType>&& sourceTree) noexcept
+    BST<DataType>& operator = (BST<DataType>&& sourceTree) noexcept;
 
-    ~BST() noexcept
+    ~BST() noexcept;
 ```
 
 - ***퍼블릭 메소드***
 ```cpp
-    //RETURN : newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환
+    //RETURN : newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환함
     template <typename InsertDataType = DataType>
-    bool Insert(std::int32_t newKey, InsertDataType&& newData)
+    bool Insert(std::int32_t newKey, InsertDataType&& newData);
 
-    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환
-    bool Retrieve(std::int32_t targetKey, DataType& outData) const
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환함
+    bool Retrieve(std::int32_t targetKey, DataType& outData) const;
 
-    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환
-    bool Remove(std::int32_t targetKey)
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환함
+    bool Remove(std::int32_t targetKey);
 
-    void RemoveTree() noexcept
+    void RemoveTree() noexcept;
 
-    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST)
+    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST);
 
     //NOTE : 디버깅 용
-    void PreorderPrint() const
-    void InorderPrint() const
-    void PostorderPrint() const
+    void PreorderPrint() const;
+    void InorderPrint() const;
+    void PostorderPrint() const;
 ```
 
 <br>
@@ -93,39 +93,39 @@ STL에 근접한 속도와 예외 안전성을 가지는 것을 목표로 하고
 
 - ***생성자, 할당 연산자, 소멸자***
 ```cpp
-    SplayTree()
+    SplayTree();
 
-    SplayTree(const SplayTree& sourceTree)
+    SplayTree(const SplayTree& sourceTree);
 
-    SplayTree(SplayTree&& sourceTree) noexcept
+    SplayTree(SplayTree&& sourceTree) noexcept;
 
-    SplayTree& operator = (const SplayTree& sourceTree)
+    SplayTree& operator = (const SplayTree& sourceTree);
 
-    SplayTree& operator = (SplayTree&& sourceTree) noexcept
+    SplayTree& operator = (SplayTree&& sourceTree) noexcept;
 
-    ~SplayTree() noexcept
+    ~SplayTree() noexcept;
 ```
 
 - ***퍼블릭 메소드***
 ```cpp
-    //RETURN : newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환
+    //RETURN : newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환함
     template <typename InsertDataType = DataType>
-    bool Insert(std::int32_t newKey, InsertDataType&& newData)
+    bool Insert(std::int32_t newKey, InsertDataType&& newData);
 
-    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환
-    bool Retrieve(std::int32_t targetKey, DataType& outData)
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
+    bool Retrieve(std::int32_t targetKey, DataType& outData);
 
-    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환
-    bool Remove(std::int32_t targetKey)
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우 false를 반환함
+    bool Remove(std::int32_t targetKey);
 
-    void RemoveTree() noexcept
+    void RemoveTree() noexcept;
 
-    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST)
+    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST);
 
     //NOTE : 디버깅 용
-    void PreorderPrint() const
-    void InorderPrint() const
-    void PostorderPrint() const
+    void PreorderPrint() const;
+    void InorderPrint() const;
+    void PostorderPrint() const;
 ```
 
 <br>
@@ -140,17 +140,32 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 - ***클래스 템플릿***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    template <typename DataType>
+    class AVLTree;
 ```
 
 - ***생성자, 할당 연산자, 소멸자***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    AVLTree();
 ```
 
 - ***퍼블릭 메소드***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    void Insert(std::int32_t newKey, DataType newData);
+
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
+    bool Retrieve(std::int32_t targetKey, DataType& outData);
+
+    void Remove(std::int32_t targetKey);
+
+    void RemoveTree() noexcept;
+
+    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST);
+
+    //NOTE : 디버깅 용
+    void PreorderPrint() const;
+    void InorderPrint() const;
+    void PostorderPrint() const;
 ```
 
 <br>
@@ -169,17 +184,32 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 - ***클래스 템플릿***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    template <typename DataType>
+    class RedBlackTree;
 ```
 
 - ***생성자, 할당 연산자, 소멸자***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    RedBlackTree();
 ```
 
 - ***퍼블릭 메소드***
 ```cpp
-    다듬기가 끝나고 작성할 예정
+    void Insert(std::int32_t newKey, DataType newData);
+
+    //RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
+    bool Retrieve(std::int32_t targetKey, DataType& outData);
+
+    void Remove(std::int32_t targetKey);
+
+    void RemoveTree() noexcept;
+
+    void CopyTree(const BSTTemplate<NodeType, DataType>& sourceBST);
+
+    //NOTE : 디버깅 용
+    void PreorderPrint() const;
+    void InorderPrint() const;
+    void PostorderPrint() const;
 ```
 
 <br>
@@ -219,10 +249,10 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 - `Common`
     - `BSTTemplate.h`  
-        각 트리들이 상속받는 이진 탐색 트리 템플릿입니다.
+        이진 탐색 트리 템플릿으로, 모든 네 개의 트리들이 이를 상속받습니다.
 
     - `Stack.h`  
-        순회, Splay 조정 등의 로직 구현을 위해 사용하는 스택입니다. 부모 노드에 대한 포인터가 도입되면 예외 안전성을 위해 삭제할 예정입니다.
+        트리의 순회, 회전 등의 로직에서 이전 경로를 기억하기 위해 사용하는 스택입니다.
 
     - `Debug.h`  
         로그 출력 매크로, 누수 추적용 `new` 함수 매크로가 정의되어있습니다.
@@ -243,7 +273,7 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 2. 트리 구현을 위해 참조하는 `Common` 폴더 내 모든 헤더 파일들도 함께 둡니다.  
 예 : `BSTTemplate.h`, `Stack.h`, `Debug.h`
 
-3. 소스 코드에서 사용할 트리의 헤더 파일을 포함한 뒤, 필요한 데이터 타입을 템플릿 인자로 지정하여 트리 객체를 선언합니다.
+3. 소스 코드에서 사용할 트리의 헤더 파일을 포함한 뒤, 보관할 데이터의 타입을 템플릿 인자로 지정하여 트리 객체를 선언합니다.
     ```cpp
         #include "SplayTree.h"
 
@@ -276,10 +306,10 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 5. 우클릭시 나오는 메뉴에서 '시작 프로젝트로 설정'을 누르거나, 단축키 'A'를 누릅니다.
 
-6. 기능 테스트를 실행하고자 한다면, Visual Studio 상단의 구성(configuration)을 "Debug" "x64"로 설정하고, 디버깅 시작키인 'F5'를 누릅니다.  
+6. 기능 테스트를 실행하려면, Visual Studio 상단의 구성(configuration)을 "Debug" "x64"로 설정하고, 디버깅 시작키인 'F5'를 누릅니다.  
 실행 결과가 검은 명렁 프롬프트에 출력됩니다. 또한 메모리 누수가 존재한다면 Visual Studio 하단의 출력(output) 창에 누수 정보가 출력됩니다.
 
-7. 속도 테스트를 실행하고자 한다면, 상단의 구성을 "Release"로 변경하고, 디버깅 없이 실행('Ctrl+F5')을 누릅니다.  
+7. 속도 테스트를 실행하려면, 상단의 구성을 "Release"로 변경하고, 디버깅 없이 실행('Ctrl+F5')을 누릅니다.  
 테스트 과정과 결과가 검은 명령 프롬프트에 출력됩니다.
 
 <br>
@@ -326,9 +356,48 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 
 ### 4.2. 측정 방식
-구현된 모든 트리는 '랜덤 워크로드', '랜덤 지역 워크로드', '선형 증가 워크로드', '선형 감소 워크로드'로 나누어 속도 테스트를 진행합니다.
+구현된 모든 트리는 아래의 워크로드들로 동일하게 속도 테스트를 진행합니다.  
+측정 대상 연산은 복사 삽입(트리 A), 이동 삽입(트리 B), 검색(트리 A), 삭제(트리 A), 소멸(트리 B)입니다.
 
-세부 사항은 임시로 `1.BST\TestingBST.cpp`, `2.SplayTree\TestingSplayTree.cpp`에 동일한 내용으로 작성되어 있습니다.
+<br>
+
+[랜덤 워크로드]
+|||
+|---------------|-------------------------------------------|
+|키 분포        |삽입, 검색, 삭제별로 독립 랜덤 셔플        |
+|키 범위        |0 ~ 9,999,999                              |
+|데이터 개수    |10,000,000                                 |
+|데이터 요소    |길이 30인 `string`                         |
+
+<br>
+
+[랜덤 로컬 워크로드]
+|||
+|---------------|-------------------------------------------------------|
+|키 분포        |10개 단위로 묶은 뒤 삽입, 검색, 삭제별로 독립 랜덤 셔플|
+|키 범위        |위와 동일                                              |
+|데이터 개수    |위와 동일                                              |
+|데이터 요소    |위와 동일                                              |
+
+<br>
+
+[선형 증가 워크로드]
+|||
+|---------------|-----------------------------------|
+|키 분포        |셔플하지 않고 선형 그대로 사용함   |
+|키 범위        |위와 동일                          |
+|데이터 개수    |위와 동일                          |
+|데이터 요소    |위와 동일                          |
+
+<br>
+
+[선형 감소 워크로드]
+|||
+|---------------|-----------------------------------|
+|키 분포        |셔플하지 않되 키를 역순으로 사용함 |
+|키 범위        |위와 동일                          |
+|데이터 개수    |위와 동일                          |
+|데이터 요소    |위와 동일                          |
 
 <br>
 
@@ -337,22 +406,239 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 ### 4.3. 측정 결과
 #### 4.1. 이진 탐색 트리
-임시로 `1.BST\TestingBST.cpp`의 주석에 업데이트 되고 있습니다.
+[랜덤 워크로드]
+|연산|BST|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |16.46 초   |15.83 초   |
+|이동 삽입  |15.77 초   |14.58 초   |
+|검색       |16.97 초   |17.64 초   |
+|삭제       |21.92 초   |18.61 초   |
+|소멸       |4.51 초    |4.38 초    |
+
+- 별도 확인 결과 BST의 삽입과 검색 메소드는 모두 인라이닝 되었고, 삭제 메소드는 인라이닝 되지 못하였습니다.
+
+- 따라서 BST의 삽입과 검색 메소드가 상대적으로 10% 정도 느린 속도는 세부적인 최적화가 부족하기 때문으로 추정합니다.
+
+- 또한 BST의 삭제 메소드가 느린 이유는 인라이닝되지 못한 것 때문으로 추정합니다.
+
+<br>
+
+[랜덤 로컬 워크로드]
+|연산|BST|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |7.75 초    |4.09 초    |
+|이동 삽입  |6.74 초    |3.34 초    |
+|검색       |6.60 초    |3.65 초    |
+|삭제       |7.70 초    |4.11 초    |
+|소멸       |3.51 초    |3.38 초    |
+
+- 워크로드가 지역 선형성을 가지게 되므로 앞선 랜덤 워크로드 테스트에 비해서 BST의 트리 높이는 더 높아집니다.
+
+- 그럼에도 앞선 랜덤 워크로드 테스트에 비해서 BST의 삽입, 검색, 삭제 메소드가 더 빨라진 이유는 캐시 히트율이 높아졌기 때문으로 추정합니다.
+
+- BST와 std::map의 속도 차이가 벌어진 이유는 설계와 구현상에서 캐시 히트율 고려에 대한 수준 차이 때문으로 추정합니다.
+
+<br>
+
+[선형 증가 워크로드]
+|연산|BST|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |시간 초과  |1.79 초    |
+|이동 삽입  |시간 초과  |1.51 초    |
+|검색       |시간 초과  |0.66 초    |
+|삭제       |0.02 초    |1.84 초    |
+|소멸       |0.36 초    |1.32 초    |
+
+- 선형 워크로드는 BST를 편향시켜 리스트와 같은 형상이 되도록 합니다.
+
+- 삽입 메소드와 검색 메소드는 리스트와 같은 모양이 되어서 나타나는 O(N^2)의 시간 복잡도 때문에 시간 초과(=50초 이상)가 납니다.
+
+- 시간 초과로 삽입이 덜 이루어졌으므로, 이후의 '삭제', '소멸'의 측정 시간은 신뢰할 수 없습니다.
+
+- BST와 달리 std::map은 균형을 유지하는 트리이기 때문에 선형 워크로드에 대해서도 O(NlogN)의 시간 복잡도를 가져 매우 빠른 속도를 보입니다.
+
+- 게다가 선형 워크로드가 가진 지역성으로 캐시 히트율이 증가해 1번 랜덤 워크로드 테스트보다 훨씬 빠른 속도를 보이는 것으로 추정합니다.
+
+<br>
+
+[선형 감소 워크로드]
+|연산|BST|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |시간 초과  |1.89 초    |
+|이동 삽입  |시간 초과  |1.46 초    |
+|검색       |시간 초과  |0.68 초    |
+|삭제       |0.02 초    |1.64 초    |
+|소멸       |0.35 초    |1.98 초    |
+
+- 앞선 선형 증가 워크로드와 해석이 같습니다.
 
 <br>
 
 #### 4.2. 스플레이 트리
-임시로 `2.SplayTree\TestingSplayTree.cpp`의 주석에 업데이트 되고 있습니다.
+[랜덤 워크로드]
+|연산|SplayTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |18.20 초   |16.47 초   |
+|이동 삽입  |17.20 초   |16.06 초   |
+|검색       |시간 초과  |17.01 초   |
+|삭제       |시간 초과  |21.99 초   |
+|소멸       |9.42 초    |5.03 초    |
+
+- 현재 구현에서는 splay 조정이 1~2 높이로만 적용되고, 또한 검색 메소드에서만 적용되고 있습니다.
+
+- 조정이 일어나지 않는 삭제 메소드도 느린 것으로 보아,
+앞선 검색 메소드에서 splay 조정이 트리를 편향시켜서 속도를 느리게 하는 것으로 추정합니다.
+
+<br>
+
+[랜덤 로컬 워크로드]
+|연산|SplayTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |7.88 초    |4.02 초    |
+|이동 삽입  |7.34 초    |3.35 초    |
+|검색       |시간 초과  |3.65 초    |
+|삭제       |시간 초과  |4.21 초    |
+|소멸       |6.81 초    |3.18 초    |
+
+- SplayTree에서 삽입의 속도보다 검색의 속도가 느리다는 점, 그리고 검색 이후 삭제 메소드에서도 속도가 느려졌다는 점을 고려하면, 앞선 랜덤 워크로드 테스트와 마찬가지로 검색 메소드 중 수행하는 splay 조정이 트리를 편향시키는 것으로 추정합니다.
+
+<br>
+
+[선형 증가 워크로드]
+|연산|SplayTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |시간 초과  |1.98 초    |
+|이동 삽입  |시간 초과  |1.46 초    |
+|검색       |0.28 초    |0.72 초    |
+|삭제       |40.67 초   |1.78 초    |
+|소멸       |0.40 초    |1.30 초    |
+
+- 앞선 랜덤 로컬 워크로드와 달리 본 워크로드의 검색에서는 splay 조정으로 인해 다음 검색 대상이 항상 루트의 자식 노드로 오게 되므로 매우 빠른 속도를 보입니다.
+
+- 반대로 삭제 메소드는 검색으로 인해 트리가 조정되어 삭제할 노드가 루트 노드에 위치하지 않게 되므로 검색보다 느린 것으로 추정합니다.
+
+<br>
+
+[선형 감소 워크로드]
+|연산|SplayTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |시간 초과  |2.11 초    |
+|이동 삽입  |시간 초과  |1.74 초    |
+|검색       |0.31 초    |0.74 초    |
+|삭제       |시간 초과  |1.82 초    |
+|소멸       |0.42 초    |2.46 초    |
+
+- 앞선 선형 증가 워크로드와 달리 본 워크로드에선 삭제 메소드가 시간 초과(=50초 이상)를 내는 것은 편차로 인한 것으로 일단 판단하고 있습니다.
 
 <br>
 
 #### 4.3. AVL 트리
-성능 테스트를 아직 작성하지 않았습니다.
+[랜덤 워크로드]
+|연산|AVLTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |22.83 초   |14.24 초   |
+|이동 삽입  |20.89 초   |13.12 초   |
+|검색       |11.79 초   |15.05 초   |
+|삭제       |24.85 초   |17.52 초   |
+|소멸       |4.46 초    |4.37 초    |
+
+- AVLTree의 삽입 메소드와 삭제 메소드가 상대적으로 느린 이유는 해당 메소드에서 균형 유지 로직이 비효율적인 것 때문으로 추정합니다.
+
+<br>
+
+[랜덤 로컬 워크로드]
+|연산|AVLTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |7.35 초    |3.83 초    |
+|이동 삽입  |7.00 초    |3.23 초    |
+|검색       |2.34 초    |3.48 초    |
+|삭제       |8.49 초    |3.89 초    |
+|소멸       |3.23 초    |3.12 초    |
+
+- 앞선 BST 테스트와 비슷한 결과가 나온 것으로 보아, 캐시 히트율 차이도 std::map과의 속도 차이의 원인 중 하나로 추정합니다.
+
+<br>
+
+[선형 증가 워크로드]
+|연산|AVLTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |4.98 초    |1.95 초    |
+|이동 삽입  |4.65 초    |1.52 초    |
+|검색       |0.66 초    |0.70 초    |
+|삭제       |4.05 초    |1.86 초    |
+|소멸       |0.97 초    |0.93 초    |
+
+- 앞선 BST와 달리 AVLTree는 균형 트리이므로 시간 초과가 나지 않게 되었습니다.
+
+- 그러나 랜덤 워크로드와 동일하게 삽입과 삭제 메소드의 균형 유지 로직들은 최적화할 필요성을 보입니다.
+
+<br>
+
+[선형 감소 워크로드]
+|연산|AVLTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |5.00 초    |1.82 초    |
+|이동 삽입  |4.70 초    |1.49 초    |
+|검색       |0.67 초    |0.64 초    |
+|삭제       |10.07 초   |2.18 초    |
+|소멸       |1.06 초    |1.34 초    |
+
+- 선형 증가 워크로드 테스트와 비교해서 특이하게 삭제에서의 시간 소요가 2배로 늘어났습니다. 추후 원인을 파악할 예정입니다.
 
 <br>
 
 #### 4.4. 레드-블랙 트리
-성능 테스트를 아직 작성하지 않았습니다.
+[랜덤 워크로드]
+|연산|RedBlackTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |26.45 초   |미수행     |
+|이동 삽입  |24.45 초   |미수행     |
+|검색       |12.47 초   |미수행     |
+|삭제       |오류 발생  |미수행     |
+|소멸       |미수행     |미수행     |
+
+- 삭제가 10% 정도 수행되고 있을 때 "Cannot Remove! Cannot find such target node!" 오류가 출력됩니다. 앞선 메소드들의 노드 조정 과정에서 일부 노드나 서브 트리가 소실되는 로직 오류로 추정하고서 추후 디버깅할 예정입니다.
+
+- 삽입 속도가 BST와 동일한 메소드인 검색 속도와 비교해 크게 느려졌습니다. 앞선 오류 해결과 더불어 균형 유지를 위한 로직들을 추후 최적화할 예정입니다.
+
+<br>
+
+[랜덤 로컬 워크로드]
+|연산|RedBlackTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |미수행     |미수행     |
+|이동 삽입  |미수행     |미수행     |
+|검색       |미수행     |미수행     |
+|삭제       |미수행     |미수행     |
+|소멸       |미수행     |미수행     |
+
+- 앞선 테스트에서 발생한 오류로 테스트를 진행하지 못하였습니다.
+
+<br>
+
+[선형 증가 워크로드]
+|연산|RedBlackTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |미수행     |미수행     |
+|이동 삽입  |미수행     |미수행     |
+|검색       |미수행     |미수행     |
+|삭제       |미수행     |미수행     |
+|소멸       |미수행     |미수행     |
+
+- 앞선 테스트에서 발생한 오류로 테스트를 진행하지 못하였습니다.
+
+<br>
+
+[선형 감소 워크로드]
+|연산|RedBlackTree|std::map|
+|-----------|-----------|-----------|
+|복사 삽입  |미수행     |미수행     |
+|이동 삽입  |미수행     |미수행     |
+|검색       |미수행     |미수행     |
+|삭제       |미수행     |미수행     |
+|소멸       |미수행     |미수행     |
+
+- 앞선 테스트에서 발생한 오류로 테스트를 진행하지 못하였습니다.
 
 <br>
 
