@@ -4,17 +4,16 @@
 //#define TREE_ERROR
 
 #include "SplayTree.h"
-#include <crtdbg.h>
-#include <iostream>
-#include <iomanip>
-#include <chrono>
-#include <string>
-#include <numeric>
-#include <random>
 #include <algorithm>
-#include <vector>
+#include <random>
+#include <numeric>
 #include <map>
+#include <vector>
+#include <string>
+#include <iostream>
 #include <utility>
+#include <chrono>
+#include <crtdbg.h>
 
 using namespace std;
 using namespace chrono;
@@ -27,17 +26,17 @@ void RandomLocalWorkloadTest(int workloadNum, int workloadPerDataLen, int localB
 void LinearIncreaseWorkloadTest(int workloadNum, int workloadPerDataLen);
 void LinearDecreaseWorkloadTest(int workloadNum, int workloadPerDataLen);
 
-//paramter : insertDataWorkload는 복사 비용이 크지만, 그럼에도 하나의 워크로드를 SplayTree와 map에 반복해서 사용할 수 있도록 값복사 형식의 매개변수를 사용함
+//NOTE: insertDataWorkload는 복사 비용이 크지만, 그럼에도 하나의 워크로드를 RedBlackTree와 map에 반복해서 사용할 수 있도록 값복사 형식의 매개변수를 사용함
 time_point<steady_clock> TestSplayTree(steady_clock& clock, int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
 time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<string> insertDataWorkload, const vector<int>& insertKeyWorkload, const vector<int>& retrieveKeyWorkload, const vector<int>& removeKeyWorkload);
 
 int main()
 {
-	//NOTE : 디버깅 실행이 종료될 시점에도 해제되지 않은 동적 메모리 누수가 존재할 시, Visual Studio의 하단의 출력창(output)에 해당 누수에 대한 정보가 출력됨
+	//NOTE: 디버깅 실행이 종료될 시점에도 해제되지 않은 동적 메모리 누수가 존재할 시, Visual Studio의 하단의 출력창(output)에 해당 누수에 대한 정보가 출력됨
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	cout << endl << "기능 테스트 1/4 : Splaying-----------------------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 1/4: Splaying-----------------------------------------------------------------------" << endl;
 
 	SplayTree<int> splayingTestSplayTree;
 
@@ -132,7 +131,7 @@ int main()
 	splayingTestSplayTree.Remove(9);
 	splayingTestSplayTree.PreorderPrint();
 
-	cout << endl << "기능 테스트 2/4 : SplayTree<int>-------------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 2/4: SplayTree<int>-------------------------------------------------------------" << endl;
 
 	SplayTree<int> intTestSplayTree;
 
@@ -199,7 +198,7 @@ int main()
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
 	intExplicitCopyTestSplayTree.PreorderPrint();
 
-	cout << endl << "기능 테스트 3/4 : SplayTree<float>-----------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 3/4: SplayTree<float>-----------------------------------------------------------" << endl;
 
 	SplayTree<float> floatTestSplayTree;
 
@@ -266,7 +265,7 @@ int main()
 	cout << endl << "복사한 트리는 원본과 독립적임 (트리 B)" << endl;
 	floatExplicitCopyTestSplayTree.PreorderPrint();
 
-	cout << endl << "기능 테스트 4/4 : SplayTree<string>----------------------------------------------------------" << endl;
+	cout << endl << "기능 테스트 4/4: SplayTree<string>----------------------------------------------------------" << endl;
 
 	SplayTree<string> stringTestSplayTree;
 
@@ -337,26 +336,26 @@ int main()
 #ifndef _DEBUG
 	cout << fixed << setprecision(2);
 
-	cout << endl << "속도 테스트 1/4 : 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
+	cout << endl << "속도 테스트 1/4: 랜덤 워크로드 테스트-------------------------------------------------------" << endl;
 
 	constexpr int randomWorkloadNum = 10000000;
 	constexpr int randomWorkloadPerDataLen = 30;
 	RandomWorkloadTest(randomWorkloadNum, randomWorkloadPerDataLen);
 
-	cout << endl << "속도 테스트 2/4 : 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
+	cout << endl << "속도 테스트 2/4: 랜덤 로컬 워크로드 테스트--------------------------------------------------" << endl;
 
 	constexpr int randomLocalWorkloadNum = randomWorkloadNum;
 	constexpr int randomLocalWorkloadPerDataLen	= randomWorkloadPerDataLen;
 	constexpr int localBlockSize = 10;
 	RandomLocalWorkloadTest(randomLocalWorkloadNum, randomLocalWorkloadPerDataLen, localBlockSize);
 
-	cout << endl << "속도 테스트 3/4 : 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
+	cout << endl << "속도 테스트 3/4: 선형 증가 워크로드 테스트--------------------------------------------------" << endl;
 
 	constexpr int linearIncreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearIncreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
 	LinearIncreaseWorkloadTest(linearIncreaseWorkloadNum, linearIncreaseWorkloadPerDataLen);
 
-	cout << endl << "속도 테스트 4/4 : 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
+	cout << endl << "속도 테스트 4/4: 선형 감소 워크로드 테스트--------------------------------------------------" << endl;
 
 	constexpr int linearDecreaseWorkloadNum = randomWorkloadNum;
 	constexpr int linearDecreaseWorkloadPerDataLen = randomWorkloadPerDataLen;
@@ -371,7 +370,7 @@ int main()
 template <typename DataType>
 void PrintKeyAndData(int key, const DataType& retrievedData)
 {
-	cout << "검색한 키 : " << key << " / 검색된 데이터 : " << retrievedData << endl;
+	cout << "검색한 키: " << key << " / 검색된 데이터: " << retrievedData << endl;
 }
 
 void RandomWorkloadTest(int workloadNum, int workloadPerDataLen)
@@ -411,7 +410,7 @@ void RandomWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "SplayTree : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "SplayTree: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << "---------------------------------------------------------------------------" << endl;
 
@@ -421,7 +420,7 @@ void RandomWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "map : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "map: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << endl << endl << endl << endl;
 }
@@ -489,7 +488,7 @@ void RandomLocalWorkloadTest(int workloadNum, int workloadPerDataLen, int localB
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "SplayTree : " << realWorkloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "SplayTree: " << realWorkloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << "---------------------------------------------------------------------------" << endl;
 
@@ -499,7 +498,7 @@ void RandomLocalWorkloadTest(int workloadNum, int workloadPerDataLen, int localB
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "map : " << realWorkloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "map: " << realWorkloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << endl << endl << endl << endl;
 }
@@ -533,7 +532,7 @@ void LinearIncreaseWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "SplayTree : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "SplayTree: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << "---------------------------------------------------------------------------" << endl;
 
@@ -543,7 +542,7 @@ void LinearIncreaseWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "map : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "map: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << endl << endl << endl << endl;
 }
@@ -577,7 +576,7 @@ void LinearDecreaseWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "SplayTree : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "SplayTree: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << "---------------------------------------------------------------------------" << endl;
 
@@ -587,7 +586,7 @@ void LinearDecreaseWorkloadTest(int workloadNum, int workloadPerDataLen)
 	timeEnd = clock.now();
 	timeDiff = timeEnd - timeBegin;
 
-	cout << endl << "map : " << workloadNum << "번의 소멸자 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+	cout << endl << "map: " << workloadNum << "번의 소멸자 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 
 	cout << endl << endl << endl << endl << endl;
 }
@@ -632,11 +631,11 @@ time_point<steady_clock> TestSplayTree(steady_clock& clock, int workloadNum, vec
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 복사 삽입 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 복사 삽입 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 복사 삽입 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 복사 삽입 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[SplayTree 이동 삽입 측정 시작]" << endl;
@@ -670,11 +669,11 @@ time_point<steady_clock> TestSplayTree(steady_clock& clock, int workloadNum, vec
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 이동 삽입 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 이동 삽입 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 이동 삽입 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 이동 삽입 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	string retrievedData;
@@ -702,17 +701,17 @@ time_point<steady_clock> TestSplayTree(steady_clock& clock, int workloadNum, vec
 		}
 
 		copyInsertTestSplayTree.Retrieve(insertKeyWorkload[i], retrievedData);
-		retrievedData += 'a';			//NOTE : 컴파일, 링킹 최적화로 테스트 중의 검색 메소드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
+		retrievedData += 'a';			//NOTE: 컴파일, 링킹 최적화로 테스트 중의 검색 메서드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
 	}
 	cout << endl;
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 검색 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 검색 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 검색 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 검색 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[SplayTree 삭제 측정 시작]" << endl;
@@ -746,11 +745,11 @@ time_point<steady_clock> TestSplayTree(steady_clock& clock, int workloadNum, vec
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 삭제 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 삭제 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "SplayTree : " << workloadNum << "번의 삭제 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "SplayTree: " << workloadNum << "번의 삭제 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[SplayTree 소멸자 측정 시작]" << endl;
@@ -797,11 +796,11 @@ time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<st
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "map : " << workloadNum << "번의 복사 삽입 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "map: " << workloadNum << "번의 복사 삽입 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "map : " << workloadNum << "번의 복사 삽입 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "map: " << workloadNum << "번의 복사 삽입 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[map 이동 삽입 측정 시작]" << endl;
@@ -835,11 +834,11 @@ time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<st
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "map : " << workloadNum << "번의 이동 삽입 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "map: " << workloadNum << "번의 이동 삽입 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "map : " << workloadNum << "번의 이동 삽입 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "map: " << workloadNum << "번의 이동 삽입 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[map 검색 측정 시작]" << endl;
@@ -865,7 +864,7 @@ time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<st
 		}
 
 		auto iterator = copyInsertTestMap.find(retrieveKeyWorkload[i]);
-		iterator->second += 'a';			//NOTE : 컴파일, 링킹 최적화로 테스트 중의 검색 메소드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
+		iterator->second += 'a';			//NOTE: 컴파일, 링킹 최적화로 테스트 중의 검색 메서드 호출이 건너뛰어지는 경우가 없도록 하기 위한 추가 명령문임
 	}
 	cout << endl;
 
@@ -874,11 +873,11 @@ time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<st
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "map : " << workloadNum << "번의 검색 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "map: " << workloadNum << "번의 검색 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "map : " << workloadNum << "번의 검색 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "map: " << workloadNum << "번의 검색 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[map 삭제 측정 시작]" << endl;
@@ -912,11 +911,11 @@ time_point<steady_clock> TestMap(steady_clock& clock, int workloadNum, vector<st
 
 	if (timeDiff.count() < 50)
 	{
-		cout << endl << "map : " << workloadNum << "번의 삭제 동안 흐른 시간은 : " << timeDiff.count() << " 초" << endl;
+		cout << endl << "map: " << workloadNum << "번의 삭제 동안 흐른 시간은: " << timeDiff.count() << " 초" << endl;
 	}
 	else
 	{
-		cout << endl << "map : " << workloadNum << "번의 삭제 동안 흐른 시간은 : 50+ 초(시간 초과)" << endl;
+		cout << endl << "map: " << workloadNum << "번의 삭제 동안 흐른 시간은: 50+ 초(시간 초과)" << endl;
 	}
 
 	cout << endl << "[map 소멸자 측정 시작]" << endl;

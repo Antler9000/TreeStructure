@@ -14,9 +14,9 @@ class AVL_Node
 	friend class BSTTemplate<AVL_Node, DataType>;
 	friend class AVLTree<DataType>;
 
-	friend std::ostream& operator <<(std::ostream& out, const AVL_Node<DataType>& printedNode)
+	friend std::ostream& operator<<(std::ostream& out, const AVL_Node<DataType>& printedNode)
 	{
-		std::cout << "키 : " << printedNode.m_key << " / 데이터 : " << printedNode.m_data << " / 높이 : " << printedNode.m_height;
+		std::cout << "키: " << printedNode.m_key << " / 데이터: " << printedNode.m_data << " / 높이: " << printedNode.m_height;
 
 		return out;
 	}

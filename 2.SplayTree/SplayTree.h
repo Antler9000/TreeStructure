@@ -11,26 +11,26 @@
 template <typename DataType>
 class SplayTree;
 
-//NOTE : BSTNode와 구성이 동일하지만, 단원의 구분을 위해서 SplayNode를 별도로 정의했음
+//NOTE: BSTNode와 구성이 동일하지만, 단원의 구분을 위해서 SplayNode를 별도로 정의했음
 template <typename DataType>
 class SplayNode
 {
 	friend class BSTTemplate<SplayNode, DataType>;
 	friend class SplayTree<DataType>;
 
-	//NOTE : unique_ptr은 유사시 가리키는 대상의 소멸을 호출하므로, HeapNode의 소멸자에 접근할 수 있어야 함
+	//NOTE: unique_ptr은 유사시 가리키는 대상의 소멸을 호출하므로, HeapNode의 소멸자에 접근할 수 있어야 함
 	friend struct std::default_delete<SplayNode<DataType>>;
 
-	friend std::ostream& operator <<(std::ostream& out, const SplayNode<DataType>& printedNode)
+	friend std::ostream& operator<<(std::ostream& out, const SplayNode<DataType>& printedNode)
 	{
-		std::cout << "키 : " << printedNode.m_key << " / 데이터 : " << printedNode.m_data;
+		std::cout << "키: " << printedNode.m_key << " / 데이터: " << printedNode.m_data;
 
 		return out;
 	}
 
 private:
 
-	//NOTE : 데이터가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
+	//NOTE: 데이터가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
 	template <typename NewDataType = DataType>
 	SplayNode(std::int32_t newKey, NewDataType&& newData) : m_key(newKey), m_data(std::forward<NewDataType>(newData)), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
@@ -42,14 +42,14 @@ private:
 
 	}
 
-	//NOTE : 이진 탐색 트리 템플릿 클래스에 소멸자가 정의되어있으므로, 별도의 노드 소멸자 정의는 필요 없음
+	//NOTE: 이진 탐색 트리 템플릿 클래스에 소멸자가 정의되어있으므로, 별도의 노드 소멸자 정의는 필요 없음
 	~SplayNode() noexcept = default;
 
-	//NOTE : 쓰이지 않는 노드 생성, 할당 방식들
+	//NOTE: 쓰이지 않는 노드 생성, 할당 방식들
 	SplayNode() = delete;
 	SplayNode(SplayNode&& sourceNode) = delete;
-	SplayNode& operator = (const SplayNode& sourceNode) = delete;
-	SplayNode& operator = (SplayNode&& sourceNode) = delete;
+	SplayNode& operator=(const SplayNode& sourceNode) = delete;
+	SplayNode& operator=(SplayNode&& sourceNode) = delete;
 
 private:
 
@@ -67,11 +67,11 @@ public:
 	SplayTree() = default;
 	SplayTree(const SplayTree& sourceTree) = default;
 	SplayTree(SplayTree&& sourceTree) noexcept = default;
-	SplayTree& operator = (const SplayTree& sourceTree) = default;
-	SplayTree& operator = (SplayTree&& sourceTree) noexcept = default;
+	SplayTree& operator=(const SplayTree& sourceTree) = default;
+	SplayTree& operator=(SplayTree&& sourceTree) noexcept = default;
 	~SplayTree() noexcept = default;
 
-	//RETURN : targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
+	//RETURN: targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
 	bool Retrieve(std::int32_t targetKey, DataType& outData)
 	{
 		LogPrint("retrieve with splay");
@@ -113,7 +113,6 @@ public:
 
 private:
 
-	//NOTE : 조건문이 깊고 코드의 반복이 많아 좋지 못한 코드지만, 아래처럼 조정을 분기하고 하위 조정 메소드에 첫 매개변수를 레퍼런스로 전달하는 방식이 최선이라고 판단함
 	void SplayTarget(SplayNode<DataType>* pGreatGrandParentOfTarget, SplayNode<DataType>* pGrandParentOfTarget, SplayNode<DataType>* pParentOfTarget, SplayNode<DataType>* pTarget)
 	{
 		LogPrint("splay target");
@@ -213,7 +212,7 @@ private:
 		}
 	}
 
-	//NOTE : ZIG는 부모를 가르키는 조부의 자식 포인터를 직접 수정할 수 있도록 레퍼런스 매개변수를 사용함
+	//NOTE: ZIG는 부모를 가르키는 조부의 자식 포인터를 직접 수정할 수 있도록 레퍼런스 매개변수를 사용함
 	void ZigL(SplayNode<DataType>*& pFatherOfTarget, SplayNode<DataType>* pTarget)
 	{
 		LogPrint("zig left");
@@ -232,7 +231,7 @@ private:
 		pFatherOfTarget = pTarget;
 	}
 
-	//NOTE : ZIG_ZIG나 ZIG_ZAG와 같이 조부까지 변화가 일어나는 경우를 위해, 조부를 가리키는 증조부의 자식 포인터를 직접 수정할 수 있도록 레퍼런스 매개변수를 사용하였음
+	//NOTE: ZIG_ZIG나 ZIG_ZAG와 같이 조부까지 변화가 일어나는 경우를 위해, 조부를 가리키는 증조부의 자식 포인터를 직접 수정할 수 있도록 레퍼런스 매개변수를 사용하였음
 	void ZigZigLL(SplayNode<DataType>*& pGrandFatherOfTarget, SplayNode<DataType>* pFatherOfTarget, SplayNode<DataType>* pTarget)
 	{
 		LogPrint("zig zig left left");
