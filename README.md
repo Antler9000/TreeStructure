@@ -1,7 +1,7 @@
 # BodoSearchTree
-C++을 이용하여 구현 중인 BST와 AVL 트리 자료구조입니다.  
+C++을 이용하여 구현 중인 이진 탐색 계열 트리입니다.  
 
-현재 각 트리를 최적화하고 있습니다.
+현재 AVL 트리에 이동 시맨틱을 구현하고 있습니다.
 
 <br>
 
@@ -164,14 +164,17 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
     ```cpp
         #include "AVLTree.h"
 
-        AVLTree<float> testAVLTree;
+        int main()
+        {
+            AVLTree<float> testAVLTree;
 
-        int testKey = 5;
-        float retrievedData = 0.0f;
+            int testKey = 5;
+            float retrievedData = 0.0f;
 
-        testAVLTree.Insert(testKey, 3.14f);
-        testAVLTree.Retrieve(testKey, retrievedData);
-        testAVLTree.Remove(testKey);
+            testAVLTree.Insert(testKey, 3.14f);
+            testAVLTree.Retrieve(testKey, retrievedData);
+            testAVLTree.Remove(testKey);
+        }
     ```
 
 <br>
@@ -184,7 +187,7 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 
 1. 리포지토리를 다운로드합니다.
 
-2. 로컬의 리포지토리 디렉터리에 포함된 `BodoTree.sln` 솔루션 파일을 더블 클릭합니다.
+2. 로컬의 리포지토리 디렉터리에 포함된 `BodoSearchTree.sln` 솔루션 파일을 더블 클릭합니다.
 
 3. Visual Studio가 실행되면 오른쪽의 솔루션 탐색기 창을 확인합니다.  
 (해당 솔루션 탐색기 창이 없는 경우 상단의 보기(V) 메뉴에서 솔루션 탐색기(P)를 누릅니다.)
@@ -437,7 +440,6 @@ AVL 트리는 키가 정렬된 노드들이 삽입될 때 이진 탐색 트리�
 <!----------------------------------------------------------------------------------------------------------------------------------------------->
 ## 5. 구현 예정
 - **BST 개선**
-    - 불필요한 포워딩이나 함수 객체가 있는지 확인하기
     - 삭제 메서드의 코드 분기와 크기를 줄여서 인라이닝이 일어나도록 하기
 
 <br>

@@ -145,9 +145,9 @@ public:
 		GenericPostorderTraverse(printNodeFuncObject, nullptr);
 	}
 
-protected:	//NOTE: 제너릭 메서드들
+protected:
 
-	//NOTE: 메서드나 인자가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
+	//NOTE: 상위 메서드가 삽입 메서드인 경우에 unique_ptr 인자를 rvalue 참조로 전달하는 경우도 같이 지원하도록 포워딩을 사용함
 	//NOTE: 상위 메서드와 하위 작업 메서드가 const 메서드인 경우를 지원하기 위한 const 버전의 제너릭 메서드 버전도 같이 있음
 	template <typename FuncObjectType, typename ArgumentType>
 	bool GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument);
@@ -155,34 +155,48 @@ protected:	//NOTE: 제너릭 메서드들
 	template <typename FuncObjectType, typename ArgumentType>
 	bool GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument) const;
 
-	//NOTE: 메서드나 인자가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
 	//NOTE: 트리 복사의 소스 트리에서 실행되거나, 순회 출력 메서드에서만 사용되므로 const 메서드로 선언하였음
 	template <typename FuncObjectType, typename ArgumentType>
-	void GenericPreorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const;
+	void GenericPreorderTraverse(FuncObjectType funcObject, ArgumentType argument) const;
 
 	template <typename FuncObjectType, typename ArgumentType>
-	void GenericInorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const;
+	void GenericInorderTraverse(FuncObjectType funcObject, ArgumentType argument) const;
 
 	template <typename FuncObjectType, typename ArgumentType>
-	void GenericPostorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const;
+	void GenericPostorderTraverse(FuncObjectType funcObject, ArgumentType argument) const;
 
-protected:	//NOTE: 제너릭 메서드에 전달되는 하위 작업 함수 객체들
+protected:
 
 	//NOTE: 삽입 위치를 가리키는 자식 포인터를 곤칠 수 있도록 레퍼런스 매개변수를 사용함
-	struct InsertNodeFuncObject { bool operator()(BSTTemplate<NodeType, DataType>* pThis, NodeType<DataType>*& pInsertPosition, std::unique_ptr<NodeType<DataType>> upNewNode); };
+	struct InsertNodeFuncObject
+	{
+		bool operator()(NodeType<DataType>*& pInsertPosition, std::unique_ptr<NodeType<DataType>> upNewNode);
+	};
 
-	struct RetrieveNodeFuncObject { bool operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pTargetNode, DataType& outData) const; };
+	struct RetrieveNodeFuncObject
+	{
+		bool operator()(const NodeType<DataType>* pTargetNode, DataType& outData) const;
+	};
 
 	//NOTE: 삭제 위치를 가리키는 자식 포인터를 곤칠 수 있도록 레퍼런스 매개변수를 사용함
-	struct RemoveNodeFuncObject { bool operator()(BSTTemplate<NodeType, DataType>* pThis, NodeType<DataType>*& pTargetNode, void* pDummyParameter); };
-	void ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode);
-	void ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode);
+	struct RemoveNodeFuncObject
+	{
+		bool operator()(NodeType<DataType>*& pTargetNode, void* pDummyParameter);
+		void ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode);
+		void ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode);
+	};
 
-	struct CopyNodeFuncObject { void operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pSourceNode, BSTTemplate<NodeType, DataType>* pDestBST) const; };
+	struct CopyNodeFuncObject
+	{
+		void operator()(const NodeType<DataType>* pSourceNode, BSTTemplate<NodeType, DataType>* pDestBST) const;
+	};
 
-	struct PrintNodeFuncObject { void operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pTargetNode, void* pDummyParameter) const; };
+	struct PrintNodeFuncObject
+	{
+		void operator()(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const;
+	};
 
-protected:	//NOTE: 논 제너릭 하위 메서드
+protected:
 
 	//NOTE: 트리의 소멸자와 이동 할당 연산자의 하위 메서드로 사용되므로 예외를 던지는 경우가 없도록 하였음
 	void RemovingBSTByRotationRR() noexcept;
@@ -200,11 +214,11 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 
 	if (m_pHead == nullptr)
 	{
-		return funcObject(this, m_pHead, std::forward<ArgumentType>(argument));
+		return funcObject(m_pHead, std::forward<ArgumentType>(argument));
 	}
 	else if (targetKey == m_pHead->m_key)
 	{
-		return funcObject(this, m_pHead, std::forward<ArgumentType>(argument));
+		return funcObject(m_pHead, std::forward<ArgumentType>(argument));
 	}
 	else
 	{
@@ -215,7 +229,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 			{
 				if (pSearchNode->m_pLeftChild == nullptr || pSearchNode->m_pLeftChild->m_key == targetKey)
 				{
-					return funcObject(this, pSearchNode->m_pLeftChild, std::forward<ArgumentType>(argument));
+					return funcObject(pSearchNode->m_pLeftChild, std::forward<ArgumentType>(argument));
 				}
 				else
 				{
@@ -226,7 +240,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 			{
 				if (pSearchNode->m_pRightChild == nullptr || pSearchNode->m_pRightChild->m_key == targetKey)
 				{
-					return funcObject(this, pSearchNode->m_pRightChild, std::forward<ArgumentType>(argument));
+					return funcObject(pSearchNode->m_pRightChild, std::forward<ArgumentType>(argument));
 				}
 				else
 				{
@@ -245,11 +259,11 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 
 	if (m_pHead == nullptr)
 	{
-		return funcObject(this, m_pHead, std::forward<ArgumentType>(argument));
+		return funcObject(m_pHead, std::forward<ArgumentType>(argument));
 	}
 	else if (targetKey == m_pHead->m_key)
 	{
-		return funcObject(this, m_pHead, std::forward<ArgumentType>(argument));
+		return funcObject(m_pHead, std::forward<ArgumentType>(argument));
 	}
 	else
 	{
@@ -260,7 +274,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 			{
 				if (pSearchNode->m_pLeftChild == nullptr || pSearchNode->m_pLeftChild->m_key == targetKey)
 				{
-					return funcObject(this, pSearchNode->m_pLeftChild, std::forward<ArgumentType>(argument));
+					return funcObject(pSearchNode->m_pLeftChild, std::forward<ArgumentType>(argument));
 				}
 				else
 				{
@@ -271,7 +285,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 			{
 				if (pSearchNode->m_pRightChild == nullptr || pSearchNode->m_pRightChild->m_key == targetKey)
 				{
-					return funcObject(this, pSearchNode->m_pRightChild, std::forward<ArgumentType>(argument));
+					return funcObject(pSearchNode->m_pRightChild, std::forward<ArgumentType>(argument));
 				}
 				else
 				{
@@ -284,7 +298,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 
 template <template <typename> class NodeType, typename DataType>
 template <typename FuncObjectType, typename ArgumentType>
-inline void BSTTemplate<NodeType, DataType>::GenericPreorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const
+inline void BSTTemplate<NodeType, DataType>::GenericPreorderTraverse(FuncObjectType funcObject, ArgumentType argument) const
 {
 	LogPrint("generic preorder traverse method");
 
@@ -295,7 +309,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericPreorderTraverse(FuncObjectT
 	{
 		while (pTraverseNode != nullptr)
 		{
-			funcObject(this, pTraverseNode, std::forward<ArgumentType>(argument));
+			funcObject(pTraverseNode, argument);
 
 			if (pTraverseNode->m_pRightChild != nullptr)
 			{
@@ -309,7 +323,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericPreorderTraverse(FuncObjectT
 
 template <template <typename> class NodeType, typename DataType>
 template <typename FuncObjectType, typename ArgumentType>
-inline void BSTTemplate<NodeType, DataType>::GenericInorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const
+inline void BSTTemplate<NodeType, DataType>::GenericInorderTraverse(FuncObjectType funcObject, ArgumentType argument) const
 {
 	LogPrint("generic inorder traverse method");
 
@@ -322,7 +336,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericInorderTraverse(FuncObjectTy
 	}
 	while (rightSideAncestorStack.Pop(pTraverseNode) == true)
 	{
-		funcObject(this, pTraverseNode, std::forward<ArgumentType>(argument));
+		funcObject(pTraverseNode, argument);
 
 		if (pTraverseNode->m_pRightChild != nullptr)
 		{
@@ -339,7 +353,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericInorderTraverse(FuncObjectTy
 
 template <template <typename> class NodeType, typename DataType>
 template <typename FuncObjectType, typename ArgumentType>
-inline void BSTTemplate<NodeType, DataType>::GenericPostorderTraverse(FuncObjectType funcObject, ArgumentType&& argument) const
+inline void BSTTemplate<NodeType, DataType>::GenericPostorderTraverse(FuncObjectType funcObject, ArgumentType argument) const
 {
 	LogPrint("generic postorder traverse method");
 
@@ -376,7 +390,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericPostorderTraverse(FuncObject
 		}
 		else if (traverseRecord.nodeJob == Record::DO_TASK)
 		{
-			funcObject(this, traverseRecord.pNode, std::forward<ArgumentType>(argument));
+			funcObject(traverseRecord.pNode, argument);
 		}
 	}
 
@@ -384,7 +398,7 @@ inline void BSTTemplate<NodeType, DataType>::GenericPostorderTraverse(FuncObject
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline bool BSTTemplate<NodeType, DataType>::InsertNodeFuncObject::operator ()(BSTTemplate<NodeType, DataType>* pThis, NodeType<DataType>*& pInsertPosition, std::unique_ptr<NodeType<DataType>> upNewNode)
+inline bool BSTTemplate<NodeType, DataType>::InsertNodeFuncObject::operator ()(NodeType<DataType>*& pInsertPosition, std::unique_ptr<NodeType<DataType>> upNewNode)
 {
 	LogPrint("insert node task method");
 
@@ -401,7 +415,7 @@ inline bool BSTTemplate<NodeType, DataType>::InsertNodeFuncObject::operator ()(B
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline bool BSTTemplate<NodeType, DataType>::RetrieveNodeFuncObject::operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pTargetNode, DataType& outData) const
+inline bool BSTTemplate<NodeType, DataType>::RetrieveNodeFuncObject::operator()(const NodeType<DataType>* pTargetNode, DataType& outData) const
 {
 	LogPrint("retrieve node task method");
 
@@ -418,7 +432,7 @@ inline bool BSTTemplate<NodeType, DataType>::RetrieveNodeFuncObject::operator()(
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline bool BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::operator()(BSTTemplate<NodeType, DataType>* pThis, NodeType<DataType>*& pTargetNode, void* pDummyParameter)
+inline bool BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::operator()(NodeType<DataType>*& pTargetNode, void* pDummyParameter)
 {
 	LogPrint("remove node task method");
 
@@ -434,20 +448,20 @@ inline bool BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::operator()(BS
 	{
 		if (pTargetNode->m_key % 2 == 0)
 		{
-			pThis->ReplaceWithInorderPredecessor(pTargetNode);
+			ReplaceWithInorderPredecessor(pTargetNode);
 		}
 		else
 		{
-			pThis->ReplaceWithInorderSuccessor(pTargetNode);
+			ReplaceWithInorderSuccessor(pTargetNode);
 		}
 	}
 	else if (pTargetNode->m_pLeftChild != nullptr)
 	{
-		pThis->ReplaceWithInorderPredecessor(pTargetNode);
+		ReplaceWithInorderPredecessor(pTargetNode);
 	}
 	else if (pTargetNode->m_pRightChild != nullptr)
 	{
-		pThis->ReplaceWithInorderSuccessor(pTargetNode);
+		ReplaceWithInorderSuccessor(pTargetNode);
 	}
 	else
 	{
@@ -459,7 +473,7 @@ inline bool BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::operator()(BS
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline void BSTTemplate<NodeType, DataType>::ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
+inline void BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::ReplaceWithInorderPredecessor(NodeType<DataType>*& pTargetNode)
 {
 	LogPrint("replace with inorder predecessor");
 
@@ -490,7 +504,7 @@ inline void BSTTemplate<NodeType, DataType>::ReplaceWithInorderPredecessor(NodeT
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline void BSTTemplate<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
+inline void BSTTemplate<NodeType, DataType>::RemoveNodeFuncObject::ReplaceWithInorderSuccessor(NodeType<DataType>*& pTargetNode)
 {
 	LogPrint("replace with inorder successor");
 
@@ -521,7 +535,7 @@ inline void BSTTemplate<NodeType, DataType>::ReplaceWithInorderSuccessor(NodeTyp
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline void BSTTemplate<NodeType, DataType>::CopyNodeFuncObject::operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pSourceNode, BSTTemplate<NodeType, DataType>* pDestBST) const
+inline void BSTTemplate<NodeType, DataType>::CopyNodeFuncObject::operator()(const NodeType<DataType>* pSourceNode, BSTTemplate<NodeType, DataType>* pDestBST) const
 {
 	LogPrint("copy node task method");
 
@@ -531,7 +545,7 @@ inline void BSTTemplate<NodeType, DataType>::CopyNodeFuncObject::operator()(cons
 }
 
 template <template <typename> class NodeType, typename DataType>
-inline void BSTTemplate<NodeType, DataType>::PrintNodeFuncObject::operator()(const BSTTemplate<NodeType, DataType>* pThis, const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
+inline void BSTTemplate<NodeType, DataType>::PrintNodeFuncObject::operator()(const NodeType<DataType>* pTargetNode, void* pDummyParameter) const
 {
 	LogPrint("print node task method");
 
