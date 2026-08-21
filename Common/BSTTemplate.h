@@ -1,8 +1,8 @@
 ﻿#ifndef BST_USING_WHILE_TEMPLATE_H
 #define BST_USING_WHILE_TEMPLATE_H
 
-#include "Debug.h"
 #include "Stack.h"
+#include "Debug.h"
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -13,7 +13,7 @@ class BSTTemplate
 {
 public:
 
-	BSTTemplate() : m_pHead(nullptr)
+	BSTTemplate() noexcept : m_pHead(nullptr)
 	{
 		LogPrint("empty constructor");
 	}
@@ -71,9 +71,9 @@ public:
 	}
 
 	//RETURN:	newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환함
-	//NOTE:		데이터가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
+	//NOTE:		데이터의 값 범주가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
 	template <typename InsertDataType = DataType>
-	bool Insert(std::int32_t newKey, InsertDataType&& newData)
+	bool Insert(std::int64_t newKey, InsertDataType&& newData)
 	{
 		LogPrint("insert");
 		
@@ -83,7 +83,7 @@ public:
 	}
 
 	//RETURN: targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
-	bool Retrieve(std::int32_t targetKey, DataType& outData) const
+	bool Retrieve(std::int64_t targetKey, DataType& outData) const
 	{
 		LogPrint("retrieve");
 
@@ -92,7 +92,7 @@ public:
 	}
 
 	//RETURN: targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
-	bool Remove(std::int32_t targetKey)
+	bool Remove(std::int64_t targetKey)
 	{
 		LogPrint("remove one item");
 
@@ -147,13 +147,13 @@ public:
 
 protected:
 
-	//NOTE: 상위 메서드가 삽입 메서드인 경우에 unique_ptr 인자를 rvalue 참조로 전달하는 경우도 같이 지원하도록 포워딩을 사용함
+	//NOTE: 상위 메서드가 삽입 메서드인 경우에 unique_ptr 인자를 rvalue로 받아 전달해야 하므로, lvalue와 rvalue 둘 다 전달하도록 포워딩을 사용함
 	//NOTE: 상위 메서드와 하위 작업 메서드가 const 메서드인 경우를 지원하기 위한 const 버전의 제너릭 메서드 버전도 같이 있음
 	template <typename FuncObjectType, typename ArgumentType>
-	bool GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument);
+	bool GenericSearch(FuncObjectType funcObject, std::int64_t targetKey, ArgumentType&& argument);
 
 	template <typename FuncObjectType, typename ArgumentType>
-	bool GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument) const;
+	bool GenericSearch(FuncObjectType funcObject, std::int64_t targetKey, ArgumentType&& argument) const;
 
 	//NOTE: 트리 복사의 소스 트리에서 실행되거나, 순회 출력 메서드에서만 사용되므로 const 메서드로 선언하였음
 	template <typename FuncObjectType, typename ArgumentType>
@@ -208,7 +208,7 @@ protected:
 
 template <template <typename> class NodeType, typename DataType>
 template <typename FuncObjectType, typename ArgumentType>
-inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument)
+inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcObject, std::int64_t targetKey, ArgumentType&& argument)
 {
 	LogPrint("generic search method (not const method)");
 
@@ -253,7 +253,7 @@ inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcOb
 
 template <template <typename> class NodeType, typename DataType>
 template <typename FuncObjectType, typename ArgumentType>
-inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcObject, std::int32_t targetKey, ArgumentType&& argument) const
+inline bool BSTTemplate<NodeType, DataType>::GenericSearch(FuncObjectType funcObject, std::int64_t targetKey, ArgumentType&& argument) const
 {
 	LogPrint("generic search method (const method)");
 

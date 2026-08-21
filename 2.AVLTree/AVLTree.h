@@ -2,19 +2,24 @@
 #define AVL_TREE_H
 
 #include "BSTTemplate.h"
+#include "Stack.h"
 #include "Debug.h"
+#include <algorithm>
+#include <iostream>
+#include <memory>
+#include <utility>
 #include <cstdint>
 
 template <typename DataType>
 class AVLTree;
 
 template <typename DataType>
-class AVL_Node
+class AVLNode
 {	
-	friend class BSTTemplate<AVL_Node, DataType>;
+	friend class BSTTemplate<AVLNode, DataType>;
 	friend class AVLTree<DataType>;
 
-	friend std::ostream& operator<<(std::ostream& out, const AVL_Node<DataType>& printedNode)
+	friend std::ostream& operator<<(std::ostream& out, const AVLNode<DataType>& printedNode)
 	{
 		std::cout << "키: " << printedNode.m_key << " / 데이터: " << printedNode.m_data << " / 높이: " << printedNode.m_height;
 
@@ -23,146 +28,311 @@ class AVL_Node
 
 private:
 
-	AVL_Node(std::int32_t newKey, DataType newData)
+	template <typename NewDataType = DataType>
+	AVLNode(std::int64_t newKey, NewDataType&& newData)
+	: m_key(newKey), m_data(std::forward<NewDataType>(newData)), m_height(0), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
-		m_key = newKey;
-		m_data = newData;
-		m_height = 0;
-		m_pLeftChild = NULL;
-		m_pRightChild = NULL;
+
 	}
 
-	AVL_Node(const AVL_Node& sourceNode)
+	//Note: BSTTemplate의 트리 복사 과정에서 노드 복사를 사용하고, 이때 자식 포인터가 복사되지 않도록 유의해야 함
+	AVLNode(const AVLNode& sourceNode)
+	: m_key(sourceNode.m_key), m_data(sourceNode.m_data), m_height(sourceNode.m_height), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
-		m_key = sourceNode.m_key;
-		m_data = sourceNode.m_data;
-		m_height = sourceNode.m_height;
-		m_pLeftChild = nullptr;
-		m_pRightChild = nullptr;
+
 	}
 
 private:
 
-	std::int32_t		m_key;
+	std::int64_t		m_key;
 	DataType			m_data;
-	std::int32_t		m_height;
-	AVL_Node<DataType>*	m_pLeftChild;
-	AVL_Node<DataType>*	m_pRightChild;
+	std::int64_t		m_height;
+	AVLNode<DataType>*	m_pLeftChild;
+	AVLNode<DataType>*	m_pRightChild;
 };
 
 template <typename DataType>
-class AVLTree : public BSTTemplate<AVL_Node, DataType>
+class AVLTree : public BSTTemplate<AVLNode, DataType>
 {
 public:
-	AVLTree() : BSTTemplate<AVL_Node, DataType>()
-	{
 	
+	AVLTree() noexcept = default;
+	AVLTree(const AVLTree<DataType>& sourceTree) = default;
+	AVLTree(AVLTree<DataType>&& sourceTree) noexcept = default;
+	AVLTree<DataType>& operator=(const AVLTree<DataType>& sourceTree) = default;
+	AVLTree<DataType>& operator=(AVLTree<DataType>&& sourceTree) noexcept = default;
+	~AVLTree() noexcept = default;
+
+	//RETURN:	newKey와 같은 키의 노드가 이미 존재하는 경우 false를 반환함
+	//NOTE:		데이터의 값 범주가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
+	template <typename InsertDataType = DataType>
+	bool Insert(std::int64_t newKey, InsertDataType&& newData)
+	{
+		LogPrint("(avl) insert");
+
+		if (this->m_pHead == nullptr)
+		{
+			this->m_pHead = DBG_NEW AVLNode<DataType>(newKey, std::forward<InsertDataType>(newData));
+
+			return true;
+		}
+
+		AVLNode<DataType>* pTraverse = this->m_pHead;
+		Stack<AVLNode<DataType>*> pRouteStack;
+		while (true)
+		{
+			if (newKey < pTraverse->m_key)
+			{
+				if (pTraverse->m_pLeftChild == nullptr)
+				{
+					pRouteStack.Push(pTraverse);
+
+					pTraverse->m_pLeftChild = DBG_NEW AVLNode<DataType>(newKey, std::forward<InsertDataType>(newData));
+					BalancingAllTargetToRoot(&pRouteStack);
+						
+					return true;
+				}
+				else
+				{
+					pRouteStack.Push(pTraverse);
+
+					pTraverse = pTraverse->m_pLeftChild;
+				}
+			}
+			else if (pTraverse->m_key < newKey)
+			{
+				if (pTraverse->m_pRightChild == nullptr)
+				{
+					pRouteStack.Push(pTraverse);
+
+					pTraverse->m_pRightChild = DBG_NEW AVLNode<DataType>(newKey, std::forward<InsertDataType>(newData));
+					BalancingAllTargetToRoot(&pRouteStack);
+					return true;
+				}
+				else
+				{
+					pRouteStack.Push(pTraverse);
+
+					pTraverse = pTraverse->m_pRightChild;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 
-	void Insert(std::int32_t newKey, DataType newData);
+	//RETURN: targetKey와 같은 키를 가진 노드가 존재하지 않는 경우에 false를 반환함
+	bool Remove(std::int64_t targetKey)
+	{
+		LogPrint("(avl) remove one item");
 
-	void Remove(std::int32_t targetKey);
+		if (this->m_pHead == nullptr)
+		{
+			std::cout << "Cannot Remove! tree is emptied" << std::endl;
+
+			return false;
+		}
+
+		Stack<AVLNode<DataType>*> pRouteStack;
+
+		if (this->m_pHead->m_key == targetKey)
+		{
+			RemoveTarget(this->m_pHead, &pRouteStack);
+
+			return true;
+		}
+
+		AVLNode<DataType>* pTraverse = this->m_pHead;
+		while (true)
+		{
+			if (targetKey < pTraverse->m_key)
+			{
+				if (pTraverse->m_pLeftChild == nullptr)
+				{
+					return false;
+				}
+
+				pRouteStack.Push(pTraverse);
+
+				if (pTraverse->m_pLeftChild->m_key == targetKey)
+				{
+					RemoveTarget(pTraverse->m_pLeftChild, &pRouteStack);
+
+					return true;
+				}
+				else
+				{
+					pTraverse = pTraverse->m_pLeftChild;
+				}
+			}
+			else
+			{
+				if (pTraverse->m_pRightChild == nullptr)
+				{
+					return false;
+				}
+
+				pRouteStack.Push(pTraverse);
+
+				if (pTraverse->m_pRightChild->m_key == targetKey)
+				{
+					RemoveTarget(pTraverse->m_pRightChild, &pRouteStack);
+
+					return true;
+				}
+				else
+				{
+					pTraverse = pTraverse->m_pRightChild;
+				}
+			}
+		}
+	}
 
 private:
-	void RemoveTarget(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack);
-	void ReplaceWithInorderPredecessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack);
-	void ReplaceWithInorderSuccessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack);
 
-	void BalancingAllTargetToRoot(Stack<AVL_Node<DataType>*>* pRouteStack);
+	void RemoveTarget(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack);
+	void ReplaceWithInorderPredecessor(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack);
+	void ReplaceWithInorderSuccessor(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack);
 
-	void BalancingTargetNode(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent);
-
-	void RotationLL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent);
-	void RotationLR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent);
-	void RotationRL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent);
-	void RotationRR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent);
-
-	void UpdateHeight(AVL_Node<DataType>* pTarget)
-	{
-		std::int32_t heightFromLChild = 0;
-		std::int32_t heightFromRChild = 0;
-		if (pTarget->m_pLeftChild != NULL) heightFromLChild = 1 + pTarget->m_pLeftChild->m_height;
-		if (pTarget->m_pRightChild != NULL) heightFromRChild = 1 + pTarget->m_pRightChild->m_height;
-		pTarget->m_height = Max(heightFromLChild, heightFromRChild);
-	}
-
-	std::int32_t Max(std::int32_t a, std::int32_t b)
-	{
-		return (a > b) ? a : b;
-	}
+	void BalancingAllTargetToRoot(Stack<AVLNode<DataType>*>* pRouteStack) noexcept;
+	void BalancingTargetNode(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept;
+	void RotationLL(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept;
+	void RotationLR(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept;
+	void RotationRL(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept;
+	void RotationRR(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept;
+	void UpdateHeight(AVLNode<DataType>* pTargetNode) noexcept;
 };
 
 template <typename DataType>
-inline void AVLTree<DataType>::RemoveTarget(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::RemoveTarget(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack)
 {
-	if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild != NULL) //두 자식 모두 있는 경우엔, 중위선행자와 중위후속자 중에서 그냥 중위후속자(오른쪽 자식 트리에서 제일 작은 키 값의 노드)를 없애기로함
+	LogPrint("(avl) remove target");
+
+	//NOTE: 중위선행자와 중위후속자가 둘 다 있는 경우에는 균형 유지에 조금이나마 도움이 되기 위해서 대체할 대상을 다소 무작위적인 홀짝 방식으로 선택함
+	if (pTargetNode->m_pLeftChild != nullptr && pTargetNode->m_pRightChild != nullptr)
 	{
-		ReplaceWithInorderSuccessor(pTarget, pRouteStack);
+		if (pTargetNode->m_key % 2 == 0)
+		{
+			ReplaceWithInorderPredecessor(pTargetNode, pRouteStack);
+		}
+		else
+		{
+			ReplaceWithInorderSuccessor(pTargetNode, pRouteStack);
+		}
 	}
-	else if (pTarget->m_pLeftChild == NULL && pTarget->m_pRightChild != NULL) {
-		ReplaceWithInorderSuccessor(pTarget, pRouteStack);
+	else if (pTargetNode->m_pLeftChild != nullptr)
+	{
+		ReplaceWithInorderPredecessor(pTargetNode, pRouteStack);
 	}
-	else if (pTarget->m_pLeftChild != NULL && pTarget->m_pRightChild == NULL) {
-		ReplaceWithInorderPredecessor(pTarget, pRouteStack);
+	else if (pTargetNode->m_pRightChild != nullptr)
+	{
+		ReplaceWithInorderSuccessor(pTargetNode, pRouteStack);
 	}
-	else {
-		delete pTarget;
-		pTarget = NULL;
+	else
+	{
+		delete pTargetNode;
+		pTargetNode = nullptr;
 	}
 
 	BalancingAllTargetToRoot(pRouteStack);
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::ReplaceWithInorderPredecessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::ReplaceWithInorderPredecessor(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack)
 {
-	AVL_Node<DataType>* pPrevious = NULL;
-	AVL_Node<DataType>* pTraverse = pTarget->m_pLeftChild;
-	pRouteStack->Push(pTarget);
-	while (pTraverse->m_pRightChild != NULL)
+	LogPrint("(avl) replace with inorder predecessor");
+
+	if (pTargetNode->m_pLeftChild->m_pRightChild == nullptr)
 	{
-		pPrevious = pTraverse;
-		pTraverse = pTraverse->m_pRightChild;
-		pRouteStack->Push(pPrevious);
+		AVLNode<DataType>* pInorderPredecessor = pTargetNode->m_pLeftChild;
+		pRouteStack->Push(pInorderPredecessor);
+
+		pInorderPredecessor->m_pRightChild = pTargetNode->m_pRightChild;
+		delete pTargetNode;
+		pTargetNode = pInorderPredecessor;
 	}
+	else
+	{
+		AVLNode<DataType>* pInitTraverse = pTargetNode->m_pLeftChild;
+		while (pInitTraverse->m_pRightChild != nullptr)
+		{
+			pInitTraverse = pInitTraverse->m_pRightChild;
+		}
+		pRouteStack->Push(pInitTraverse);
 
-	if (pPrevious != NULL) pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
-	else pTarget->m_pLeftChild = pTraverse->m_pLeftChild;
+		AVLNode<DataType>* pPrevious = pTargetNode;
+		AVLNode<DataType>* pTraverse = pTargetNode->m_pLeftChild;
+		while (pTraverse->m_pRightChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pRightChild;
+			pRouteStack->Push(pPrevious);
+		}
 
-	pTarget->m_key = pTraverse->m_key;
-	pTarget->m_data = pTraverse->m_data;
-	delete pTraverse;
+		pPrevious->m_pRightChild = pTraverse->m_pLeftChild;
+		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+
+		delete pTargetNode;
+		pTargetNode = pTraverse;
+	}
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::ReplaceWithInorderSuccessor(AVL_Node<DataType>*& pTarget, Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::ReplaceWithInorderSuccessor(AVLNode<DataType>*& pTargetNode, Stack<AVLNode<DataType>*>* pRouteStack)
 {
-	AVL_Node<DataType>* pPrevious = NULL;
-	AVL_Node<DataType>* pTraverse = pTarget->m_pRightChild;
-	pRouteStack->Push(pTarget);
-	while (pTraverse->m_pLeftChild != NULL)
+	LogPrint("(avl) replace with inorder successor");
+
+	if (pTargetNode->m_pRightChild->m_pLeftChild == nullptr)
 	{
-		pPrevious = pTraverse;
-		pTraverse = pTraverse->m_pLeftChild;
-		pRouteStack->Push(pPrevious);
+		AVLNode<DataType>* pInorderSuccessor = pTargetNode->m_pRightChild;
+		pRouteStack->Push(pInorderSuccessor);
+
+		pInorderSuccessor->m_pLeftChild = pTargetNode->m_pLeftChild;
+		delete pTargetNode;
+		pTargetNode = pInorderSuccessor;
 	}
+	else
+	{
+		AVLNode<DataType>* pInitTraverse = pTargetNode->m_pRightChild;
+		while (pInitTraverse->m_pLeftChild != nullptr)
+		{
+			pInitTraverse = pInitTraverse->m_pLeftChild;
+		}
+		pRouteStack->Push(pInitTraverse);
 
-	if (pPrevious != NULL) pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
-	else pTarget->m_pRightChild = pTraverse->m_pRightChild;
+		AVLNode<DataType>* pPrevious = pTargetNode;
+		AVLNode<DataType>* pTraverse = pTargetNode->m_pRightChild;
+		while (pTraverse->m_pLeftChild != nullptr)
+		{
+			pPrevious = pTraverse;
+			pTraverse = pTraverse->m_pLeftChild;
+			pRouteStack->Push(pPrevious);
+		}
 
-	pTarget->m_key = pTraverse->m_key;
-	pTarget->m_data = pTraverse->m_data;
-	delete pTraverse;
+		pPrevious->m_pLeftChild = pTraverse->m_pRightChild;
+		pTraverse->m_pRightChild = pTargetNode->m_pRightChild;
+		pTraverse->m_pLeftChild = pTargetNode->m_pLeftChild;
+
+		delete pTargetNode;
+		pTargetNode = pTraverse;
+	}
 }
 
+//Note:	Stack의 Pop(..), GetTop(..)은 출력 인자로의 데이터 복사 때문에 원래 noexcept가 아니지만,
+//		여기선 Stack의 데이터 타입이 AVLNode<DataType>*로 포인터이기 때문에 예외가 발생하지 않음
 template <typename DataType>
-inline void AVLTree<DataType>::BalancingAllTargetToRoot(Stack<AVL_Node<DataType>*>* pRouteStack)
+inline void AVLTree<DataType>::BalancingAllTargetToRoot(Stack<AVLNode<DataType>*>* pRouteStack) noexcept
 {
+	LogPrint("balancing all target to root");
+
 	while (pRouteStack->IsEmpty() == false)
 	{
-		AVL_Node<DataType>* pRetraverse = nullptr;
+		AVLNode<DataType>* pRetraverse = nullptr;
+		AVLNode<DataType>* pParentOfRetraverse = nullptr;
 		pRouteStack->Pop(pRetraverse);
-		AVL_Node<DataType>* pParentOfRetraverse = nullptr;
 		pRouteStack->GetTop(pParentOfRetraverse);
 		UpdateHeight(pRetraverse);
 
@@ -171,231 +341,168 @@ inline void AVLTree<DataType>::BalancingAllTargetToRoot(Stack<AVL_Node<DataType>
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::BalancingTargetNode(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::BalancingTargetNode(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept
 {
-	std::int32_t leftHeight = 0;
-	std::int32_t rightHeight = 0;
-	if (pTarget->m_pLeftChild != NULL) leftHeight = 1 + pTarget->m_pLeftChild->m_height;
-	if (pTarget->m_pRightChild != NULL) rightHeight = 1 + pTarget->m_pRightChild->m_height;
+	LogPrint("balancing target node");
+
+	std::int64_t leftHeight = 0;
+	std::int64_t rightHeight = 0;
+	if (pTargetNode->m_pLeftChild != nullptr)
+	{
+		leftHeight = 1 + pTargetNode->m_pLeftChild->m_height;
+	}
+	if (pTargetNode->m_pRightChild != nullptr)
+	{
+		rightHeight = 1 + pTargetNode->m_pRightChild->m_height;
+	}
 
 	if (leftHeight - rightHeight >= 2) {
-		if (pTarget->m_pLeftChild->m_pRightChild == NULL)
+		if (pTargetNode->m_pLeftChild->m_pRightChild == nullptr)
 		{
-			RotationLL(pTarget, pParent);
+			RotationLL(pTargetNode, pParent);
 		}
-		else if (pTarget->m_pLeftChild->m_pLeftChild == NULL)
+		else if (pTargetNode->m_pLeftChild->m_pLeftChild == nullptr)
 		{
-			RotationLR(pTarget, pParent);
+			RotationLR(pTargetNode, pParent);
 		}
 		else
 		{
-			if (pTarget->m_pLeftChild->m_pLeftChild->m_height > pTarget->m_pLeftChild->m_pRightChild->m_height)
+			if (pTargetNode->m_pLeftChild->m_pLeftChild->m_height > pTargetNode->m_pLeftChild->m_pRightChild->m_height)
 			{
-				RotationLL(pTarget, pParent);
+				RotationLL(pTargetNode, pParent);
 			}
 			else
 			{
-				RotationLR(pTarget, pParent);
+				RotationLR(pTargetNode, pParent);
 			}
 		}
 	}
 	else if (rightHeight - leftHeight >= 2)
 	{
-		if (pTarget->m_pRightChild->m_pRightChild == NULL)
+		if (pTargetNode->m_pRightChild->m_pRightChild == nullptr)
 		{
-			RotationRL(pTarget, pParent);
+			RotationRL(pTargetNode, pParent);
 		}
-		else if (pTarget->m_pRightChild->m_pLeftChild == NULL)
+		else if (pTargetNode->m_pRightChild->m_pLeftChild == nullptr)
 		{
-			RotationRR(pTarget, pParent);
+			RotationRR(pTargetNode, pParent);
 		}
 		else
 		{
-			if (pTarget->m_pRightChild->m_pLeftChild->m_height > pTarget->m_pRightChild->m_pRightChild->m_height)
+			if (pTargetNode->m_pRightChild->m_pLeftChild->m_height > pTargetNode->m_pRightChild->m_pRightChild->m_height)
 			{
-				RotationRL(pTarget, pParent);
+				RotationRL(pTargetNode, pParent);
 			}
 			else
 			{
-				RotationRR(pTarget, pParent);
+				RotationRR(pTargetNode, pParent);
 			}
 		}
 	}
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::RotationLL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationLL(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept
 {
-	if (pParent == NULL)
+	LogPrint("rotaion LL");
+
+	AVLNode<DataType>* pRotationNode = pTargetNode->m_pLeftChild;
+	pTargetNode->m_pLeftChild = pRotationNode->m_pRightChild;
+	pRotationNode->m_pRightChild = pTargetNode;
+	if (pParent == nullptr)
 	{
-		this->m_pHead = pTarget->m_pLeftChild;
-		pTarget->m_pLeftChild = pTarget->m_pLeftChild->m_pRightChild;
-		this->m_pHead->m_pRightChild = pTarget;
-		this->m_pHead->m_height = pTarget->m_height - 1;
+		this->m_pHead = pRotationNode;
 	}
-	else if (pParent->m_pLeftChild == pTarget)
+	else if (pParent->m_pLeftChild == pTargetNode)
 	{
-		pParent->m_pLeftChild = pTarget->m_pLeftChild;
-		pTarget->m_pLeftChild = pTarget->m_pLeftChild->m_pRightChild;
-		pParent->m_pLeftChild->m_pRightChild = pTarget;
-		pParent->m_pLeftChild->m_height = pTarget->m_height - 1;
+		pParent->m_pLeftChild = pRotationNode;
 	}
 	else
 	{
-		pParent->m_pRightChild = pTarget->m_pLeftChild;
-		pTarget->m_pLeftChild = pTarget->m_pLeftChild->m_pRightChild;
-		pParent->m_pRightChild->m_pRightChild = pTarget;
-		pParent->m_pRightChild->m_height = pTarget->m_height - 1;
+		pParent->m_pRightChild = pRotationNode;
 	}
 
-	UpdateHeight(pTarget);
+	UpdateHeight(pTargetNode);
+	UpdateHeight(pRotationNode);
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::RotationLR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationLR(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept
 {
-	AVL_Node<DataType>* pLR_Location = pTarget->m_pLeftChild->m_pRightChild;
-	pTarget->m_pLeftChild->m_pRightChild = pLR_Location->m_pLeftChild;
-	pLR_Location->m_pLeftChild = pTarget->m_pLeftChild;
-	pTarget->m_pLeftChild = pLR_Location;
+	LogPrint("rotaion LR");
 
-	UpdateHeight(pLR_Location->m_pLeftChild);
-	UpdateHeight(pLR_Location);
-	UpdateHeight(pTarget);
+	AVLNode<DataType>* pRotatationNode = pTargetNode->m_pLeftChild->m_pRightChild;
+	pTargetNode->m_pLeftChild->m_pRightChild = pRotatationNode->m_pLeftChild;
+	pRotatationNode->m_pLeftChild = pTargetNode->m_pLeftChild;
+	pTargetNode->m_pLeftChild = pRotatationNode;
 
-	RotationLL(pTarget, pParent);
+	UpdateHeight(pRotatationNode->m_pLeftChild);
+	UpdateHeight(pRotatationNode);
+	UpdateHeight(pTargetNode);
+
+	RotationLL(pTargetNode, pParent);
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::RotationRL(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationRL(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept
 {
-	AVL_Node<DataType>* pRL_Location = pTarget->m_pRightChild->m_pLeftChild;
-	pTarget->m_pRightChild->m_pLeftChild = pRL_Location->m_pRightChild;
-	pRL_Location->m_pRightChild = pTarget->m_pRightChild;
-	pTarget->m_pRightChild = pRL_Location;
+	LogPrint("rotaion RL");
 
-	UpdateHeight(pRL_Location->m_pRightChild);
-	UpdateHeight(pRL_Location);
-	UpdateHeight(pTarget);
+	AVLNode<DataType>* pRotationNode = pTargetNode->m_pRightChild->m_pLeftChild;
+	pTargetNode->m_pRightChild->m_pLeftChild = pRotationNode->m_pRightChild;
+	pRotationNode->m_pRightChild = pTargetNode->m_pRightChild;
+	pTargetNode->m_pRightChild = pRotationNode;
 
-	RotationRR(pTarget, pParent);
+	UpdateHeight(pRotationNode->m_pRightChild);
+	UpdateHeight(pRotationNode);
+	UpdateHeight(pTargetNode);
+
+	RotationRR(pTargetNode, pParent);
 }
 
 template <typename DataType>
-inline void AVLTree<DataType>::RotationRR(AVL_Node<DataType>* pTarget, AVL_Node<DataType>* pParent)
+inline void AVLTree<DataType>::RotationRR(AVLNode<DataType>* pTargetNode, AVLNode<DataType>* pParent) noexcept
 {
-	if (pParent == NULL)
+	LogPrint("rotaion RR");
+
+	AVLNode<DataType>* pRotationNode = pTargetNode->m_pRightChild;
+	pTargetNode->m_pRightChild = pRotationNode->m_pLeftChild;
+	pRotationNode->m_pLeftChild = pTargetNode;
+	if (pParent == nullptr)
 	{
-		this->m_pHead = pTarget->m_pRightChild;
-		pTarget->m_pRightChild = pTarget->m_pRightChild->m_pLeftChild;
-		this->m_pHead->m_pLeftChild = pTarget;
-		this->m_pHead->m_height = pTarget->m_height - 1;
+		this->m_pHead = pRotationNode;
 	}
-	else if (pParent->m_pLeftChild == pTarget)
+	else if (pParent->m_pLeftChild == pTargetNode)
 	{
-		pParent->m_pLeftChild = pTarget->m_pRightChild;
-		pTarget->m_pRightChild = pTarget->m_pRightChild->m_pLeftChild;
-		pParent->m_pLeftChild->m_pLeftChild = pTarget;
-		pParent->m_pLeftChild->m_height = pTarget->m_height - 1;
+		pParent->m_pLeftChild = pRotationNode;
 	}
 	else
 	{
-		pParent->m_pRightChild = pTarget->m_pRightChild;
-		pTarget->m_pRightChild = pTarget->m_pRightChild->m_pLeftChild;
-		pParent->m_pRightChild->m_pLeftChild = pTarget;
-		pParent->m_pRightChild->m_height = pTarget->m_height - 1;
+		pParent->m_pRightChild = pRotationNode;
 	}
 
-	UpdateHeight(pTarget);
+	UpdateHeight(pTargetNode);
+	UpdateHeight(pRotationNode);
 }
 
-template <typename DataType>
-inline void AVLTree<DataType>::Insert(std::int32_t newKey, DataType newData)
-{
-	if (this->m_pHead == NULL)
-	{
-		this->m_pHead = new AVL_Node<DataType>(newKey, newData);
-		return;
-	}
-
-	AVL_Node<DataType>* pTraverse = this->m_pHead;
-	Stack<AVL_Node<DataType>*> pRouteStack;
-	while (true)
-	{
-		if (newKey < pTraverse->m_key)
-		{
-			if (pTraverse->m_pLeftChild == NULL)
-			{
-				pTraverse->m_pLeftChild = new AVL_Node<DataType>(newKey, newData);
-				pRouteStack.Push(pTraverse);
-				BalancingAllTargetToRoot(&pRouteStack);
-				return;
-			}
-			else
-			{
-				pRouteStack.Push(pTraverse);
-				pTraverse = pTraverse->m_pLeftChild;
-			}
-		}
-		else
-		{
-			if (pTraverse->m_pRightChild == NULL)
-			{
-				pTraverse->m_pRightChild = new AVL_Node<DataType>(newKey, newData);
-				pRouteStack.Push(pTraverse);
-				BalancingAllTargetToRoot(&pRouteStack);
-				return;
-			}
-			else
-			{
-				pRouteStack.Push(pTraverse);
-				pTraverse = pTraverse->m_pRightChild;
-			}
-		}
-	}
-}
 
 template <typename DataType>
-inline void AVLTree<DataType>::Remove(std::int32_t targetKey)
+inline void AVLTree<DataType>::UpdateHeight(AVLNode<DataType>* pTargetNode) noexcept
 {
-	if (this->m_pHead == NULL)
-	{
-		std::cout << "Cannot Remove! tree is emptied" << std::endl;
-		return;
-	}
+	LogPrint("update height");
 
-	Stack<AVL_Node<DataType>*> pRouteStack;
-
-	if (this->m_pHead->m_key == targetKey)
+	std::int64_t heightFromLeftChild = 0;
+	std::int64_t heightFromRightChild = 0;
+	if (pTargetNode->m_pLeftChild != nullptr)
 	{
-		RemoveTarget(this->m_pHead, &pRouteStack);
-		return;
+		heightFromLeftChild = 1 + pTargetNode->m_pLeftChild->m_height;
 	}
-
-	AVL_Node<DataType>* pTraverse = this->m_pHead;
-	while (true)
+	if (pTargetNode->m_pRightChild != nullptr)
 	{
-		if (targetKey < pTraverse->m_key)
-		{
-			pRouteStack.Push(pTraverse);
-			if (pTraverse->m_pLeftChild->m_key == targetKey)
-			{
-				RemoveTarget(pTraverse->m_pLeftChild, &pRouteStack);
-				return;
-			}
-			else pTraverse = pTraverse->m_pLeftChild;
-		}
-		else
-		{
-			pRouteStack.Push(pTraverse);
-			if (pTraverse->m_pRightChild->m_key == targetKey)
-			{
-				RemoveTarget(pTraverse->m_pRightChild, &pRouteStack);
-				return;
-			}
-			else pTraverse = pTraverse->m_pRightChild;
-		}
+		heightFromRightChild = 1 + pTargetNode->m_pRightChild->m_height;
 	}
+	
+	pTargetNode->m_height = std::max(heightFromLeftChild, heightFromRightChild);
 }
 
 #endif //AVL_TREE_H

@@ -29,12 +29,15 @@ private:
 
 	//NOTE: 데이터가 lvalue인 경우와 rvalue인 경우를 모두 각 참조로 받을 수 있도록 포워딩을 사용함
 	template <typename NewDataType = DataType>
-	BSTNode(std::int32_t newKey, NewDataType&& newData) : m_key(newKey), m_data(std::forward<NewDataType>(newData)), m_pLeftChild(nullptr), m_pRightChild(nullptr)
+	BSTNode(std::int64_t newKey, NewDataType&& newData)
+	: m_key(newKey), m_data(std::forward<NewDataType>(newData)), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
 
 	}
 
-	BSTNode(const BSTNode& sourceNode) : m_key(sourceNode.m_key), m_data(sourceNode.m_data), m_pLeftChild(nullptr), m_pRightChild(nullptr)
+	//Note: BSTTemplate의 트리 복사 과정에서 노드 복사를 사용하고, 이때 자식 포인터가 복사되지 않도록 유의해야 함
+	BSTNode(const BSTNode& sourceNode)
+	: m_key(sourceNode.m_key), m_data(sourceNode.m_data), m_pLeftChild(nullptr), m_pRightChild(nullptr)
 	{
 
 	}
@@ -50,7 +53,7 @@ private:
 
 private:
 
-	std::int32_t	m_key;
+	std::int64_t	m_key;
 	DataType		m_data;
 	BSTNode*		m_pLeftChild;
 	BSTNode*		m_pRightChild;
@@ -61,7 +64,7 @@ class BST : public BSTTemplate<BSTNode, DataType>
 {
 public:
 
-	BST() = default;
+	BST() noexcept = default;
 	BST(const BST<DataType>& sourceTree) = default;
 	BST(BST<DataType>&& sourceTree) noexcept = default;
 	BST<DataType>& operator=(const BST<DataType>& sourceTree) = default;
